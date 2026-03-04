@@ -1,0 +1,11 @@
+{
+    "name": "DataSync",
+    "alias": "datasync",
+    "description": "Platform data synchronization — receives catalog, inventory, orders, and customer data from connected Magento / WooCommerce stores.",
+    "keywords": ["sync", "products", "orders", "magento", "woocommerce"],
+    "priority": 0,
+    "providers": [
+        "Modules\\DataSync\\Providers\\DataSyncServiceProvider"
+    ],
+    "files": []
+}

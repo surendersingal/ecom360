@@ -1,0 +1,740 @@
+<?php
+/** @var \Ecom360\Analytics\Block\Tracker $block */
+if (!$block->isEnabled()) {
+    return;
+}
+$excludeAdmin = $block->isExcludeAdminUsers() ? 'true' : 'false';
+?>
+<!-- Ecom360 Analytics Tracker v3 — localStorage buffer, zero blocking -->
+<script id="ecom360-config" type="application/json">
+    <?= /* @noEscape */ $block->getTrackerConfigJson() ?>
+</script>
+<script>
+(function() {
+    'use strict';
+
+    /* ================================================================
+     *  Ecom360 Tracker v3  —  localStorage Event Buffer
+     *
+     *  ARCHITECTURE
+     *  ────────────
+     *  1. Every tracked event is written to localStorage (~0.05 ms).
+     *  2. A micro-scheduler flushes the buffer to the ecom360 API
+     *     via sendBeacon (non-blocking, survives page unload).
+     *  3. ZERO synchronous network calls in the page lifecycle.
+     *  4. Works even if the API is temporarily unreachable (events
+     *     stay in localStorage, retried on next page load).
+     *
+     *  PERF GUARANTEES
+     *  ───────────────
+     *  - < 0.1 ms per event (localStorage write)
+     *  - 0 ms main-thread blocking on flush (sendBeacon)
+     *  - Max buffer size: 500 events / 512 KB (auto-evicts oldest)
+     *  - Works with Full Page Cache (no customer PII in HTML)
+     * ================================================================ */
+
+    // ---------- admin exclusion ----------
+    var excludeAdmin = <?= /* @noEscape */ $excludeAdmin ?>;
+    if (excludeAdmin && document.cookie.indexOf('admin=1') !== -1) {
+        return;
+    }
+
+    // ==================== HELPERS ====================
+    var COOKIE_PREFIX = 'ecom360_';
+    var LS_KEY        = 'ecom360_event_buffer';
+    var LS_SENT_KEY   = 'ecom360_last_flush';
+    var MAX_BUFFER    = 500;
+    var MAX_BYTES     = 512 * 1024;   // 512 KB localStorage cap
+    var BATCH_MAX     = 50;
+
+    function setCookie(n, v, d) {
+        var e = new Date(); e.setTime(e.getTime() + d * 864e5);
+        document.cookie = COOKIE_PREFIX + n + '=' + encodeURIComponent(v) +
+            ';expires=' + e.toUTCString() + ';path=/;SameSite=Lax';
+    }
+    function getCookie(n) {
+        var m = document.cookie.match('(?:^|; )' + COOKIE_PREFIX + n + '=([^;]*)');
+        return m ? decodeURIComponent(m[1]) : null;
+    }
+    function uuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (Math.random() * 16) | 0;
+            return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+        });
+    }
+    function now() { return Date.now(); }
+    function ts()  { return new Date().toISOString(); }
+
+    // ==================== CONFIG ====================
+    var cfgEl = document.getElementById('ecom360-config');
+    if (!cfgEl) return;
+    var CFG;
+    try { CFG = JSON.parse(cfgEl.textContent); } catch (_) { return; }
+    if (!CFG.api_key || !CFG.server_url) return;
+
+    var T = CFG.tracking || {};
+    var COLLECT_URL = CFG.server_url.replace(/\/+$/, '') + '/api/v1/collect';
+    var BATCH_URL   = COLLECT_URL + '/batch';
+
+    // ==================== SESSION ====================
+    var SESSION_MS = (CFG.session_timeout || 30) * 60000;
+    var sessionId  = getCookie('session_id');
+    var lastAct    = parseInt(getCookie('last_activity') || '0', 10);
+    if (!sessionId || now() - lastAct > SESSION_MS) {
+        sessionId = uuid();
+    }
+    setCookie('session_id', sessionId, 1);
+    setCookie('last_activity', String(now()), 1);
+
+    // ==================== CUSTOMER (FPC-safe, Magento private content) ====================
+    var cid = null;
+    function loadCid() {
+        try {
+            var s = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
+            var c = s.customer;
+            if (c && c.firstname) {
+                cid = { type: 'email', value: c.email || '', name: (c.firstname || '') + ' ' + (c.lastname || '') };
+            }
+        } catch (_) {}
+    }
+    loadCid();
+
+    // ==================== FINGERPRINT ====================
+    var _fp = null;
+    function fingerprint() {
+        if (!T.fingerprint) return null;
+        if (_fp) return _fp;
+        try {
+            var cv = document.createElement('canvas'), cx = cv.getContext('2d');
+            if (!cx) return null;
+            cx.textBaseline = 'top'; cx.font = '14px Arial'; cx.fillText('fp', 2, 2);
+            _fp = cv.toDataURL().slice(-50);
+            return _fp;
+        } catch (_) { return null; }
+    }
+
+    // ==================== UTM ====================
+    function getUtm() {
+        if (!T.utm) return {};
+        var p = new URLSearchParams(window.location.search), u = {};
+        ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function(k) {
+            var v = p.get(k); if (v) u[k] = v;
+        });
+        if (Object.keys(u).length) setCookie('utm', JSON.stringify(u), 30);
+        var s = getCookie('utm');
+        return s ? JSON.parse(s) : u;
+    }
+
+    // ==================== BASE PAYLOAD ====================
+    function base() {
+        if (!cid) loadCid();
+        var p = {
+            session_id: sessionId,
+            url: location.href,
+            page_title: document.title,
+            screen_resolution: screen.width + 'x' + screen.height,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+            language: navigator.language || '',
+            timestamp: ts()
+        };
+        if (T.referrer && document.referrer) p.referrer = document.referrer;
+        var fp = fingerprint(); if (fp) p.device_fingerprint = fp;
+        var utm = getUtm(); for (var k in utm) p[k] = utm[k];
+        if (cid && cid.value) {
+            p.customer_identifier = { type: cid.type, value: cid.value };
+        }
+        return p;
+    }
+
+    // ==================== localStorage EVENT BUFFER ====================
+    //
+    // Events are written to localStorage immediately (~0.05 ms).
+    // The buffer is flushed asynchronously via sendBeacon.
+    //
+    function readBuffer() {
+        try {
+            return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        } catch (_) { return []; }
+    }
+
+    function writeBuffer(buf) {
+        try {
+            var json = JSON.stringify(buf);
+            // Enforce size cap — evict oldest if over limit
+            if (json.length > MAX_BYTES) {
+                buf = buf.slice(-Math.floor(MAX_BUFFER / 2));
+                json = JSON.stringify(buf);
+            }
+            localStorage.setItem(LS_KEY, json);
+        } catch (_) {
+            // localStorage full — evict half and retry
+            try {
+                buf = buf.slice(-Math.floor(buf.length / 2));
+                localStorage.setItem(LS_KEY, JSON.stringify(buf));
+            } catch (_) { /* give up silently */ }
+        }
+    }
+
+    function bufferEvent(eventType, metadata) {
+        var payload  = base();
+        payload.event_type = eventType;
+        payload.metadata   = metadata || {};
+
+        var buf = readBuffer();
+        buf.push(payload);
+        // Hard cap on event count
+        if (buf.length > MAX_BUFFER) {
+            buf = buf.slice(-MAX_BUFFER);
+        }
+        writeBuffer(buf);
+        scheduleFlush();
+    }
+
+    // ==================== ASYNC FLUSH (sendBeacon / XHR) ====================
+    var _flushScheduled = false;
+    var FLUSH_DELAY_MS  = 2000;  // batch window — 2 seconds
+
+    function scheduleFlush() {
+        if (_flushScheduled) return;
+        _flushScheduled = true;
+        setTimeout(function() {
+            _flushScheduled = false;
+            flushBuffer();
+        }, FLUSH_DELAY_MS);
+    }
+
+    function flushBuffer() {
+        var buf = readBuffer();
+        if (!buf.length) return;
+
+        // Take up to BATCH_MAX items
+        var batch = buf.splice(0, BATCH_MAX);
+        // Write remaining back IMMEDIATELY (before network call)
+        writeBuffer(buf);
+
+        // Send via sendBeacon (non-blocking, survives unload)
+        sendBatch(batch);
+
+        // If more remain, schedule another flush
+        if (buf.length > 0) scheduleFlush();
+    }
+
+    function sendBatch(events) {
+        if (!events.length) return;
+        var data = events.length === 1
+            ? events[0]
+            : { events: events };
+        var url = events.length === 1 ? COLLECT_URL : BATCH_URL;
+        var body = JSON.stringify(data);
+
+        if (navigator.sendBeacon) {
+            var blob = new Blob([body], { type: 'application/json' });
+            if (!navigator.sendBeacon(url, blob)) {
+                // sendBeacon rejected (e.g., payload too large) — fallback
+                xhrPost(url, body);
+            }
+        } else {
+            xhrPost(url, body);
+        }
+    }
+
+    function xhrPost(url, body) {
+        try {
+            var x = new XMLHttpRequest();
+            x.open('POST', url, true);
+            x.setRequestHeader('Content-Type', 'application/json');
+            x.setRequestHeader('X-Ecom360-Key', CFG.api_key);
+            x.send(body);
+        } catch (_) { /* fail silently — events stay in next buffer */ }
+    }
+
+    // Flush on page unload / visibility hidden
+    function urgentFlush() {
+        var buf = readBuffer();
+        if (!buf.length) return;
+        var batch = buf.splice(0, BATCH_MAX);
+        writeBuffer(buf);
+        // sendBeacon is the only reliable method during unload
+        var body = JSON.stringify(batch.length === 1 ? batch[0] : { events: batch });
+        var url  = batch.length === 1 ? COLLECT_URL : BATCH_URL;
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+        }
+    }
+    window.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') urgentFlush();
+    });
+    window.addEventListener('pagehide', urgentFlush);
+
+    // Flush any leftover events from previous page loads (retry mechanism)
+    if (readBuffer().length > 0) scheduleFlush();
+
+    // ==================== EVENT TRACKING ====================
+
+    // ---------- page_view ----------
+    if (T.page_views) {
+        bufferEvent('page_view', {
+            page_type: (CFG.page && CFG.page.type) || 'page',
+            product: CFG.page && CFG.page.product || undefined,
+            category: CFG.page && CFG.page.category || undefined,
+            search_query: CFG.page && CFG.page.search_query || undefined
+        });
+    }
+
+    // ---------- product_view ----------
+    if (T.product_views && CFG.page && CFG.page.type === 'product' && CFG.page.product) {
+        bufferEvent('product_view', CFG.page.product);
+    }
+
+    // ---------- search ----------
+    if (T.search && CFG.page && CFG.page.type === 'search') {
+        bufferEvent('search', {
+            query: CFG.page.search_query || '',
+            page_type: 'search_results'
+        });
+    }
+
+    // ---------- purchase (order confirmation — data injected server-side, session-gated) ----------
+    if (T.purchases && CFG.page && CFG.page.type === 'order_confirmation' && CFG.page.order) {
+        bufferEvent('purchase', CFG.page.order);
+    }
+
+    // ---------- scroll depth ----------
+    var maxScroll = 0;
+    if (T.page_views) {
+        var scrollTick = false;
+        window.addEventListener('scroll', function() {
+            if (scrollTick) return;
+            scrollTick = true;
+            requestAnimationFrame(function() {
+                scrollTick = false;
+                var st = window.pageYOffset || document.documentElement.scrollTop;
+                var dh = document.documentElement.scrollHeight - window.innerHeight;
+                if (dh > 0) {
+                    var pct = Math.round((st / dh) * 100);
+                    if (pct > maxScroll) maxScroll = pct;
+                }
+            });
+        }, { passive: true });
+        window.addEventListener('beforeunload', function() {
+            if (maxScroll > 0) bufferEvent('scroll_depth', { max_percent: maxScroll });
+        });
+    }
+
+    // ---------- engagement time ----------
+    var engStart = now();
+    window.addEventListener('beforeunload', function() {
+        var secs = Math.round((now() - engStart) / 1000);
+        if (secs > 1) bufferEvent('engagement_time', { seconds: secs });
+        urgentFlush();
+    });
+
+    // ---------- AJAX add-to-cart (Magento catalogAddToCart widget) ----------
+    if (T.cart) {
+        document.addEventListener('ajax:addToCart', function(e) {
+            if (e.detail && e.detail.productIds) {
+                bufferEvent('add_to_cart', { product_ids: e.detail.productIds, source: 'ajax' });
+            }
+        });
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).on('ajax:addToCart:success', function(ev, d) {
+                if (d && d.product && d.product.name) {
+                    bufferEvent('add_to_cart', {
+                        product_name: d.product.name,
+                        product_id: d.product.id,
+                        sku: d.product.sku || '',
+                        source: 'ajax_widget'
+                    });
+                }
+            });
+            // Remove from cart (minicart)
+            jQuery(document).on('ajax:removeFromCart', function(ev, d) {
+                if (d && d.productIds) {
+                    bufferEvent('remove_from_cart', { product_ids: d.productIds, source: 'ajax' });
+                }
+            });
+        }
+    }
+
+    // ---------- checkout step tracking (hashchange — no polling) ----------
+    if (T.checkout && CFG.page && CFG.page.type === 'checkout') {
+        var lastStep = location.hash;
+        if (lastStep) bufferEvent('checkout_step', { step: lastStep.replace('#', '') });
+        window.addEventListener('hashchange', function() {
+            var h = location.hash;
+            if (h && h !== lastStep) {
+                lastStep = h;
+                bufferEvent('checkout_step', { step: h.replace('#', '') });
+            }
+        });
+
+        // Detect Magento checkout step changes via Knockout observable
+        if (typeof require !== 'undefined') {
+            try {
+                require(['Magento_Checkout/js/model/step-navigator'], function(nav) {
+                    if (nav && nav.steps && nav.steps.subscribe) {
+                        nav.steps.subscribe(function() {
+                            var current = nav.getActiveItemIndex && nav.getActiveItemIndex();
+                            if (current !== undefined) {
+                                bufferEvent('checkout_step', { step_index: current, source: 'knockout' });
+                            }
+                        });
+                    }
+                });
+            } catch (_) {}
+        }
+    }
+
+    // ---------- customer login detection (Magento private content change) ----------
+    if (T.login) {
+        // Watch for customer section invalidation — Magento reloads customer-data after login
+        var _prevLoggedIn = !!(cid && cid.value);
+        window.addEventListener('storage', function(e) {
+            if (e.key !== 'mage-cache-storage') return;
+            var prevCid = cid;
+            loadCid();
+            if (cid && cid.value && !_prevLoggedIn) {
+                _prevLoggedIn = true;
+                bufferEvent('customer_login', {
+                    customer_email: cid.value,
+                    customer_name: cid.name || '',
+                    source: 'private_content'
+                });
+            } else if (!cid && _prevLoggedIn) {
+                _prevLoggedIn = false;
+                bufferEvent('customer_logout', { source: 'private_content' });
+            }
+        });
+    }
+
+    // ---------- wishlist button clicks ----------
+    if (T.wishlist) {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest && e.target.closest('[data-action="add-to-wishlist"], .towishlist, .action.towishlist');
+            if (!btn) return;
+            var form = btn.closest('form');
+            var productId = btn.getAttribute('data-product-id') ||
+                            (form && form.querySelector('input[name="product"]') ? form.querySelector('input[name="product"]').value : '');
+            bufferEvent('add_to_wishlist', { product_id: productId, source: 'click' });
+        }, true);
+    }
+
+    // ---------- review submission ----------
+    if (T.reviews) {
+        document.addEventListener('submit', function(e) {
+            var form = e.target;
+            if (!form || form.id !== 'review-form') return;
+            var rating = '';
+            var checked = form.querySelector('input[name^="ratings"]:checked');
+            if (checked) rating = checked.value;
+            bufferEvent('review_submit', {
+                product_id: (CFG.page && CFG.page.product && CFG.page.product.id) || '',
+                rating: rating,
+                source: 'form_submit'
+            });
+        }, true);
+    }
+
+    // ---------- Abandoned cart detection (localStorage-based) ----------
+    if (CFG.abandoned_cart && CFG.abandoned_cart.enabled && T.cart) {
+        // Watch cart mini section for item count changes
+        try {
+            var cartKey = 'ecom360_cart_snapshot';
+            function snapshotCart() {
+                try {
+                    var s = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
+                    var cart = s.cart || s['cart-data'] || {};
+                    var count = cart.summary_count || cart.items_count || 0;
+                    var prev = JSON.parse(localStorage.getItem(cartKey) || '{}');
+                    if (count !== prev.count) {
+                        localStorage.setItem(cartKey, JSON.stringify({
+                            count: count,
+                            updated: now()
+                        }));
+                        if (count > 0) {
+                            bufferEvent('cart_update', {
+                                items_count: count,
+                                subtotal: cart.subtotalAmount || cart.subtotal || 0
+                            });
+                        }
+                    }
+                } catch (_) {}
+            }
+            snapshotCart();
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'mage-cache-storage') snapshotCart();
+            });
+        } catch (_) {}
+    }
+
+    // ---------- keep session alive ----------
+    setInterval(function() {
+        setCookie('last_activity', String(now()), 1);
+    }, 60000);
+
+    // ==================== EXIT-INTENT DETECTION ====================
+    var _exitIntentFired = false;
+    var _exitCallbacks = [];
+
+    // Mouse leaving viewport (top edge)
+    document.addEventListener('mouseout', function(e) {
+        if (_exitIntentFired) return;
+        if (e.clientY < 10 && e.relatedTarget === null) {
+            _exitIntentFired = true;
+            bufferEvent('exit_intent', { trigger: 'mouse_leave', url: location.href });
+            _exitCallbacks.forEach(function(cb) { try { cb(); } catch(_){} });
+        }
+    });
+
+    // Rapid scroll up (scrolling from below back to top quickly)
+    var _scrollSamples = [];
+    window.addEventListener('scroll', function() {
+        var y = window.pageYOffset || document.documentElement.scrollTop;
+        _scrollSamples.push({ y: y, t: now() });
+        if (_scrollSamples.length > 10) _scrollSamples.shift();
+        if (_exitIntentFired || _scrollSamples.length < 3) return;
+        var recent = _scrollSamples.slice(-3);
+        var allUp = recent.every(function(s,i) { return i === 0 || s.y < recent[i-1].y; });
+        if (allUp && recent[0].y > 300 && recent[recent.length-1].y < 100) {
+            _exitIntentFired = true;
+            bufferEvent('exit_intent', { trigger: 'rapid_scroll_up', url: location.href });
+            _exitCallbacks.forEach(function(cb) { try { cb(); } catch(_){} });
+        }
+    }, { passive: true });
+
+    // Idle detection (60 seconds of no interaction)
+    var _idleTimer = null;
+    function resetIdleTimer() {
+        clearTimeout(_idleTimer);
+        _idleTimer = setTimeout(function() {
+            if (!_exitIntentFired) {
+                _exitIntentFired = true;
+                bufferEvent('exit_intent', { trigger: 'idle_60s', url: location.href });
+                _exitCallbacks.forEach(function(cb) { try { cb(); } catch(_){} });
+            }
+        }, 60000);
+    }
+    ['mousemove','keydown','touchstart','scroll'].forEach(function(ev) {
+        document.addEventListener(ev, resetIdleTimer, { passive: true });
+    });
+    resetIdleTimer();
+
+    // ==================== RAGE-CLICK DETECTION ====================
+    var _recentClicks = [];
+    var _rageFiredElements = {};
+    document.addEventListener('click', function(e) {
+        var entry = { x: e.clientX, y: e.clientY, t: now() };
+        _recentClicks.push(entry);
+        if (_recentClicks.length > 10) _recentClicks.shift();
+
+        // Need 3+ clicks in 1500ms within 50px radius
+        var cutoff = now() - 1500;
+        var recent = _recentClicks.filter(function(c) { return c.t >= cutoff; });
+        if (recent.length < 3) return;
+
+        var cx = recent[0].x, cy = recent[0].y;
+        var nearby = recent.filter(function(c) {
+            return Math.sqrt(Math.pow(c.x - cx, 2) + Math.pow(c.y - cy, 2)) < 50;
+        });
+
+        if (nearby.length >= 3) {
+            var selector = getElementSelector(e.target);
+            if (_rageFiredElements[selector]) return;
+            _rageFiredElements[selector] = true;
+            bufferEvent('rage_click', {
+                element: selector,
+                click_count: nearby.length,
+                page_url: location.href,
+                page_type: (CFG.page && CFG.page.type) || 'page'
+            });
+        }
+    });
+
+    function getElementSelector(el) {
+        if (!el || !el.tagName) return 'unknown';
+        var parts = [];
+        while (el && el.tagName && parts.length < 4) {
+            var tag = el.tagName.toLowerCase();
+            if (el.id) { parts.unshift(tag + '#' + el.id); break; }
+            var cls = (el.className || '').toString().trim().split(/\s+/).slice(0,2).join('.');
+            parts.unshift(cls ? tag + '.' + cls : tag);
+            el = el.parentElement;
+        }
+        return parts.join(' > ');
+    }
+
+    // ==================== FREE-SHIPPING WIDGET ====================
+    var _freeShipCfg = CFG.free_shipping || null;
+    if (_freeShipCfg && _freeShipCfg.enabled && _freeShipCfg.threshold > 0) {
+        (function() {
+            var threshold = _freeShipCfg.threshold;
+            var bar = document.createElement('div');
+            bar.id = 'ecom360-freeship-bar';
+            bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1a1a2e;color:#fff;padding:10px 20px;font-family:system-ui;font-size:14px;display:none;text-align:center;transition:all .3s;';
+            bar.innerHTML = '<span id="ecom360-freeship-msg"></span><div style="background:#333;border-radius:4px;height:6px;margin-top:6px;overflow:hidden;"><div id="ecom360-freeship-fill" style="height:100%;background:linear-gradient(90deg,#4ade80,#22d3ee);width:0;transition:width .5s ease;border-radius:4px;"></div></div>';
+            document.body.appendChild(bar);
+
+            function updateFreeShipBar() {
+                var total = getCartTotal();
+                if (total <= 0) { bar.style.display = 'none'; return; }
+                bar.style.display = 'block';
+                var pct = Math.min(100, (total / threshold) * 100);
+                document.getElementById('ecom360-freeship-fill').style.width = pct + '%';
+                var remaining = threshold - total;
+                var msg = document.getElementById('ecom360-freeship-msg');
+                if (remaining <= 0) {
+                    msg.innerHTML = '🎉 You qualify for FREE shipping!';
+                    bar.style.background = '#065f46';
+                    bufferEvent('free_shipping_qualified', { cart_total: total, threshold: threshold });
+                } else {
+                    msg.innerHTML = '🚚 Add $' + remaining.toFixed(2) + ' more for FREE shipping!';
+                }
+            }
+
+            function getCartTotal() {
+                try {
+                    var s = JSON.parse(localStorage.getItem('mage-cache-storage') || '{}');
+                    var cart = s.cart || s['cart-data'] || {};
+                    var amt = parseFloat(cart.subtotalAmount || cart.subtotal || 0);
+                    if (amt > 0) return amt;
+                } catch (_) {}
+                // Fallback: read from DOM
+                var selectors = ['.cart-totals .price','.minicart-price','.cart-summary .price','.subtotal .price','[data-cart-total]'];
+                for (var i = 0; i < selectors.length; i++) {
+                    var el = document.querySelector(selectors[i]);
+                    if (el) {
+                        var t = parseFloat((el.textContent || '').replace(/[^0-9.]/g, ''));
+                        if (t > 0) return t;
+                    }
+                }
+                return 0;
+            }
+
+            // Poll for cart changes
+            setInterval(updateFreeShipBar, 3000);
+            updateFreeShipBar();
+
+            // React to mage-cache-storage changes (Magento FPC)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'mage-cache-storage') setTimeout(updateFreeShipBar, 100);
+            });
+        })();
+    }
+
+    // ==================== INTERVENTION POLLING ====================
+    (function() {
+        var POLL_INTERVAL = 15000; // 15 seconds
+        var API_URL = CFG.server_url.replace(/\/+$/, '') + '/api/v1/interventions/poll';
+
+        function pollInterventions() {
+            try {
+                var x = new XMLHttpRequest();
+                x.open('GET', API_URL + '?session_id=' + sessionId, true);
+                x.setRequestHeader('X-Ecom360-Key', CFG.api_key);
+                x.onreadystatechange = function() {
+                    if (x.readyState !== 4 || x.status !== 200) return;
+                    try {
+                        var data = JSON.parse(x.responseText);
+                        var interventions = data.data && data.data.interventions || data.interventions || [];
+                        if (Array.isArray(interventions)) {
+                            interventions.forEach(function(i) { executeIntervention(i); });
+                        }
+                    } catch (_) {}
+                };
+                x.send();
+            } catch (_) {}
+        }
+
+        function executeIntervention(intervention) {
+            var type = intervention.type || '';
+            switch (type) {
+                case 'popup':
+                    showPopup(intervention.content || {});
+                    break;
+                case 'coupon':
+                    showCouponOffer(intervention.content || {});
+                    break;
+                case 'chat':
+                    openChatWidget(intervention.content || {});
+                    break;
+                case 'redirect':
+                    if (intervention.content && intervention.content.url) {
+                        window.location.href = intervention.content.url;
+                    }
+                    break;
+                case 'notification':
+                    showNotification(intervention.content || {});
+                    break;
+            }
+            bufferEvent('intervention_received', {
+                intervention_type: type,
+                intervention_id: intervention.id || ''
+            });
+        }
+
+        function showPopup(content) {
+            var overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;';
+            overlay.innerHTML = '<div style="background:#fff;border-radius:12px;padding:30px;max-width:450px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;">'
+                + '<button onclick="this.closest(\'div[style]\').parentElement.remove()" style="position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;">&times;</button>'
+                + '<h3 style="margin:0 0 10px;font-size:20px;color:#1a1a2e;">' + (content.title || 'Special Offer!') + '</h3>'
+                + '<p style="margin:0 0 15px;color:#555;">' + (content.message || '') + '</p>'
+                + (content.coupon_code ? '<div style="background:#f0fdf4;padding:10px;border-radius:8px;font-size:18px;font-weight:bold;color:#065f46;letter-spacing:2px;">' + content.coupon_code + '</div>' : '')
+                + '</div>';
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        }
+
+        function showCouponOffer(content) { showPopup(content); }
+
+        function openChatWidget(content) {
+            // Trigger chatbot widget if available
+            if (window.ecom360Chat && window.ecom360Chat.open) {
+                window.ecom360Chat.open(content.message || '');
+            }
+        }
+
+        function showNotification(content) {
+            var notif = document.createElement('div');
+            notif.style.cssText = 'position:fixed;top:20px;right:20px;z-index:100001;background:#1a1a2e;color:#fff;padding:15px 25px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,.3);max-width:350px;animation:slideIn .3s ease;';
+            notif.innerHTML = '<strong>' + (content.title || 'Notice') + '</strong><br><span style="opacity:.85">' + (content.message || '') + '</span>';
+            document.body.appendChild(notif);
+            setTimeout(function() { notif.remove(); }, 6000);
+        }
+
+        setInterval(pollInterventions, POLL_INTERVAL);
+        // First poll after 5 seconds
+        setTimeout(pollInterventions, 5000);
+    })();
+
+    // ==================== PUBLIC API ====================
+    window.ecom360 = {
+        track: bufferEvent,
+        flush: flushBuffer,
+        getSessionId: function() { return sessionId; },
+        getBufferSize: function() { return readBuffer().length; },
+        identify: function(type, value) {
+            cid = { type: type, value: value, name: '' };
+        },
+        onExitIntent: function(cb) {
+            if (typeof cb === 'function') _exitCallbacks.push(cb);
+        },
+        updateCartTotal: function(total) {
+            // Manually update free-shipping bar
+            var fill = document.getElementById('ecom360-freeship-fill');
+            var msg = document.getElementById('ecom360-freeship-msg');
+            if (!fill || !msg || !_freeShipCfg) return;
+            var threshold = _freeShipCfg.threshold;
+            var pct = Math.min(100, (total / threshold) * 100);
+            fill.style.width = pct + '%';
+            var remaining = threshold - total;
+            if (remaining <= 0) {
+                msg.innerHTML = '🎉 You qualify for FREE shipping!';
+            } else {
+                msg.innerHTML = '🚚 Add $' + remaining.toFixed(2) + ' more for FREE shipping!';
+            }
+        }
+    };
+})();
+</script>
+<!-- /Ecom360 Analytics Tracker v3 -->

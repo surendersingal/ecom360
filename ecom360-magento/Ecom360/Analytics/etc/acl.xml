@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ACL — Access Control List entries
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Ecom360_Analytics::config" title="Ecom360 Analytics Configuration" sortOrder="100"/>
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Ecom360_Analytics::ecom360" title="Ecom360 Analytics" sortOrder="100">
+                    <resource id="Ecom360_Analytics::sync_log" title="Sync Logs" sortOrder="10"/>
+                    <resource id="Ecom360_Analytics::abandoned_carts" title="Abandoned Carts" sortOrder="20"/>
+                    <resource id="Ecom360_Analytics::journey" title="Customer Journey" sortOrder="30"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

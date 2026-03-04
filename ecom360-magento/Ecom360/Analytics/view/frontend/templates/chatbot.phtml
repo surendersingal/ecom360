@@ -1,0 +1,144 @@
+<?php
+/** @var \Ecom360\Analytics\Block\ChatbotWidget $block */
+if (!$block->isEnabled()) {
+    return;
+}
+$position = $block->escapeHtmlAttr($block->getPosition());
+$greeting = $block->escapeHtml($block->getGreeting());
+$configJson = $block->getConfigJson();
+
+// Position classes
+$posMap = [
+    'bottom-right' => 'right:20px;bottom:20px;',
+    'bottom-left'  => 'left:20px;bottom:20px;',
+    'top-right'    => 'right:20px;top:80px;',
+    'top-left'     => 'left:20px;top:80px;',
+];
+$posStyle = $posMap[$position] ?? $posMap['bottom-right'];
+?>
+<!-- Ecom360 Chatbot Widget -->
+<style>
+#ecom360-chatbot-fab{position:fixed;<?= $posStyle ?>z-index:999998;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 4px 20px rgba(102,126,234,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .3s,box-shadow .3s;border:none}
+#ecom360-chatbot-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(102,126,234,.6)}
+#ecom360-chatbot-fab svg{width:28px;height:28px;fill:#fff}
+#ecom360-chatbot-panel{position:fixed;<?= $posStyle ?>z-index:999999;width:380px;height:520px;background:#fff;border-radius:16px;box-shadow:0 12px 50px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+#ecom360-chatbot-panel.open{display:flex}
+.ecom360-chat-header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.ecom360-chat-header h4{margin:0;font-size:16px;font-weight:600}
+.ecom360-chat-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 4px;opacity:.8}
+.ecom360-chat-close:hover{opacity:1}
+.ecom360-chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+.ecom360-chat-msg{max-width:80%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.ecom360-chat-msg.bot{align-self:flex-start;background:#f0f0f7;color:#333;border-bottom-left-radius:4px}
+.ecom360-chat-msg.user{align-self:flex-end;background:#667eea;color:#fff;border-bottom-right-radius:4px}
+.ecom360-chat-input{display:flex;padding:12px 16px;border-top:1px solid #eee;gap:8px}
+.ecom360-chat-input input{flex:1;border:1px solid #ddd;border-radius:24px;padding:10px 16px;font-size:14px;outline:none}
+.ecom360-chat-input input:focus{border-color:#667eea}
+.ecom360-chat-input button{border:none;background:#667eea;color:#fff;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ecom360-chat-input button:hover{background:#5a6fd6}
+.ecom360-chat-typing{align-self:flex-start;padding:10px 14px;background:#f0f0f7;border-radius:16px;font-size:13px;color:#999;display:none}
+</style>
+
+<!-- Chat FAB -->
+<button id="ecom360-chatbot-fab" aria-label="Chat with us">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+</button>
+
+<!-- Chat Panel -->
+<div id="ecom360-chatbot-panel">
+    <div class="ecom360-chat-header">
+        <h4>💬 Ecom360 Assistant</h4>
+        <button class="ecom360-chat-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div class="ecom360-chat-messages" id="ecom360-chat-messages">
+        <div class="ecom360-chat-msg bot"><?= $greeting ?></div>
+    </div>
+    <div class="ecom360-chat-typing" id="ecom360-chat-typing">Typing...</div>
+    <div class="ecom360-chat-input">
+        <input type="text" id="ecom360-chat-input" placeholder="Type your message..." autocomplete="off"/>
+        <button id="ecom360-chat-send" aria-label="Send">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+(function(){
+    var cfg = <?= /* @noEscape */ $configJson ?>;
+    var fab = document.getElementById('ecom360-chatbot-fab');
+    var panel = document.getElementById('ecom360-chatbot-panel');
+    var closeBtn = panel.querySelector('.ecom360-chat-close');
+    var messages = document.getElementById('ecom360-chat-messages');
+    var input = document.getElementById('ecom360-chat-input');
+    var sendBtn = document.getElementById('ecom360-chat-send');
+    var typing = document.getElementById('ecom360-chat-typing');
+    var sessionId = (window.ecom360 && window.ecom360.getSessionId) ? window.ecom360.getSessionId() : 'chatbot_' + Date.now();
+
+    fab.addEventListener('click', function(){ panel.classList.add('open'); fab.style.display='none'; input.focus(); });
+    closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); fab.style.display='flex'; });
+
+    function addMessage(text, role) {
+        var div = document.createElement('div');
+        div.className = 'ecom360-chat-msg ' + (role === 'user' ? 'user' : 'bot');
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function sendMessage() {
+        var text = input.value.trim();
+        if (!text) return;
+        addMessage(text, 'user');
+        input.value = '';
+        typing.style.display = 'block';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', cfg.endpoint + '/send', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+        xhr.onload = function() {
+            typing.style.display = 'none';
+            try {
+                var res = JSON.parse(xhr.responseText);
+                addMessage(res.data && res.data.reply ? res.data.reply.content : (res.message || 'Sorry, I couldn\'t process that.'), 'bot');
+                // Handle quick replies
+                if (res.data && res.data.reply && res.data.reply.quick_replies) {
+                    var qr = res.data.reply.quick_replies;
+                    for (var i = 0; i < qr.length; i++) {
+                        var btn = document.createElement('button');
+                        btn.style.cssText = 'margin:4px 4px 0 0;padding:6px 12px;border:1px solid #667eea;border-radius:16px;background:#fff;color:#667eea;cursor:pointer;font-size:13px;';
+                        btn.textContent = qr[i];
+                        btn.addEventListener('click', (function(t){ return function(){ input.value = t; sendMessage(); }; })(qr[i]));
+                        messages.appendChild(btn);
+                    }
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            } catch(e) {
+                addMessage('Connection error. Please try again.', 'bot');
+            }
+        };
+        xhr.onerror = function() {
+            typing.style.display = 'none';
+            addMessage('Network error. Please check your connection.', 'bot');
+        };
+        xhr.send(JSON.stringify({
+            session_id: sessionId,
+            message: text,
+            page_url: window.location.href
+        }));
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', function(e){ if(e.key==='Enter') sendMessage(); });
+
+    // Expose for rage-click trigger
+    window.ecom360OpenChatbot = function(msg) {
+        panel.classList.add('open');
+        fab.style.display = 'none';
+        if (msg) {
+            input.value = msg;
+            sendMessage();
+        }
+    };
+})();
+</script>

@@ -1,0 +1,24 @@
+{
+    "name": "nwidart/datasync",
+    "description": "Ecom360 DataSync module",
+    "authors": [{ "name": "Ecom360" }],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\DataSync\\Providers\\DataSyncServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\DataSync\\": "app/",
+            "Modules\\DataSync\\Database\\Factories\\": "database/factories/",
+            "Modules\\DataSync\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\DataSync\\Tests\\": "tests/"
+        }
+    }
+}

@@ -1,0 +1,40 @@
+<?php
+/** @var \Ecom360\Analytics\Block\Adminhtml\System\Config\Button\TestConnection $block */
+?>
+<div id="ecom360-test-result" style="display:none; margin-top:10px; padding:8px 12px; border-radius:4px;"></div>
+<?= $block->getButtonHtml() ?>
+<script>
+require(['jquery'], function($) {
+    'use strict';
+    $('#ecom360_test_connection').on('click', function() {
+        var btn = $(this);
+        var result = $('#ecom360-test-result');
+        btn.prop('disabled', true).text('<?= $block->escapeJs(__('Testing...')) ?>');
+        result.hide();
+        $.ajax({
+            url: '<?= $block->escapeUrl($block->getAjaxUrl()) ?>',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                form_key: window.FORM_KEY
+            },
+            success: function(resp) {
+                if (resp.success) {
+                    result.css({background:'#e8f5e9',color:'#2e7d32',border:'1px solid #a5d6a7'})
+                          .text(resp.message || 'Connection successful!').show();
+                } else {
+                    result.css({background:'#ffebee',color:'#c62828',border:'1px solid #ef9a9a'})
+                          .text(resp.message || 'Connection failed.').show();
+                }
+            },
+            error: function() {
+                result.css({background:'#ffebee',color:'#c62828',border:'1px solid #ef9a9a'})
+                      .text('Network error – could not reach server.').show();
+            },
+            complete: function() {
+                btn.prop('disabled', false).text('<?= $block->escapeJs(__('Test Connection')) ?>');
+            }
+        });
+    });
+});
+</script>

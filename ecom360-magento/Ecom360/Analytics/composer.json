@@ -1,0 +1,19 @@
+{
+    "name": "ecom360/module-analytics",
+    "description": "Ecom360 Analytics — Complete ecommerce analytics, data sync, push notifications, abandoned cart recovery, customer capture and session journey tracking for Magento 2 stores.",
+    "version": "1.0.0",
+    "type": "magento2-module",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "magento/framework": ">=103.0"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Ecom360\\Analytics\\": ""
+        }
+    }
+}

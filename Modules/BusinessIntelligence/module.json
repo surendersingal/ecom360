@@ -1,0 +1,11 @@
+{
+    "name": "BusinessIntelligence",
+    "alias": "businessintelligence",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BusinessIntelligence\\Providers\\BusinessIntelligenceServiceProvider"
+    ],
+    "files": []
+}

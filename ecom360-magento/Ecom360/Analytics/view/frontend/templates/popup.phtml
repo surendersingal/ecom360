@@ -1,0 +1,186 @@
+<?php
+/** @var \Ecom360\Analytics\Block\PopupWidget $block */
+if (!$block->isEnabled()) {
+    return;
+}
+$config = $block->getPopupConfigJson();
+?>
+<!-- Ecom360 Popup CSS — loaded only when popup is enabled -->
+<link rel="stylesheet" type="text/css"
+      href="<?= $block->escapeUrl($block->getViewFileUrl('Ecom360_Analytics::css/ecom360-popup.css')) ?>"
+      media="all" />
+<!-- Ecom360 Popup Capture Widget -->
+<div id="ecom360-popup-overlay" class="ecom360-popup-overlay" style="display:none;">
+    <div class="ecom360-popup-modal">
+        <button class="ecom360-popup-close" id="ecom360-popup-close" aria-label="Close">&times;</button>
+
+        <h2 class="ecom360-popup-title"><?= $block->escapeHtml($block->getPopupTitle()) ?></h2>
+        <?php if ($block->getPopupDescription()): ?>
+            <p class="ecom360-popup-desc"><?= $block->escapeHtml($block->getPopupDescription()) ?></p>
+        <?php endif; ?>
+
+        <form id="ecom360-popup-form" class="ecom360-popup-form" novalidate>
+            <?php if ($block->shouldCollectName()): ?>
+                <div class="ecom360-popup-field">
+                    <input type="text" name="name" placeholder="<?= $block->escapeHtmlAttr(__('Your name')) ?>"
+                           class="ecom360-popup-input" autocomplete="name" />
+                </div>
+            <?php endif; ?>
+
+            <?php if ($block->shouldCollectEmail()): ?>
+                <div class="ecom360-popup-field">
+                    <input type="email" name="email" placeholder="<?= $block->escapeHtmlAttr(__('Email address')) ?>"
+                           class="ecom360-popup-input" autocomplete="email" required />
+                </div>
+            <?php endif; ?>
+
+            <?php if ($block->shouldCollectPhone()): ?>
+                <div class="ecom360-popup-field">
+                    <input type="tel" name="phone" placeholder="<?= $block->escapeHtmlAttr(__('Phone number')) ?>"
+                           class="ecom360-popup-input" autocomplete="tel" />
+                </div>
+            <?php endif; ?>
+
+            <?php if ($block->shouldCollectDob()): ?>
+                <div class="ecom360-popup-field">
+                    <input type="date" name="dob" placeholder="<?= $block->escapeHtmlAttr(__('Date of birth')) ?>"
+                           class="ecom360-popup-input" />
+                </div>
+            <?php endif; ?>
+
+            <button type="submit" class="ecom360-popup-submit">
+                <?= $block->escapeHtml(__('Subscribe')) ?>
+            </button>
+
+            <p id="ecom360-popup-msg" class="ecom360-popup-msg" style="display:none;"></p>
+        </form>
+    </div>
+</div>
+
+<script id="ecom360-popup-config" type="application/json">
+    <?= /* @noEscape */ $config ?>
+</script>
+<script>
+(function() {
+    'use strict';
+
+    var cfgEl = document.getElementById('ecom360-popup-config');
+    if (!cfgEl) return;
+    var CFG;
+    try { CFG = JSON.parse(cfgEl.textContent); } catch(_) { return; }
+
+    var COOKIE_NAME = 'ecom360_popup_shown';
+    var overlay = document.getElementById('ecom360-popup-overlay');
+    var closeBtn = document.getElementById('ecom360-popup-close');
+    var form = document.getElementById('ecom360-popup-form');
+    var msgEl = document.getElementById('ecom360-popup-msg');
+
+    if (!overlay || !form) return;
+
+    // ---------- frequency check ----------
+    function wasShown() {
+        return document.cookie.indexOf(COOKIE_NAME + '=1') !== -1;
+    }
+    function markShown() {
+        var days = CFG.frequency === 'once' ? 365 : (CFG.frequency === 'once_per_session' ? 0 : 1);
+        if (days === 0) {
+            document.cookie = COOKIE_NAME + '=1;path=/;SameSite=Lax';
+        } else {
+            var d = new Date();
+            d.setTime(d.getTime() + days * 86400000);
+            document.cookie = COOKIE_NAME + '=1;expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+        }
+    }
+
+    if (CFG.frequency !== 'always' && wasShown()) return;
+
+    // ---------- show / hide ----------
+    function show() {
+        overlay.style.display = 'flex';
+        markShown();
+    }
+    function hide() {
+        overlay.style.display = 'none';
+    }
+    closeBtn.addEventListener('click', hide);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) hide();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') hide();
+    });
+
+    // ---------- triggers ----------
+    if (CFG.trigger === 'time_delay') {
+        setTimeout(show, (CFG.delay || 5) * 1000);
+    } else if (CFG.trigger === 'scroll_percent') {
+        var triggered = false;
+        window.addEventListener('scroll', function() {
+            if (triggered) return;
+            var pct = Math.round((window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+            if (pct >= (CFG.scroll_percent || 50)) {
+                triggered = true;
+                show();
+            }
+        });
+    } else if (CFG.trigger === 'exit_intent') {
+        var eiTriggered = false;
+        document.addEventListener('mouseout', function(e) {
+            if (eiTriggered) return;
+            if (e.clientY < 10 && e.relatedTarget === null) {
+                eiTriggered = true;
+                show();
+            }
+        });
+    } else if (CFG.trigger === 'page_load') {
+        show();
+    }
+
+    // ---------- form submit ----------
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var data = {};
+        var inputs = form.querySelectorAll('input');
+        inputs.forEach(function(inp) {
+            if (inp.name && inp.value) data[inp.name] = inp.value;
+        });
+
+        // Add session id if tracker is loaded
+        if (window.ecom360 && window.ecom360.getSessionId) {
+            data.session_id = window.ecom360.getSessionId();
+        }
+
+        data.page_url = window.location.href;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', CFG.submit_url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                msgEl.textContent = 'Thank you!';
+                msgEl.className = 'ecom360-popup-msg ecom360-popup-msg--success';
+                msgEl.style.display = 'block';
+                form.reset();
+                setTimeout(hide, 2000);
+
+                // Track via main tracker
+                if (window.ecom360) {
+                    window.ecom360.track('popup_capture', data);
+                }
+            } else {
+                msgEl.textContent = 'Something went wrong. Please try again.';
+                msgEl.className = 'ecom360-popup-msg ecom360-popup-msg--error';
+                msgEl.style.display = 'block';
+            }
+        };
+        xhr.onerror = function() {
+            msgEl.textContent = 'Network error. Please try again.';
+            msgEl.className = 'ecom360-popup-msg ecom360-popup-msg--error';
+            msgEl.style.display = 'block';
+        };
+        xhr.send(JSON.stringify(data));
+    });
+})();
+</script>
+<!-- /Ecom360 Popup Capture Widget -->

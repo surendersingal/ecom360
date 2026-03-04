@@ -1,0 +1,630 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Admin System Configuration — Stores > Configuration > Ecom360 > Analytics
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="ecom360" translate="label" sortOrder="999">
+            <label>Ecom360</label>
+        </tab>
+
+        <section id="ecom360_analytics" translate="label" sortOrder="10"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Analytics</label>
+            <tab>ecom360</tab>
+            <resource>Ecom360_Analytics::config</resource>
+
+            <!-- ═══ Connection ═══ -->
+            <group id="connection" translate="label" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Connection Settings</label>
+                <comment><![CDATA[Enter your Ecom360 platform credentials. Get these from your Ecom360 dashboard under Settings > API Keys.]]></comment>
+
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Module</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable or disable the Ecom360 Analytics module.</comment>
+                </field>
+
+                <field id="server_url" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Server URL</label>
+                    <comment><![CDATA[Your Ecom360 platform URL (e.g. https://analytics.yourdomain.com). Do not include /api path.]]></comment>
+                    <validate>required-entry validate-url</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="api_key" translate="label comment" type="obscure" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>Your tenant API key from Ecom360 dashboard.</comment>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="secret_key" translate="label comment" type="obscure" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Secret Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>Your secret key for authenticated API calls (server-to-server sync).</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="test_connection" translate="label" type="button" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test Connection</label>
+                    <frontend_model>Ecom360\Analytics\Block\Adminhtml\System\Config\Button\TestConnection</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- ═══ Data Sync ═══ -->
+            <group id="sync" translate="label" sortOrder="20"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Data Sync</label>
+                <comment><![CDATA[Configure which data types to sync with your Ecom360 dashboard.]]></comment>
+
+                <field id="sync_products" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Products</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="sync_categories" translate="label" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Categories</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="sync_orders" translate="label" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="sync_customers" translate="label" type="select" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Customers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="sync_sales_data" translate="label" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Sales Data (Revenue, Tax, Shipping)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="sync_interval" translate="label comment" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sync Frequency</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\SyncInterval</source_model>
+                    <comment>How often to run the background data sync.</comment>
+                </field>
+
+                <field id="batch_size" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sync Batch Size</label>
+                    <comment>Number of records per sync batch (max 100).</comment>
+                    <validate>required-entry validate-digits validate-digits-range digits-range-1-100</validate>
+                </field>
+            </group>
+
+            <!-- ═══ Event Tracking ═══ -->
+            <group id="tracking" translate="label" sortOrder="30"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Event Tracking</label>
+                <comment><![CDATA[Control which frontend events are tracked and sent to Ecom360.]]></comment>
+
+                <field id="track_page_views" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Page Views</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_product_views" translate="label" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Product Views</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_cart" translate="label" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Cart Events</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_checkout" translate="label" type="select" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Checkout Events</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_purchases" translate="label" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Purchases / Orders</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_search" translate="label" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Search Queries</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_customer_login" translate="label" type="select" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Customer Login</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_customer_register" translate="label" type="select" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Customer Registration</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_reviews" translate="label" type="select" sortOrder="90"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Product Reviews</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_wishlist" translate="label" type="select" sortOrder="100"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Wishlist Events</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="track_compare" translate="label" type="select" sortOrder="110"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Track Compare Events</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+
+            <!-- ═══ Behavior ═══ -->
+            <group id="behavior" translate="label" sortOrder="40"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Tracking Behavior</label>
+
+                <field id="batch_events" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Events</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Queue events and send in batches to reduce HTTP requests.</comment>
+                </field>
+
+                <field id="batch_size" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch Size</label>
+                    <comment>Max events per batch request (API limit: 50).</comment>
+                    <validate>required-entry validate-digits</validate>
+                </field>
+
+                <field id="flush_interval" translate="label comment" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Flush Interval (ms)</label>
+                    <comment>How often to flush the event queue in milliseconds.</comment>
+                    <validate>required-entry validate-digits</validate>
+                </field>
+
+                <field id="session_timeout" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Session Timeout (min)</label>
+                    <comment>Session expires after this many minutes of inactivity.</comment>
+                    <validate>required-entry validate-digits</validate>
+                </field>
+
+                <field id="enable_fingerprint" translate="label comment" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Device Fingerprinting</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Lightweight browser fingerprint for cross-session identification.</comment>
+                </field>
+
+                <field id="capture_utm" translate="label" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Capture UTM Parameters</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="capture_referrer" translate="label" type="select" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Capture Referrer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="exclude_admin_users" translate="label comment" type="select" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Exclude Admin Users</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Stop tracking for logged-in admin/backend users on storefront.</comment>
+                </field>
+            </group>
+
+            <!-- ═══ Abandoned Cart ═══ -->
+            <group id="abandoned_cart" translate="label" sortOrder="50"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Abandoned Cart Recovery</label>
+
+                <field id="enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Abandoned Cart Tracking</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="timeout_minutes" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cart Abandonment Timeout (min)</label>
+                    <comment>Mark cart as abandoned after this many minutes of inactivity.</comment>
+                    <validate>required-entry validate-digits</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="send_email" translate="label" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send Recovery Emails</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="email_delay_minutes" translate="label comment" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Email Delay (min)</label>
+                    <comment>Wait this long after abandonment before sending the email.</comment>
+                    <validate>required-entry validate-digits</validate>
+                    <depends>
+                        <field id="send_email">1</field>
+                    </depends>
+                </field>
+
+                <field id="email_template" translate="label" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Email Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends>
+                        <field id="send_email">1</field>
+                    </depends>
+                </field>
+
+                <field id="include_coupon" translate="label" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Include Discount Coupon</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="send_email">1</field>
+                    </depends>
+                </field>
+
+                <field id="coupon_rule_id" translate="label comment" type="text" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cart Price Rule ID</label>
+                    <comment>ID of the cart price rule to generate coupons from.</comment>
+                    <validate>validate-digits</validate>
+                    <depends>
+                        <field id="include_coupon">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- ═══ Push Notifications ═══ -->
+            <group id="push" translate="label" sortOrder="60"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Push Notifications</label>
+
+                <field id="enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Web Push Notifications</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="provider" translate="label" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Push Provider</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\PushProvider</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="firebase_api_key" translate="label" type="obscure" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Firebase Server Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="provider">firebase</field>
+                    </depends>
+                </field>
+
+                <field id="firebase_sender_id" translate="label" type="text" sortOrder="35"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Firebase Sender ID</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="provider">firebase</field>
+                    </depends>
+                </field>
+
+                <field id="onesignal_app_id" translate="label" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>OneSignal App ID</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="provider">onesignal</field>
+                    </depends>
+                </field>
+
+                <field id="onesignal_api_key" translate="label" type="obscure" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>OneSignal REST API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="provider">onesignal</field>
+                    </depends>
+                </field>
+
+                <field id="prompt_delay" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Permission Prompt Delay (sec)</label>
+                    <comment>Delay before showing the push notification opt-in prompt.</comment>
+                    <validate>validate-digits</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- ═══ Popup Capture Widget ═══ -->
+            <group id="popup" translate="label" sortOrder="70"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Popup Capture Widget</label>
+
+                <field id="enabled" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Popup Widget</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="trigger" translate="label" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Popup Trigger</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\PopupTrigger</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="delay_seconds" translate="label" type="text" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Delay (seconds)</label>
+                    <validate>validate-digits</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="scroll_percent" translate="label" type="text" sortOrder="35"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Scroll Percentage Trigger</label>
+                    <validate>validate-digits</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="trigger">scroll</field>
+                    </depends>
+                </field>
+
+                <field id="title" translate="label" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Popup Title</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="description" translate="label" type="textarea" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Popup Description</label>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="collect_name" translate="label" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Collect Full Name</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="collect_email" translate="label" type="select" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Collect Email</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="collect_phone" translate="label" type="select" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Collect Phone</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="collect_dob" translate="label" type="select" sortOrder="90"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Collect Date of Birth</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="show_on" translate="label" type="select" sortOrder="100"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show On</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\PopupShowOn</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="show_frequency" translate="label comment" type="select" sortOrder="110"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Frequency</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\PopupFrequency</source_model>
+                    <comment>How often to show the popup to the same visitor.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- ═══ Advanced Features (UC1-UC20) ═══ -->
+            <group id="features" translate="label" sortOrder="80"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Advanced Features</label>
+                <comment><![CDATA[Configure advanced e-commerce intelligence features powered by Ecom360.]]></comment>
+
+                <!-- Exit-Intent Detection (UC1) -->
+                <field id="exit_intent_enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Exit-Intent Detection</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Detect when visitors are about to leave and trigger coupon offers.</comment>
+                </field>
+
+                <!-- Rage-Click Detection (UC2) -->
+                <field id="rage_click_enabled" translate="label comment" type="select" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rage-Click Detection</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Detect frustrated users and trigger proactive chatbot assistance.</comment>
+                </field>
+
+                <!-- Free-Shipping Gamification Bar (UC3) -->
+                <field id="free_shipping_bar_enabled" translate="label comment" type="select" sortOrder="30"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Free-Shipping Progress Bar</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Show a sticky progress bar showing how close the cart is to free shipping.</comment>
+                </field>
+
+                <field id="free_shipping_threshold" translate="label comment" type="text" sortOrder="31"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Free-Shipping Threshold</label>
+                    <comment>Cart total needed for free shipping (e.g. 50).</comment>
+                    <validate>validate-number</validate>
+                    <depends>
+                        <field id="free_shipping_bar_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="free_shipping_currency" translate="label" type="text" sortOrder="32"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Currency Symbol</label>
+                    <depends>
+                        <field id="free_shipping_bar_enabled">1</field>
+                    </depends>
+                </field>
+
+                <!-- Interventions (UC1,2,3 + general) -->
+                <field id="interventions_enabled" translate="label comment" type="select" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Platform Interventions</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Poll the Ecom360 platform for real-time interventions (coupons, popups, chat triggers).</comment>
+                </field>
+
+                <field id="interventions_poll_interval" translate="label comment" type="text" sortOrder="41"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Intervention Poll Interval (sec)</label>
+                    <comment>How often the storefront JS checks for new interventions.</comment>
+                    <validate>validate-digits</validate>
+                    <depends>
+                        <field id="interventions_enabled">1</field>
+                    </depends>
+                </field>
+
+                <!-- Chatbot Widget (UC2, UC20) -->
+                <field id="chatbot_enabled" translate="label comment" type="select" sortOrder="50"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Chatbot Widget</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Embed the Ecom360 AI chatbot on your storefront.</comment>
+                </field>
+
+                <field id="chatbot_position" translate="label" type="select" sortOrder="51"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Chatbot Position</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\ChatbotPosition</source_model>
+                    <depends>
+                        <field id="chatbot_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="chatbot_greeting" translate="label" type="text" sortOrder="52"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Chatbot Greeting Message</label>
+                    <depends>
+                        <field id="chatbot_enabled">1</field>
+                    </depends>
+                </field>
+
+                <!-- AI Search (UC17, UC19) -->
+                <field id="ai_search_enabled" translate="label comment" type="select" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AI-Powered Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Replace default search with Ecom360 AI search (margin-ranked, faceted).</comment>
+                </field>
+
+                <field id="ai_search_visual_enabled" translate="label comment" type="select" sortOrder="61"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Visual Search (Image Upload)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Allow customers to search by uploading product images.</comment>
+                    <depends>
+                        <field id="ai_search_enabled">1</field>
+                    </depends>
+                </field>
+
+                <!-- Inventory Sync (UC7, UC16, UC17) -->
+                <field id="sync_inventory" translate="label comment" type="select" sortOrder="70"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Inventory Data</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Sync stock levels and cost prices for margin analysis and replenishment predictions.</comment>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>

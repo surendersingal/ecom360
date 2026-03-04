@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Dependency Injection configuration
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Virtual type for logger -->
+    <virtualType name="Ecom360AnalyticsLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">ecom360_analytics</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Ecom360AnalyticsLogHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Ecom360AnalyticsLogHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/ecom360_analytics.log</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Inject custom logger into API Client -->
+    <type name="Ecom360\Analytics\Helper\ApiClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into Config helper -->
+    <type name="Ecom360\Analytics\Helper\Config">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into EventQueuePublisher -->
+    <type name="Ecom360\Analytics\Model\EventQueuePublisher">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into ProcessEventQueueCron -->
+    <type name="Ecom360\Analytics\Cron\ProcessEventQueueCron">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into storefront observers -->
+    <type name="Ecom360\Analytics\Observer\AddToCartObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\RemoveFromCartObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CartSaveObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CheckoutSuccessObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\OrderPlacedObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CustomerLoginObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CustomerRegisterObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\SearchObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\WishlistAddObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\ReviewSaveObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into new observers -->
+    <type name="Ecom360\Analytics\Observer\ShipmentObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\InventoryObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\RefundObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into previously-orphaned observers -->
+    <type name="Ecom360\Analytics\Observer\ProductSaveObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CategorySaveObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\CustomerSaveObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\OrderStatusObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Observer\OrderRefundObserver">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject custom logger into new crons -->
+    <type name="Ecom360\Analytics\Cron\SyncInventoryCron">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+    <type name="Ecom360\Analytics\Cron\FetchInterventionsCron">
+        <arguments>
+            <argument name="logger" xsi:type="object">Ecom360AnalyticsLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Console commands -->
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="ecom360_sync_products" xsi:type="object">Ecom360\Analytics\Console\Command\SyncProducts</item>
+                <item name="ecom360_sync_categories" xsi:type="object">Ecom360\Analytics\Console\Command\SyncCategories</item>
+                <item name="ecom360_sync_orders" xsi:type="object">Ecom360\Analytics\Console\Command\SyncOrders</item>
+                <item name="ecom360_sync_customers" xsi:type="object">Ecom360\Analytics\Console\Command\SyncCustomers</item>
+                <item name="ecom360_test_connection" xsi:type="object">Ecom360\Analytics\Console\Command\TestConnection</item>
+                <item name="ecom360_sync_all" xsi:type="object">Ecom360\Analytics\Console\Command\SyncAll</item>
+                <item name="ecom360_abandoned_carts" xsi:type="object">Ecom360\Analytics\Console\Command\ProcessAbandonedCarts</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

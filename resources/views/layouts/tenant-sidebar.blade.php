@@ -1,0 +1,421 @@
+@php $slug = $tenant->slug; @endphp
+<!-- ========== Left Sidebar Start ========== -->
+<div class="vertical-menu">
+    <div data-simplebar class="h-100">
+        <div id="sidebar-menu">
+            <ul class="metismenu list-unstyled" id="side-menu">
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   MAIN
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-main">Main</li>
+
+                <li>
+                    <a href="{{ route('tenant.dashboard', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}">
+                        <i class="bx bxs-dashboard"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.realtime', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.realtime') ? 'active' : '' }}">
+                        <i class="bx bx-pulse"></i>
+                        <span>Real-Time</span>
+                    </a>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   ANALYTICS
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-analytics">Analytics</li>
+
+                {{-- Traffic submenu --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.page-visits', 'tenant.sessions', 'tenant.funnels') ? 'mm-active' : '' }}">
+                        <i class="bx bx-line-chart"></i>
+                        <span>Traffic</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.page-visits', $slug) }}" class="{{ request()->routeIs('tenant.page-visits') ? 'active' : '' }}">Page Visits</a></li>
+                        <li><a href="{{ route('tenant.sessions', $slug) }}" class="{{ request()->routeIs('tenant.sessions') ? 'active' : '' }}">Sessions</a></li>
+                        <li><a href="{{ route('tenant.funnels', $slug) }}" class="{{ request()->routeIs('tenant.funnels') ? 'active' : '' }}">Funnel Analysis</a></li>
+                    </ul>
+                </li>
+
+                {{-- Revenue submenu --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.products', 'tenant.categories', 'tenant.campaigns', 'tenant.revenue-waterfall') ? 'mm-active' : '' }}">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span>Revenue</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.products', $slug) }}" class="{{ request()->routeIs('tenant.products') ? 'active' : '' }}">Products</a></li>
+                        <li><a href="{{ route('tenant.categories', $slug) }}" class="{{ request()->routeIs('tenant.categories') ? 'active' : '' }}">Categories</a></li>
+                        <li><a href="{{ route('tenant.campaigns', $slug) }}" class="{{ request()->routeIs('tenant.campaigns') ? 'active' : '' }}">Attribution</a></li>
+                        <li><a href="{{ route('tenant.revenue-waterfall', $slug) }}" class="{{ request()->routeIs('tenant.revenue-waterfall') ? 'active' : '' }}">Revenue Waterfall</a></li>
+                    </ul>
+                </li>
+
+                {{-- Audience submenu --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.customer-journey', 'tenant.cohorts', 'tenant.segments', 'tenant.geographic', 'tenant.clv') ? 'mm-active' : '' }}">
+                        <i class="bx bx-group"></i>
+                        <span>Audience</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.customer-journey', $slug) }}" class="{{ request()->routeIs('tenant.customer-journey') ? 'active' : '' }}">Customer Journey</a></li>
+                        <li><a href="{{ route('tenant.cohorts', $slug) }}" class="{{ request()->routeIs('tenant.cohorts') ? 'active' : '' }}">Cohorts</a></li>
+                        <li><a href="{{ route('tenant.segments', $slug) }}" class="{{ request()->routeIs('tenant.segments') ? 'active' : '' }}">Segments</a></li>
+                        <li><a href="{{ route('tenant.geographic', $slug) }}" class="{{ request()->routeIs('tenant.geographic') ? 'active' : '' }}">Geographic</a></li>
+                        <li><a href="{{ route('tenant.clv', $slug) }}" class="{{ request()->routeIs('tenant.clv') ? 'active' : '' }}">Customer Lifetime Value</a></li>
+                    </ul>
+                </li>
+
+                {{-- AI & Insights submenu --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.ai-insights', 'tenant.why-analysis', 'tenant.nlq', 'tenant.recommendations', 'tenant.benchmarks') ? 'mm-active' : '' }}">
+                        <i class="bx bx-brain"></i>
+                        <span>AI & Insights</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.ai-insights', $slug) }}" class="{{ request()->routeIs('tenant.ai-insights') ? 'active' : '' }}">AI Analytics</a></li>
+                        <li><a href="{{ route('tenant.why-analysis', $slug) }}" class="{{ request()->routeIs('tenant.why-analysis') ? 'active' : '' }}">Why Analysis</a></li>
+                        <li><a href="{{ route('tenant.nlq', $slug) }}" class="{{ request()->routeIs('tenant.nlq') ? 'active' : '' }}">Ask a Question</a></li>
+                        <li><a href="{{ route('tenant.recommendations', $slug) }}" class="{{ request()->routeIs('tenant.recommendations') ? 'active' : '' }}">Recommendations</a></li>
+                        <li><a href="{{ route('tenant.benchmarks', $slug) }}" class="{{ request()->routeIs('tenant.benchmarks') ? 'active' : '' }}">Benchmarks</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   AI SEARCH & DISCOVERY
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-ai-search">AI Search & Discovery</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.search.gift-concierge', 'tenant.search.shop-the-room', 'tenant.search.personalized-size', 'tenant.search.oos-reroute', 'tenant.search.typo-correction') ? 'mm-active' : '' }}">
+                        <i class="bx bx-search-alt-2"></i>
+                        <span>Smart Search</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.search.gift-concierge', $slug) }}" class="{{ request()->routeIs('tenant.search.gift-concierge') ? 'active' : '' }}">Gift Concierge</a></li>
+                        <li><a href="{{ route('tenant.search.shop-the-room', $slug) }}" class="{{ request()->routeIs('tenant.search.shop-the-room') ? 'active' : '' }}">Shop the Room</a></li>
+                        <li><a href="{{ route('tenant.search.personalized-size', $slug) }}" class="{{ request()->routeIs('tenant.search.personalized-size') ? 'active' : '' }}">Size Filtering</a></li>
+                        <li><a href="{{ route('tenant.search.oos-reroute', $slug) }}" class="{{ request()->routeIs('tenant.search.oos-reroute') ? 'active' : '' }}">OOS Rerouting</a></li>
+                        <li><a href="{{ route('tenant.search.typo-correction', $slug) }}" class="{{ request()->routeIs('tenant.search.typo-correction') ? 'active' : '' }}">Typo Correction</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.search.subscription-discovery', 'tenant.search.b2b-search', 'tenant.search.trend-ranking', 'tenant.search.comparison', 'tenant.search.voice-to-cart') ? 'mm-active' : '' }}">
+                        <i class="bx bx-rocket"></i>
+                        <span>Advanced Search</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.search.subscription-discovery', $slug) }}" class="{{ request()->routeIs('tenant.search.subscription-discovery') ? 'active' : '' }}">Subscriptions</a></li>
+                        <li><a href="{{ route('tenant.search.b2b-search', $slug) }}" class="{{ request()->routeIs('tenant.search.b2b-search') ? 'active' : '' }}">B2B Search</a></li>
+                        <li><a href="{{ route('tenant.search.trend-ranking', $slug) }}" class="{{ request()->routeIs('tenant.search.trend-ranking') ? 'active' : '' }}">Trend Ranking</a></li>
+                        <li><a href="{{ route('tenant.search.comparison', $slug) }}" class="{{ request()->routeIs('tenant.search.comparison') ? 'active' : '' }}">Comparison Matrix</a></li>
+                        <li><a href="{{ route('tenant.search.voice-to-cart', $slug) }}" class="{{ request()->routeIs('tenant.search.voice-to-cart') ? 'active' : '' }}">Voice to Cart</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   MARKETING
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-marketing">Marketing</li>
+
+                <li>
+                    <a href="{{ route('tenant.marketing.contacts', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.marketing.contacts*') ? 'active' : '' }}">
+                        <i class="bx bx-user-circle"></i>
+                        <span>Contacts</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.marketing.campaigns*', 'tenant.marketing.templates*') ? 'mm-active' : '' }}">
+                        <i class="bx bx-send"></i>
+                        <span>Campaigns</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.marketing.campaigns', $slug) }}" class="{{ request()->routeIs('tenant.marketing.campaigns') ? 'active' : '' }}">All Campaigns</a></li>
+                        <li><a href="{{ route('tenant.marketing.templates', $slug) }}" class="{{ request()->routeIs('tenant.marketing.templates') ? 'active' : '' }}">Templates</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.marketing.flows', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.marketing.flows*') ? 'active' : '' }}">
+                        <i class="bx bx-git-branch"></i>
+                        <span>Automation Flows</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.marketing.channels', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.marketing.channels*') ? 'active' : '' }}">
+                        <i class="bx bx-broadcast"></i>
+                        <span>Channels</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.marketing.audience-sync', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.marketing.audience-sync*') ? 'active' : '' }}">
+                        <i class="bx bx-sync"></i>
+                        <span>Audience Sync</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.marketing.weather-campaigns', 'tenant.marketing.payday-surge', 'tenant.marketing.cart-downsell', 'tenant.marketing.ugc-incentive', 'tenant.marketing.back-in-stock') ? 'mm-active' : '' }}">
+                        <i class="bx bx-meteor"></i>
+                        <span>Hyper-Personalization</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.marketing.weather-campaigns', $slug) }}" class="{{ request()->routeIs('tenant.marketing.weather-campaigns') ? 'active' : '' }}">Weather Campaigns</a></li>
+                        <li><a href="{{ route('tenant.marketing.payday-surge', $slug) }}" class="{{ request()->routeIs('tenant.marketing.payday-surge') ? 'active' : '' }}">Payday Surge</a></li>
+                        <li><a href="{{ route('tenant.marketing.cart-downsell', $slug) }}" class="{{ request()->routeIs('tenant.marketing.cart-downsell') ? 'active' : '' }}">Cart Down-Sell</a></li>
+                        <li><a href="{{ route('tenant.marketing.ugc-incentive', $slug) }}" class="{{ request()->routeIs('tenant.marketing.ugc-incentive') ? 'active' : '' }}">UGC Incentives</a></li>
+                        <li><a href="{{ route('tenant.marketing.back-in-stock', $slug) }}" class="{{ request()->routeIs('tenant.marketing.back-in-stock') ? 'active' : '' }}">Back in Stock</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.marketing.discount-addiction', 'tenant.marketing.vip-early-access', 'tenant.marketing.churn-winback', 'tenant.marketing.replenishment', 'tenant.marketing.milestones') ? 'mm-active' : '' }}">
+                        <i class="bx bx-recycle"></i>
+                        <span>Lifecycle</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.marketing.discount-addiction', $slug) }}" class="{{ request()->routeIs('tenant.marketing.discount-addiction') ? 'active' : '' }}">Discount Addiction</a></li>
+                        <li><a href="{{ route('tenant.marketing.vip-early-access', $slug) }}" class="{{ request()->routeIs('tenant.marketing.vip-early-access') ? 'active' : '' }}">VIP Early Access</a></li>
+                        <li><a href="{{ route('tenant.marketing.churn-winback', $slug) }}" class="{{ request()->routeIs('tenant.marketing.churn-winback') ? 'active' : '' }}">Churn Winback</a></li>
+                        <li><a href="{{ route('tenant.marketing.replenishment', $slug) }}" class="{{ request()->routeIs('tenant.marketing.replenishment') ? 'active' : '' }}">Replenishment</a></li>
+                        <li><a href="{{ route('tenant.marketing.milestones', $slug) }}" class="{{ request()->routeIs('tenant.marketing.milestones') ? 'active' : '' }}">Milestones</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   BUSINESS INTELLIGENCE
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-bi">Business Intelligence</li>
+
+                <li>
+                    <a href="{{ route('tenant.bi.dashboards', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.dashboards*') ? 'active' : '' }}">
+                        <i class="bx bxs-bar-chart-alt-2"></i>
+                        <span>BI Dashboards</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.bi.reports', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.reports*') ? 'active' : '' }}">
+                        <i class="bx bx-file-find"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.bi.kpis', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.kpis*') ? 'active' : '' }}">
+                        <i class="bx bx-tachometer"></i>
+                        <span>KPI Tracker</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.bi.alerts', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.alerts*') ? 'active' : '' }}">
+                        <i class="bx bx-bell"></i>
+                        <span>Alerts</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.bi.predictions', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.predictions*') ? 'active' : '' }}">
+                        <i class="bx bx-trending-up"></i>
+                        <span>Predictions</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.bi.exports', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.exports*') ? 'active' : '' }}">
+                        <i class="bx bx-export"></i>
+                        <span>Data Exports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.bi.stale-pricing', 'tenant.bi.fraud-scoring', 'tenant.bi.demand-forecast', 'tenant.bi.shipping-analyzer', 'tenant.bi.return-anomaly') ? 'mm-active' : '' }}">
+                        <i class="bx bx-bot"></i>
+                        <span>Autonomous Ops</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.bi.stale-pricing', $slug) }}" class="{{ request()->routeIs('tenant.bi.stale-pricing') ? 'active' : '' }}">Stale Pricing</a></li>
+                        <li><a href="{{ route('tenant.bi.fraud-scoring', $slug) }}" class="{{ request()->routeIs('tenant.bi.fraud-scoring') ? 'active' : '' }}">Fraud Scoring</a></li>
+                        <li><a href="{{ route('tenant.bi.demand-forecast', $slug) }}" class="{{ request()->routeIs('tenant.bi.demand-forecast') ? 'active' : '' }}">Demand Forecast</a></li>
+                        <li><a href="{{ route('tenant.bi.shipping-analyzer', $slug) }}" class="{{ request()->routeIs('tenant.bi.shipping-analyzer') ? 'active' : '' }}">Shipping Analyzer</a></li>
+                        <li><a href="{{ route('tenant.bi.return-anomaly', $slug) }}" class="{{ request()->routeIs('tenant.bi.return-anomaly') ? 'active' : '' }}">Return Anomalies</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.bi.cannibalization', 'tenant.bi.ltv-vs-cac', 'tenant.bi.conversion-probability', 'tenant.bi.device-revenue', 'tenant.bi.cohort-acquisition') ? 'mm-active' : '' }}">
+                        <i class="bx bx-analyse"></i>
+                        <span>Advanced BI</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.bi.cannibalization', $slug) }}" class="{{ request()->routeIs('tenant.bi.cannibalization') ? 'active' : '' }}">Cannibalization</a></li>
+                        <li><a href="{{ route('tenant.bi.ltv-vs-cac', $slug) }}" class="{{ request()->routeIs('tenant.bi.ltv-vs-cac') ? 'active' : '' }}">LTV vs CAC</a></li>
+                        <li><a href="{{ route('tenant.bi.conversion-probability', $slug) }}" class="{{ request()->routeIs('tenant.bi.conversion-probability') ? 'active' : '' }}">Conversion Score</a></li>
+                        <li><a href="{{ route('tenant.bi.device-revenue', $slug) }}" class="{{ request()->routeIs('tenant.bi.device-revenue') ? 'active' : '' }}">Device Revenue</a></li>
+                        <li><a href="{{ route('tenant.bi.cohort-acquisition', $slug) }}" class="{{ request()->routeIs('tenant.bi.cohort-acquisition') ? 'active' : '' }}">Source Cohorts</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   MONITORING & ALERTS
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-monitoring">Monitoring</li>
+
+                <li>
+                    <a href="{{ route('tenant.behavioral-triggers', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.behavioral-triggers') ? 'active' : '' }}">
+                        <i class="bx bx-target-lock"></i>
+                        <span>Behavioral Triggers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.realtime-alerts', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.realtime-alerts') ? 'active' : '' }}">
+                        <i class="bx bx-error-circle"></i>
+                        <span>Real-Time Alerts</span>
+                    </a>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   CUSTOMER SUPPORT
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-support">Customer Support</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.support.order-modification', 'tenant.support.sentiment-router', 'tenant.support.vip-greeting', 'tenant.support.warranty-claims', 'tenant.support.sizing-assistant') ? 'mm-active' : '' }}">
+                        <i class="bx bx-support"></i>
+                        <span>Proactive Support</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.support.order-modification', $slug) }}" class="{{ request()->routeIs('tenant.support.order-modification') ? 'active' : '' }}">Order Modification</a></li>
+                        <li><a href="{{ route('tenant.support.sentiment-router', $slug) }}" class="{{ request()->routeIs('tenant.support.sentiment-router') ? 'active' : '' }}">Sentiment Router</a></li>
+                        <li><a href="{{ route('tenant.support.vip-greeting', $slug) }}" class="{{ request()->routeIs('tenant.support.vip-greeting') ? 'active' : '' }}">VIP Greeting</a></li>
+                        <li><a href="{{ route('tenant.support.warranty-claims', $slug) }}" class="{{ request()->routeIs('tenant.support.warranty-claims') ? 'active' : '' }}">Warranty Claims</a></li>
+                        <li><a href="{{ route('tenant.support.sizing-assistant', $slug) }}" class="{{ request()->routeIs('tenant.support.sizing-assistant') ? 'active' : '' }}">Sizing Assistant</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.support.order-tracking', 'tenant.support.objection-handler', 'tenant.support.subscription-mgmt', 'tenant.support.gift-cards', 'tenant.support.video-reviews') ? 'mm-active' : '' }}">
+                        <i class="bx bx-chat"></i>
+                        <span>Advanced Chat</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.support.order-tracking', $slug) }}" class="{{ request()->routeIs('tenant.support.order-tracking') ? 'active' : '' }}">Order Tracking</a></li>
+                        <li><a href="{{ route('tenant.support.objection-handler', $slug) }}" class="{{ request()->routeIs('tenant.support.objection-handler') ? 'active' : '' }}">Objection Handler</a></li>
+                        <li><a href="{{ route('tenant.support.subscription-mgmt', $slug) }}" class="{{ request()->routeIs('tenant.support.subscription-mgmt') ? 'active' : '' }}">Subscriptions</a></li>
+                        <li><a href="{{ route('tenant.support.gift-cards', $slug) }}" class="{{ request()->routeIs('tenant.support.gift-cards') ? 'active' : '' }}">Gift Cards</a></li>
+                        <li><a href="{{ route('tenant.support.video-reviews', $slug) }}" class="{{ request()->routeIs('tenant.support.video-reviews') ? 'active' : '' }}">Video Reviews</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   CDP & ANALYTICS OPS
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-cdp">CDP & Analytics Ops</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.cdp.offline-stitching', 'tenant.cdp.zombie-accounts', 'tenant.cdp.product-affinity', 'tenant.cdp.zero-party-data', 'tenant.cdp.refund-impact') ? 'mm-active' : '' }}">
+                        <i class="bx bx-data"></i>
+                        <span>CDP Operations</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.cdp.offline-stitching', $slug) }}" class="{{ request()->routeIs('tenant.cdp.offline-stitching') ? 'active' : '' }}">Offline Stitching</a></li>
+                        <li><a href="{{ route('tenant.cdp.zombie-accounts', $slug) }}" class="{{ request()->routeIs('tenant.cdp.zombie-accounts') ? 'active' : '' }}">Zombie Accounts</a></li>
+                        <li><a href="{{ route('tenant.cdp.product-affinity', $slug) }}" class="{{ request()->routeIs('tenant.cdp.product-affinity') ? 'active' : '' }}">Product Affinity</a></li>
+                        <li><a href="{{ route('tenant.cdp.zero-party-data', $slug) }}" class="{{ request()->routeIs('tenant.cdp.zero-party-data') ? 'active' : '' }}">Zero-Party Data</a></li>
+                        <li><a href="{{ route('tenant.cdp.refund-impact', $slug) }}" class="{{ request()->routeIs('tenant.cdp.refund-impact') ? 'active' : '' }}">Refund Impact</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.cdp.attribution', 'tenant.cdp.journey-replay', 'tenant.cdp.gdpr-purge', 'tenant.cdp.form-abandonment', 'tenant.cdp.cross-benchmarking') ? 'mm-active' : '' }}">
+                        <i class="bx bx-scatter-chart"></i>
+                        <span>Analytics Ops</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.cdp.attribution', $slug) }}" class="{{ request()->routeIs('tenant.cdp.attribution') ? 'active' : '' }}">Multi-Touch Attribution</a></li>
+                        <li><a href="{{ route('tenant.cdp.journey-replay', $slug) }}" class="{{ request()->routeIs('tenant.cdp.journey-replay') ? 'active' : '' }}">Journey Replay</a></li>
+                        <li><a href="{{ route('tenant.cdp.gdpr-purge', $slug) }}" class="{{ request()->routeIs('tenant.cdp.gdpr-purge') ? 'active' : '' }}">GDPR Purge Sim</a></li>
+                        <li><a href="{{ route('tenant.cdp.form-abandonment', $slug) }}" class="{{ request()->routeIs('tenant.cdp.form-abandonment') ? 'active' : '' }}">Form Abandonment</a></li>
+                        <li><a href="{{ route('tenant.cdp.cross-benchmarking', $slug) }}" class="{{ request()->routeIs('tenant.cdp.cross-benchmarking') ? 'active' : '' }}">Cross Benchmarking</a></li>
+                    </ul>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   DATA SYNC
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-datasync">Data Sync</li>
+
+                <li>
+                    <a href="{{ route('tenant.datasync.connections', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.datasync.connections') ? 'active' : '' }}">
+                        <i class="bx bx-plug"></i>
+                        <span>Connections</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.datasync.permissions', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.datasync.permissions') ? 'active' : '' }}">
+                        <i class="bx bx-lock-open-alt"></i>
+                        <span>Permissions</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.datasync.products', 'tenant.datasync.categories', 'tenant.datasync.inventory') ? 'mm-active' : '' }}">
+                        <i class="bx bx-package"></i>
+                        <span>Catalog Data</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.datasync.products', $slug) }}" class="{{ request()->routeIs('tenant.datasync.products') ? 'active' : '' }}">Products</a></li>
+                        <li><a href="{{ route('tenant.datasync.categories', $slug) }}" class="{{ request()->routeIs('tenant.datasync.categories') ? 'active' : '' }}">Categories</a></li>
+                        <li><a href="{{ route('tenant.datasync.inventory', $slug) }}" class="{{ request()->routeIs('tenant.datasync.inventory') ? 'active' : '' }}">Inventory</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.datasync.orders', 'tenant.datasync.customers') ? 'mm-active' : '' }}">
+                        <i class="bx bx-user-check"></i>
+                        <span>Customer Data</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.datasync.orders', $slug) }}" class="{{ request()->routeIs('tenant.datasync.orders') ? 'active' : '' }}">Orders</a></li>
+                        <li><a href="{{ route('tenant.datasync.customers', $slug) }}" class="{{ request()->routeIs('tenant.datasync.customers') ? 'active' : '' }}">Customers</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.datasync.logs', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.datasync.logs') ? 'active' : '' }}">
+                        <i class="bx bx-history"></i>
+                        <span>Sync Logs</span>
+                    </a>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   DEVELOPER
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-developer">Developer</li>
+
+                <li>
+                    <a href="{{ route('tenant.custom-events', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.custom-events') ? 'active' : '' }}">
+                        <i class="bx bx-bolt-circle"></i>
+                        <span>Custom Events</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.webhooks', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.webhooks') ? 'active' : '' }}">
+                        <i class="bx bx-link-external"></i>
+                        <span>Webhooks</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.integration', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.integration') ? 'active' : '' }}">
+                        <i class="bx bx-code-alt"></i>
+                        <span>Integration & SDK</span>
+                    </a>
+                </li>
+
+                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   SETTINGS
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                <li class="menu-title" key="t-settings">Settings</li>
+
+                <li>
+                    <a href="{{ route('tenant.settings', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.settings') ? 'active' : '' }}">
+                        <i class="bx bx-cog"></i>
+                        <span>Store Settings</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- Left Sidebar End -->

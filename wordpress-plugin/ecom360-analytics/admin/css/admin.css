@@ -1,0 +1,185 @@
+/* ═══════════════════════════ Ecom360 Admin Styles ════════════════════ */
+
+.ecom360-wrap {
+    max-width: 900px;
+}
+
+.ecom360-wrap h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.6em;
+    margin-bottom: 16px;
+}
+
+.ecom360-logo {
+    font-size: 1.3em;
+}
+
+
+/* ─── Status banner ─── */
+
+.ecom360-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.ecom360-status .indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ecom360-status.connected {
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+}
+
+.ecom360-status.connected .indicator {
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.ecom360-status.disconnected {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+.ecom360-status.disconnected .indicator {
+    background: #ef4444;
+}
+
+.ecom360-status small {
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+
+/* ─── Cards ─── */
+
+.ecom360-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ecom360-card h2 {
+    font-size: 1.15em;
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+
+.ecom360-card .form-table th {
+    width: 220px;
+    font-weight: 500;
+    color: #334155;
+    padding: 12px 10px 12px 0;
+}
+
+.ecom360-card .form-table td {
+    padding: 12px 10px;
+}
+
+
+/* ─── Toggle switch ─── */
+
+.ecom360-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+.ecom360-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ecom360-toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #cbd5e1;
+    border-radius: 24px;
+    transition: background-color 0.2s;
+}
+
+.ecom360-toggle .slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.ecom360-toggle input:checked+.slider {
+    background-color: #6366f1;
+}
+
+.ecom360-toggle input:checked+.slider::before {
+    transform: translateX(20px);
+}
+
+
+/* Hide the hidden input visually (WP needs it for unchecked state) */
+
+.ecom360-toggle input[type="hidden"] {
+    display: none;
+}
+
+
+/* ─── Test connection ─── */
+
+#ecom360-test-connection {
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+#ecom360-test-result {
+    margin-left: 10px;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+#ecom360-test-result.success {
+    color: #059669;
+}
+
+#ecom360-test-result.error {
+    color: #dc2626;
+}
+
+#ecom360-test-result.loading {
+    color: #6366f1;
+}
+
+
+/* ─── Responsive ─── */
+
+@media (max-width: 782px) {
+    .ecom360-card .form-table th {
+        width: auto;
+        padding-bottom: 4px;
+    }
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * FRONTEND-ONLY event observers.
+ *
+ * These observers fire ONLY during storefront (customer-facing) requests.
+ * They NEVER execute during admin panel operations, API calls, or cron.
+ *
+ * Admin catalog/customer/order sync is handled exclusively by cron jobs:
+ *   - SyncProductsCron, SyncCategoriesCron, SyncOrdersCron, SyncCustomersCron
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- ═══ Cart Events (storefront only) ═══ -->
+    <event name="checkout_cart_product_add_after">
+        <observer name="ecom360_add_to_cart" instance="Ecom360\Analytics\Observer\AddToCartObserver"/>
+    </event>
+    <event name="sales_quote_remove_item">
+        <observer name="ecom360_remove_from_cart" instance="Ecom360\Analytics\Observer\RemoveFromCartObserver"/>
+    </event>
+    <event name="checkout_cart_save_after">
+        <observer name="ecom360_cart_save" instance="Ecom360\Analytics\Observer\CartSaveObserver"/>
+    </event>
+
+    <!-- ═══ Checkout & Order Events (storefront only) ═══ -->
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="ecom360_checkout_success" instance="Ecom360\Analytics\Observer\CheckoutSuccessObserver"/>
+    </event>
+    <event name="sales_order_place_after">
+        <observer name="ecom360_order_placed" instance="Ecom360\Analytics\Observer\OrderPlacedObserver"/>
+    </event>
+
+    <!-- ═══ Customer Events (storefront only) ═══ -->
+    <event name="customer_login">
+        <observer name="ecom360_customer_login" instance="Ecom360\Analytics\Observer\CustomerLoginObserver"/>
+    </event>
+    <event name="customer_register_success">
+        <observer name="ecom360_customer_register" instance="Ecom360\Analytics\Observer\CustomerRegisterObserver"/>
+    </event>
+
+    <!-- ═══ Wishlist Events (storefront only) ═══ -->
+    <event name="wishlist_add_product">
+        <observer name="ecom360_wishlist_add" instance="Ecom360\Analytics\Observer\WishlistAddObserver"/>
+    </event>
+
+    <!-- ═══ Review Events (storefront only) ═══ -->
+    <event name="review_save_after">
+        <observer name="ecom360_review_save" instance="Ecom360\Analytics\Observer\ReviewSaveObserver"/>
+    </event>
+
+    <!-- ═══ Search Events (storefront only) ═══ -->
+    <event name="catalogsearch_query_save_after">
+        <observer name="ecom360_search" instance="Ecom360\Analytics\Observer\SearchObserver"/>
+    </event>
+</config>

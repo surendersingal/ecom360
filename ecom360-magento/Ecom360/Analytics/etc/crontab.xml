@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Cron job configuration
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="ecom360">
+        <!-- ★ EVENT QUEUE CONSUMER — processes async observer events every minute ★ -->
+        <job name="ecom360_process_event_queue" instance="Ecom360\Analytics\Cron\ProcessEventQueueCron"
+             method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+
+        <!-- Data sync cron -->
+        <job name="ecom360_sync_products" instance="Ecom360\Analytics\Cron\SyncProductsCron"
+             method="execute">
+            <schedule>0 */1 * * *</schedule>
+        </job>
+        <job name="ecom360_sync_categories" instance="Ecom360\Analytics\Cron\SyncCategoriesCron"
+             method="execute">
+            <schedule>0 */6 * * *</schedule>
+        </job>
+        <job name="ecom360_sync_orders" instance="Ecom360\Analytics\Cron\SyncOrdersCron"
+             method="execute">
+            <schedule>*/15 * * * *</schedule>
+        </job>
+        <job name="ecom360_sync_customers" instance="Ecom360\Analytics\Cron\SyncCustomersCron"
+             method="execute">
+            <schedule>0 */2 * * *</schedule>
+        </job>
+        <job name="ecom360_sync_sales" instance="Ecom360\Analytics\Cron\SyncSalesCron"
+             method="execute">
+            <schedule>0 1 * * *</schedule>
+        </job>
+
+        <!-- Abandoned cart cron -->
+        <job name="ecom360_abandoned_carts" instance="Ecom360\Analytics\Cron\AbandonedCartCron"
+             method="execute">
+            <schedule>*/10 * * * *</schedule>
+        </job>
+
+        <!-- Sync popup captures to ecom360 -->
+        <job name="ecom360_sync_popup_captures" instance="Ecom360\Analytics\Cron\SyncPopupCapturesCron"
+             method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+
+        <!-- Sync inventory (stock + cost) for margin analysis / replenishment (UC7, UC16, UC17) -->
+        <job name="ecom360_sync_inventory" instance="Ecom360\Analytics\Cron\SyncInventoryCron"
+             method="execute">
+            <schedule>0 */2 * * *</schedule>
+        </job>
+
+        <!-- Fetch pending interventions from platform (UC1, UC2, UC3) -->
+        <job name="ecom360_fetch_interventions" instance="Ecom360\Analytics\Cron\FetchInterventionsCron"
+             method="execute">
+            <schedule>*/2 * * * *</schedule>
+        </job>
+    </group>
+</config>

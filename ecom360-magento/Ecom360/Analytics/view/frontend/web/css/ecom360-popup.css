@@ -1,0 +1,151 @@
+/* Ecom360 Popup Capture Widget */
+
+.ecom360-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: ecom360FadeIn .3s ease;
+}
+
+@keyframes ecom360FadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.ecom360-popup-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    animation: ecom360SlideUp .35s ease;
+}
+
+@keyframes ecom360SlideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.ecom360-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color .2s;
+}
+
+.ecom360-popup-close:hover {
+    color: #333;
+}
+
+.ecom360-popup-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.ecom360-popup-desc {
+    margin: 0 0 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.ecom360-popup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ecom360-popup-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.ecom360-popup-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.ecom360-popup-input:focus {
+    border-color: #4a90d9;
+    box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.15);
+}
+
+.ecom360-popup-submit {
+    padding: 13px 20px;
+    background: #4a90d9;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: 4px;
+}
+
+.ecom360-popup-submit:hover {
+    background: #357abd;
+}
+
+.ecom360-popup-msg {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.ecom360-popup-msg--success {
+    color: #2e7d32;
+}
+
+.ecom360-popup-msg--error {
+    color: #c62828;
+}
+
+
+/* Mobile */
+
+@media (max-width: 480px) {
+    .ecom360-popup-modal {
+        padding: 28px 20px 22px;
+        border-radius: 10px;
+    }
+    .ecom360-popup-title {
+        font-size: 18px;
+    }
+}

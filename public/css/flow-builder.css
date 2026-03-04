@@ -1,0 +1,553 @@
+/* ============================================================
+   Flow Builder – Visual Drag-Drop Canvas
+   ============================================================ */
+
+
+/* ── Layout ─────────────────────────────────────────────────── */
+
+.fb-wrapper {
+    display: flex;
+    height: calc(100vh - 130px);
+    background: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+
+/* ── Left Sidebar – Node Palette ──────────────────────────── */
+
+.fb-palette {
+    width: 240px;
+    min-width: 240px;
+    background: #fff;
+    border-right: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.fb-palette-header {
+    padding: 14px 16px 10px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #495057;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #eee;
+}
+
+.fb-palette-group {
+    padding: 8px 12px 4px;
+}
+
+.fb-palette-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #adb5bd;
+    margin-bottom: 6px;
+    padding-left: 4px;
+    letter-spacing: 0.3px;
+}
+
+.fb-palette-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    cursor: grab;
+    font-size: 13px;
+    color: #495057;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.fb-palette-item:hover {
+    background: #f0f4ff;
+    border-color: #d0d9f2;
+}
+
+.fb-palette-item:active {
+    cursor: grabbing;
+    opacity: 0.7;
+}
+
+.fb-palette-item .fb-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+
+/* ── Canvas Area ────────────────────────────────────────────── */
+
+.fb-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle, #dee2e6 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.fb-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+}
+
+.fb-canvas svg.fb-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.fb-canvas svg.fb-svg path {
+    pointer-events: stroke;
+    cursor: pointer;
+}
+
+.fb-canvas svg.fb-svg path:hover {
+    stroke-width: 3;
+}
+
+.fb-canvas svg.fb-svg path.fb-edge-selected {
+    stroke: #556ee6;
+    stroke-width: 3;
+}
+
+.fb-canvas svg.fb-svg .fb-edge-label {
+    pointer-events: all;
+    cursor: pointer;
+}
+
+
+/* ── Canvas Toolbar ─────────────────────────────────────────── */
+
+.fb-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    gap: 6px;
+    background: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fb-toolbar .btn {
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+
+/* ── Zoom Controls ──────────────────────────────────────────── */
+
+.fb-zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #fff;
+    padding: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fb-zoom-controls .btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fb-zoom-label {
+    font-size: 11px;
+    text-align: center;
+    color: #6c757d;
+    padding: 2px 0;
+}
+
+
+/* ── Canvas Nodes ───────────────────────────────────────────── */
+
+.fb-node {
+    position: absolute;
+    min-width: 180px;
+    max-width: 240px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border: 2px solid #dee2e6;
+    cursor: move;
+    z-index: 10;
+    user-select: none;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.fb-node:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.fb-node.fb-node-selected {
+    border-color: #556ee6;
+    box-shadow: 0 0 0 3px rgba(85, 110, 230, 0.25);
+}
+
+.fb-node.fb-node-dragging {
+    opacity: 0.85;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.fb-node-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.fb-node-header .fb-node-icon {
+    font-size: 16px;
+}
+
+.fb-node-header .fb-node-type {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fb-node-header .fb-node-delete {
+    cursor: pointer;
+    opacity: 0.7;
+    font-size: 14px;
+    transition: opacity 0.15s;
+}
+
+.fb-node-header .fb-node-delete:hover {
+    opacity: 1;
+}
+
+.fb-node-body {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #495057;
+}
+
+.fb-node-body .fb-node-label {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.fb-node-body .fb-node-desc {
+    color: #868e96;
+    font-size: 11px;
+}
+
+
+/* ── Connection Ports ───────────────────────────────────────── */
+
+.fb-port {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #adb5bd;
+    z-index: 20;
+    cursor: crosshair;
+    transition: all 0.15s;
+}
+
+.fb-port:hover,
+.fb-port.fb-port-active {
+    background: #556ee6;
+    border-color: #556ee6;
+    transform: scale(1.3);
+}
+
+.fb-port-out {
+    bottom: -7px;
+    left: 50%;
+    margin-left: -7px;
+}
+
+.fb-port-in {
+    top: -7px;
+    left: 50%;
+    margin-left: -7px;
+}
+
+
+/* Condition nodes get yes/no ports */
+
+.fb-port-yes {
+    bottom: -7px;
+    left: 30%;
+    margin-left: -7px;
+}
+
+.fb-port-no {
+    bottom: -7px;
+    left: 70%;
+    margin-left: -7px;
+}
+
+.fb-port-yes::after,
+.fb-port-no::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.fb-port-yes::after {
+    content: 'YES';
+    color: #34c38f;
+}
+
+.fb-port-no::after {
+    content: 'NO';
+    color: #f46a6a;
+}
+
+
+/* ── Right Panel – Properties ───────────────────────────────── */
+
+.fb-properties {
+    width: 300px;
+    min-width: 300px;
+    background: #fff;
+    border-left: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transition: width 0.2s;
+}
+
+.fb-properties.fb-collapsed {
+    width: 0;
+    min-width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+
+.fb-properties-header {
+    padding: 14px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fb-properties-body {
+    padding: 16px;
+    flex: 1;
+}
+
+.fb-properties-body .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.fb-properties-body .form-control,
+.fb-properties-body .form-select {
+    font-size: 13px;
+}
+
+.fb-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #adb5bd;
+    text-align: center;
+    padding: 40px;
+}
+
+.fb-empty-state i {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.fb-empty-state p {
+    font-size: 13px;
+}
+
+
+/* ── Node Type Colors ───────────────────────────────────────── */
+
+.fb-color-trigger {
+    background: #556ee6;
+}
+
+.fb-color-email {
+    background: #34c38f;
+}
+
+.fb-color-sms {
+    background: #f1b44c;
+}
+
+.fb-color-push {
+    background: #50a5f1;
+}
+
+.fb-color-whatsapp {
+    background: #25d366;
+}
+
+.fb-color-delay {
+    background: #74788d;
+}
+
+.fb-color-condition {
+    background: #f46a6a;
+}
+
+.fb-color-split {
+    background: #e83e8c;
+}
+
+.fb-color-webhook {
+    background: #343a40;
+}
+
+.fb-color-update {
+    background: #6f42c1;
+}
+
+.fb-color-list {
+    background: #20c997;
+}
+
+.fb-color-goal {
+    background: #fd7e14;
+}
+
+.fb-color-exit {
+    background: #dc3545;
+}
+
+
+/* ── Drag Ghost ─────────────────────────────────────────────── */
+
+.fb-drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0.8;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+}
+
+
+/* ── Temp Connection Line ───────────────────────────────────── */
+
+.fb-temp-line {
+    pointer-events: none;
+    z-index: 5;
+}
+
+
+/* ── Minimap ────────────────────────────────────────────────── */
+
+.fb-minimap {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    width: 160px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.fb-minimap canvas {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ── Status Bar ─────────────────────────────────────────────── */
+
+.fb-status-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 11px;
+    color: #868e96;
+    gap: 16px;
+    z-index: 100;
+}
+
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .fb-palette {
+        width: 60px;
+        min-width: 60px;
+    }
+    .fb-palette-item span:not(.fb-icon) {
+        display: none;
+    }
+    .fb-properties {
+        width: 250px;
+        min-width: 250px;
+    }
+}

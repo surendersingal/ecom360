@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * GLOBAL event observers — fire in ALL scopes (frontend, admin, cron, API).
+ *
+ * Observers here handle events that fire on admin saves (catalog, customers,
+ * orders) which storefront-scoped events.xml would miss.
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- ═══ Catalog Save Events (admin panel & API) ═══ -->
+    <event name="catalog_product_save_after">
+        <observer name="ecom360_product_save" instance="Ecom360\Analytics\Observer\ProductSaveObserver"/>
+    </event>
+    <event name="catalog_category_save_after">
+        <observer name="ecom360_category_save" instance="Ecom360\Analytics\Observer\CategorySaveObserver"/>
+    </event>
+
+    <!-- ═══ Customer Save Events (admin panel & API) ═══ -->
+    <event name="customer_save_after">
+        <observer name="ecom360_customer_save" instance="Ecom360\Analytics\Observer\CustomerSaveObserver"/>
+    </event>
+
+    <!-- ═══ Order Status Change Events (admin panel & API) ═══ -->
+    <event name="sales_order_save_after">
+        <observer name="ecom360_order_status" instance="Ecom360\Analytics\Observer\OrderStatusObserver"/>
+    </event>
+
+    <!-- ═══ Shipment Events (admin panel — shipments are created from admin) ═══ -->
+    <event name="sales_order_shipment_save_after">
+        <observer name="ecom360_shipment_global" instance="Ecom360\Analytics\Observer\ShipmentObserver"/>
+    </event>
+
+    <!-- ═══ Inventory Events (admin MSI changes & catalog saves) ═══ -->
+    <event name="cataloginventory_stock_item_save_after">
+        <observer name="ecom360_inventory_global" instance="Ecom360\Analytics\Observer\InventoryObserver"/>
+    </event>
+
+    <!-- ═══ Refund/Credit Memo Events (admin panel) ═══ -->
+    <event name="sales_order_creditmemo_save_after">
+        <observer name="ecom360_refund_global" instance="Ecom360\Analytics\Observer\RefundObserver"/>
+    </event>
+</config>

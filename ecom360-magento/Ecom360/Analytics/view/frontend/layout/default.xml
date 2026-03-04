@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Frontend layout — inject tracker script and config into all pages.
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <!-- CSS moved into popup.phtml — only loaded when popup is enabled -->
+    <body>
+        <!-- Ecom360 tracker config block injected into <head> -->
+        <referenceContainer name="before.body.end">
+            <block class="Ecom360\Analytics\Block\Tracker" name="ecom360.tracker"
+                   template="Ecom360_Analytics::tracker.phtml"/>
+            <block class="Ecom360\Analytics\Block\PopupWidget" name="ecom360.popup"
+                   template="Ecom360_Analytics::popup.phtml"/>
+            <block class="Ecom360\Analytics\Block\PushNotification" name="ecom360.push"
+                   template="Ecom360_Analytics::push.phtml"/>
+            <block class="Ecom360\Analytics\Block\ChatbotWidget" name="ecom360.chatbot"
+                   template="Ecom360_Analytics::chatbot.phtml"/>
+            <block class="Ecom360\Analytics\Block\AiSearchWidget" name="ecom360.aisearch"
+                   template="Ecom360_Analytics::aisearch.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

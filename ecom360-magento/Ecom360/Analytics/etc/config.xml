@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Default configuration values
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <ecom360_analytics>
+            <connection>
+                <enabled>0</enabled>
+                <server_url/>
+                <api_key/>
+                <secret_key/>
+            </connection>
+            <sync>
+                <sync_products>1</sync_products>
+                <sync_categories>1</sync_categories>
+                <sync_orders>1</sync_orders>
+                <sync_customers>1</sync_customers>
+                <sync_sales_data>1</sync_sales_data>
+                <sync_interval>every_hour</sync_interval>
+                <batch_size>50</batch_size>
+            </sync>
+            <tracking>
+                <track_page_views>1</track_page_views>
+                <track_product_views>1</track_product_views>
+                <track_cart>1</track_cart>
+                <track_checkout>1</track_checkout>
+                <track_purchases>1</track_purchases>
+                <track_search>1</track_search>
+                <track_customer_login>1</track_customer_login>
+                <track_customer_register>1</track_customer_register>
+                <track_reviews>1</track_reviews>
+                <track_wishlist>1</track_wishlist>
+                <track_compare>1</track_compare>
+            </tracking>
+            <behavior>
+                <batch_events>1</batch_events>
+                <batch_size>10</batch_size>
+                <flush_interval>5000</flush_interval>
+                <session_timeout>30</session_timeout>
+                <enable_fingerprint>1</enable_fingerprint>
+                <capture_utm>1</capture_utm>
+                <capture_referrer>1</capture_referrer>
+                <exclude_admin_users>1</exclude_admin_users>
+            </behavior>
+            <abandoned_cart>
+                <enabled>1</enabled>
+                <timeout_minutes>60</timeout_minutes>
+                <send_email>1</send_email>
+                <email_delay_minutes>30</email_delay_minutes>
+                <include_coupon>0</include_coupon>
+            </abandoned_cart>
+            <push>
+                <enabled>0</enabled>
+                <provider>firebase</provider>
+                <prompt_delay>10</prompt_delay>
+            </push>
+            <popup>
+                <enabled>0</enabled>
+                <trigger>time_delay</trigger>
+                <delay_seconds>15</delay_seconds>
+                <scroll_percent>50</scroll_percent>
+                <title>Stay Connected!</title>
+                <description>Sign up for exclusive offers and updates.</description>
+                <collect_name>1</collect_name>
+                <collect_email>1</collect_email>
+                <collect_phone>0</collect_phone>
+                <collect_dob>0</collect_dob>
+                <show_on>all_pages</show_on>
+                <show_frequency>once_per_session</show_frequency>
+            </popup>
+            <features>
+                <exit_intent_enabled>1</exit_intent_enabled>
+                <rage_click_enabled>1</rage_click_enabled>
+                <free_shipping_bar_enabled>0</free_shipping_bar_enabled>
+                <free_shipping_threshold>50</free_shipping_threshold>
+                <free_shipping_currency>USD</free_shipping_currency>
+                <interventions_enabled>1</interventions_enabled>
+                <interventions_poll_interval>15</interventions_poll_interval>
+                <chatbot_enabled>0</chatbot_enabled>
+                <chatbot_position>bottom-right</chatbot_position>
+                <chatbot_greeting>Hi! How can I help you today?</chatbot_greeting>
+                <ai_search_enabled>0</ai_search_enabled>
+                <ai_search_visual_enabled>0</ai_search_visual_enabled>
+                <sync_inventory>1</sync_inventory>
+            </features>
+        </ecom360_analytics>
+    </default>
+</config>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Admin Menu — sidebar navigation entries
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <!-- Top-level menu item -->
+        <add id="Ecom360_Analytics::ecom360"
+             title="Ecom360 Analytics"
+             module="Ecom360_Analytics"
+             sortOrder="90"
+             resource="Ecom360_Analytics::ecom360"/>
+
+        <!-- Sync Logs -->
+        <add id="Ecom360_Analytics::sync_log"
+             title="Sync Logs"
+             module="Ecom360_Analytics"
+             parent="Ecom360_Analytics::ecom360"
+             sortOrder="10"
+             action="ecom360/synclog/index"
+             resource="Ecom360_Analytics::sync_log"/>
+
+        <!-- Abandoned Carts -->
+        <add id="Ecom360_Analytics::abandoned_carts"
+             title="Abandoned Carts"
+             module="Ecom360_Analytics"
+             parent="Ecom360_Analytics::ecom360"
+             sortOrder="20"
+             action="ecom360/abandonedcart/index"
+             resource="Ecom360_Analytics::abandoned_carts"/>
+
+        <!-- Customer Journey -->
+        <add id="Ecom360_Analytics::journey"
+             title="Customer Journey"
+             module="Ecom360_Analytics"
+             parent="Ecom360_Analytics::ecom360"
+             sortOrder="30"
+             action="ecom360/journey/timeline"
+             resource="Ecom360_Analytics::journey"/>
+    </menu>
+</config>

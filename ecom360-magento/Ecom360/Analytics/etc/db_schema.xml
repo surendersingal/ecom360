@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Database schema — creates tables for sync logs and abandoned carts.
+ *
+ * @package Ecom360_Analytics
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- ═══ Sync Log Table ═══ -->
+    <table name="ecom360_sync_log" resource="default" engine="innodb"
+           comment="Ecom360 Data Sync Log">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true"
+                comment="Log ID"/>
+        <column xsi:type="varchar" name="entity_type" nullable="false" length="50"
+                comment="Entity Type (product, category, order, customer, sales)"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending"
+                comment="Status (pending, running, success, failed)"/>
+        <column xsi:type="int" name="records_synced" unsigned="true" nullable="false" default="0"
+                comment="Number of records synced"/>
+        <column xsi:type="int" name="records_failed" unsigned="true" nullable="false" default="0"
+                comment="Number of records failed"/>
+        <column xsi:type="text" name="error_message" nullable="true"
+                comment="Error message if failed"/>
+        <column xsi:type="text" name="details" nullable="true"
+                comment="JSON details about the sync run"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Store ID"/>
+        <column xsi:type="timestamp" name="started_at" nullable="true"
+                comment="Sync start time"/>
+        <column xsi:type="timestamp" name="completed_at" nullable="true"
+                comment="Sync completion time"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="ECOM360_SYNC_LOG_ENTITY_TYPE" indexType="btree">
+            <column name="entity_type"/>
+        </index>
+        <index referenceId="ECOM360_SYNC_LOG_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ECOM360_SYNC_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <!-- ═══ Abandoned Cart Table ═══ -->
+    <table name="ecom360_abandoned_cart" resource="default" engine="innodb"
+           comment="Ecom360 Abandoned Cart Tracking">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
+                comment="ID"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="false"
+                comment="Quote/Cart ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true"
+                comment="Customer ID (null for guests)"/>
+        <column xsi:type="varchar" name="customer_email" nullable="true" length="255"
+                comment="Customer Email"/>
+        <column xsi:type="varchar" name="customer_name" nullable="true" length="255"
+                comment="Customer Name"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Store ID"/>
+        <column xsi:type="decimal" name="grand_total" scale="4" precision="20" unsigned="false"
+                nullable="false" default="0" comment="Cart Grand Total"/>
+        <column xsi:type="int" name="items_count" unsigned="true" nullable="false" default="0"
+                comment="Number of items in cart"/>
+        <column xsi:type="text" name="items_json" nullable="true"
+                comment="JSON snapshot of cart items"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="30" default="active"
+                comment="Status (active, abandoned, recovered, email_sent, converted)"/>
+        <column xsi:type="varchar" name="recovery_token" nullable="true" length="128"
+                comment="Unique token for recovery link"/>
+        <column xsi:type="varchar" name="coupon_code" nullable="true" length="64"
+                comment="Generated coupon code for recovery"/>
+        <column xsi:type="boolean" name="email_sent" nullable="false" default="false"
+                comment="Whether recovery email was sent"/>
+        <column xsi:type="timestamp" name="email_sent_at" nullable="true"
+                comment="When recovery email was sent"/>
+        <column xsi:type="boolean" name="synced_to_ecom360" nullable="false" default="false"
+                comment="Whether synced to Ecom360 platform"/>
+        <column xsi:type="timestamp" name="last_activity_at" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Last cart activity"/>
+        <column xsi:type="timestamp" name="abandoned_at" nullable="true"
+                comment="When cart was marked abandoned"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ECOM360_ABANDONED_CART_QUOTE_ID">
+            <column name="quote_id"/>
+        </constraint>
+        <index referenceId="ECOM360_ABANDONED_CART_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="ECOM360_ABANDONED_CART_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ECOM360_ABANDONED_CART_STORE_ID" indexType="btree">
+            <column name="store_id"/>
+        </index>
+        <index referenceId="ECOM360_ABANDONED_CART_RECOVERY_TOKEN" indexType="btree">
+            <column name="recovery_token"/>
+        </index>
+        <!-- P2 fix: composite index for cron abandoned-cart detection queries -->
+        <index referenceId="ECOM360_ABANDONED_CART_STATUS_LAST_ACTIVITY" indexType="btree">
+            <column name="status"/>
+            <column name="last_activity_at"/>
+        </index>
+        <!-- P2 fix: index for cron sync queries on synced_to_ecom360 flag -->
+        <index referenceId="ECOM360_ABANDONED_CART_SYNCED" indexType="btree">
+            <column name="synced_to_ecom360"/>
+        </index>
+        <!-- P2 fix: index for email lookups on guest carts -->
+        <index referenceId="ECOM360_ABANDONED_CART_EMAIL" indexType="btree">
+            <column name="customer_email"/>
+        </index>
+    </table>
+
+    <!-- ═══ Push Subscription Table ═══ -->
+    <table name="ecom360_push_subscription" resource="default" engine="innodb"
+           comment="Ecom360 Push Notification Subscriptions">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
+                comment="ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true"
+                comment="Customer ID"/>
+        <column xsi:type="varchar" name="endpoint" nullable="false" length="512"
+                comment="Push endpoint URL"/>
+        <column xsi:type="text" name="subscription_data" nullable="true"
+                comment="Full subscription JSON (keys, auth)"/>
+        <column xsi:type="varchar" name="token" nullable="true" length="512"
+                comment="FCM token or OneSignal player ID"/>
+        <column xsi:type="varchar" name="provider" nullable="false" length="20" default="firebase"
+                comment="Push provider (firebase, onesignal)"/>
+        <column xsi:type="varchar" name="user_agent" nullable="true" length="512"
+                comment="Browser user agent"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Store ID"/>
+        <column xsi:type="boolean" name="is_active" nullable="false" default="true"
+                comment="Is subscription active"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ECOM360_PUSH_SUB_CUSTOMER" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="ECOM360_PUSH_SUB_TOKEN" indexType="btree">
+            <column name="token"/>
+        </index>
+    </table>
+
+    <!-- ═══ Popup Capture Table ═══ -->
+    <table name="ecom360_popup_capture" resource="default" engine="innodb"
+           comment="Ecom360 Popup Form Captures">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
+                comment="ID"/>
+        <column xsi:type="varchar" name="session_id" nullable="true" length="128"
+                comment="Ecom360 session ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true"
+                comment="Customer ID if logged in"/>
+        <column xsi:type="varchar" name="name" nullable="true" length="255"
+                comment="Full name"/>
+        <column xsi:type="varchar" name="email" nullable="true" length="255"
+                comment="Email"/>
+        <column xsi:type="varchar" name="phone" nullable="true" length="50"
+                comment="Phone number"/>
+        <column xsi:type="date" name="dob" nullable="true"
+                comment="Date of birth"/>
+        <column xsi:type="text" name="extra_data" nullable="true"
+                comment="JSON extra captured data"/>
+        <column xsi:type="text" name="page_url" nullable="true"
+                comment="Page where popup was shown"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Store ID"/>
+        <column xsi:type="boolean" name="synced_to_ecom360" nullable="false" default="false"
+                comment="Whether synced to Ecom360 platform"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ECOM360_POPUP_SESSION" indexType="btree">
+            <column name="session_id"/>
+        </index>
+        <index referenceId="ECOM360_POPUP_EMAIL" indexType="btree">
+            <column name="email"/>
+        </index>
+        <!-- P2 fix: index for cron sync queries -->
+        <index referenceId="ECOM360_POPUP_SYNCED" indexType="btree">
+            <column name="synced_to_ecom360"/>
+        </index>
+    </table>
+
+    <!-- ═══ Event Queue Table (async processing) ═══ -->
+    <table name="ecom360_event_queue" resource="default" engine="innodb"
+           comment="Ecom360 Async Event Queue — observers write here, cron reads">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true"
+                comment="Queue Item ID"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="20" default="event"
+                comment="Type: event (tracking) or sync (server-to-server)"/>
+        <column xsi:type="varchar" name="event_type" nullable="false" length="255"
+                comment="Event type or API path (e.g. add_to_cart or /api/v1/sync/products)"/>
+        <column xsi:type="mediumtext" name="payload" nullable="false"
+                comment="JSON serialized payload"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" default="0"
+                comment="Store ID scope"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending"
+                comment="pending, processing, done, failed"/>
+        <column xsi:type="smallint" name="attempts" unsigned="true" nullable="false" default="0"
+                comment="Number of delivery attempts"/>
+        <column xsi:type="varchar" name="error_message" nullable="true" length="500"
+                comment="Last error message"/>
+        <column xsi:type="timestamp" name="processed_at" nullable="true"
+                comment="When item was processed"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <!-- Primary query: pending items ordered by id -->
+        <index referenceId="ECOM360_EVENT_QUEUE_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <!-- Cleanup query: done/failed items by created_at -->
+        <index referenceId="ECOM360_EVENT_QUEUE_STATUS_CREATED" indexType="btree">
+            <column name="status"/>
+            <column name="created_at"/>
+        </index>
+    </table>
+</schema>

@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStore Demo — Ecom360 Analytics Test</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+         :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+        
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        /* ── Layout ── */
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--muted);
+            font-weight: 400;
+            font-size: 12px;
+        }
+        
+        nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        nav a {
+            color: var(--text);
+            transition: color .2s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        .cart-btn {
+            position: relative;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        
+        .cart-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* ── Hero ── */
+        
+        .hero {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed, #a855f7);
+            color: #fff;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .hero p {
+            opacity: .85;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* ── Product Grid ── */
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+        }
+        
+        .product-img {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            background: #f1f5f9;
+        }
+        
+        .product-info {
+            padding: 16px;
+        }
+        
+        .product-name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .product-category {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+        }
+        
+        .btn:active {
+            transform: scale(.97);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        /* ── Cart Drawer ── */
+        
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .4);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+        
+        .cart-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 420px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--card);
+            z-index: 101;
+            transform: translateX(100%);
+            transition: transform .3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-overlay.open+.cart-drawer,
+        .cart-drawer.open {
+            transform: translateX(0);
+        }
+        
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--muted);
+        }
+        
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .cart-item-img {
+            width: 56px;
+            height: 56px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .cart-item-price {
+            font-size: 13px;
+            color: var(--muted);
+        }
+        
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-item-remove {
+            color: var(--danger);
+            font-size: 12px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            margin-top: 4px;
+        }
+        
+        .cart-empty {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--muted);
+        }
+        
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        /* ── Checkout Modal ── */
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.open {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 32px;
+            width: 480px;
+            max-width: 92vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .success-msg {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .success-msg .check {
+            font-size: 64px;
+        }
+        
+        .success-msg h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--success);
+            margin: 12px 0 8px;
+        }
+        /* ── Search Bar ── */
+        
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .search-bar button {
+            padding: 12px 24px;
+        }
+        /* ── Debug Panel ── */
+        
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            color: #e2e8f0;
+            z-index: 300;
+            transition: height .3s;
+        }
+        
+        .debug-toggle {
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            background: #1e293b;
+            color: #e2e8f0;
+            border: none;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            z-index: 301;
+        }
+        
+        .debug-toggle .count {
+            background: var(--success);
+            color: #fff;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-size: 11px;
+        }
+        
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .debug-header h3 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+        
+        .debug-header .stats {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            gap: 16px;
+        }
+        
+        .debug-header .stats span {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .debug-clear {
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .debug-log {
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            padding: 8px 16px;
+        }
+        
+        .debug-log .entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #283548;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .debug-log .ts {
+            color: #64748b;
+            flex-shrink: 0;
+        }
+        
+        .debug-log .type {
+            min-width: 140px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .debug-log .type.page_view {
+            color: #38bdf8;
+        }
+        
+        .debug-log .type.product_view {
+            color: #a78bfa;
+        }
+        
+        .debug-log .type.add_to_cart {
+            color: #34d399;
+        }
+        
+        .debug-log .type.remove_from_cart {
+            color: #f87171;
+        }
+        
+        .debug-log .type.begin_checkout {
+            color: #fbbf24;
+        }
+        
+        .debug-log .type.purchase {
+            color: #10b981;
+        }
+        
+        .debug-log .type.search {
+            color: #60a5fa;
+        }
+        
+        .debug-log .type.scroll_depth {
+            color: #c084fc;
+        }
+        
+        .debug-log .type.identify {
+            color: #fb923c;
+        }
+        
+        .debug-log .type.cart_update {
+            color: #2dd4bf;
+        }
+        
+        .debug-log .type.time_on_page {
+            color: #94a3b8;
+        }
+        
+        .debug-log .msg {
+            color: #cbd5e1;
+            word-break: break-all;
+        }
+        /* ── Footer ── */
+        
+        .site-footer {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            margin-top: 60px;
+            margin-bottom: 330px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        /* ── Responsive ── */
+        
+        @media (max-width: 640px) {
+            .products {
+                grid-template-columns: 1fr 1fr;
+            }
+            .hero h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════ Header ═══════ -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">TechStore <span>powered by Ecom360</span></div>
+            <nav>
+                <a href="#" onclick="showAllProducts(); return false;">All Products</a>
+                <a href="#" onclick="filterByCategory('Electronics'); return false;">Electronics</a>
+                <a href="#" onclick="filterByCategory('Wearables'); return false;">Wearables</a>
+                <a href="#" onclick="filterByCategory('Audio'); return false;">Audio</a>
+                <a href="#" onclick="searchProducts('laptop'); return false;">Search "laptop"</a>
+                <button class="cart-btn" onclick="openCart()">
+          🛒 Cart <span class="cart-badge" id="cartCount">0</span>
+        </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ═══════ Hero ═══════ -->
+    <section class="hero">
+        <div class="container">
+            <h1>TechStore Demo</h1>
+            <p>Complete ecommerce simulation with real-time Ecom360 analytics tracking. Every interaction is captured and visible in the debug panel below.</p>
+        </div>
+    </section>
+
+    <!-- ═══════ Main Content ═══════ -->
+    <main class="container">
+        <!-- Search -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search products (try 'laptop', 'headphones', 'watch')..." onkeydown="if(event.key==='Enter') doSearch()">
+            <button class="btn btn-primary" onclick="doSearch()">🔍 Search</button>
+        </div>
+
+        <h2 class="section-title" id="sectionTitle">All Products</h2>
+        <div class="products" id="productGrid"></div>
+    </main>
+
+    <!-- ═══════ Cart Drawer ═══════ -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h2>Shopping Cart</h2>
+            <button class="close-cart" onclick="closeCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="btn btn-success checkout-btn" onclick="beginCheckout()" id="checkoutBtn" disabled>Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- ═══════ Checkout Modal ═══════ -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal" id="checkoutForm">
+            <h2>Checkout</h2>
+            <form onsubmit="completePurchase(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" value="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="custEmail" value="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="custPhone" value="+1-555-0100">
+                </div>
+                <div class="form-group">
+                    <label>Shipping Address</label>
+                    <input type="text" id="custAddress" value="123 Tech Street, San Francisco, CA 94105" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod">
+            <option>Credit Card</option>
+            <option>PayPal</option>
+            <option>Apple Pay</option>
+          </select>
+                </div>
+                <div class="form-group">
+                    <label>Coupon Code</label>
+                    <input type="text" id="couponCode" placeholder="e.g. SAVE10">
+                </div>
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <button type="submit" class="btn btn-success" style="flex:1; padding:14px; font-size:15px;">Complete Purchase</button>
+                    <button type="button" class="btn btn-outline" onclick="closeCheckout()" style="padding:14px;">Cancel</button>
+                </div>
+            </form>
+        </div>
+        <div class="modal" id="successMsg" style="display:none;">
+            <div class="success-msg">
+                <div class="check">✅</div>
+                <h3>Order Confirmed!</h3>
+                <p style="color:var(--muted);margin-bottom:8px;">Your order has been placed successfully.</p>
+                <p style="font-weight:600;" id="orderIdDisplay"></p>
+                <p style="font-size:14px;color:var(--muted);margin-top:12px;">Check the debug panel — you'll see the complete event trail:<br>page_view → product_view → add_to_cart → begin_checkout → purchase</p>
+                <button class="btn btn-primary" onclick="closeCheckout(); resetCart();" style="margin-top:20px;">Continue Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ Footer ═══════ -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>TechStore Demo — Ecom360 Analytics SDK v1.0.0 Test Page</p>
+            <p style="margin-top:4px;">All events are tracked in real-time and sent to your Ecom360 Analytics backend.</p>
+        </div>
+    </footer>
+
+    <!-- ═══════ Debug Panel ═══════ -->
+    <button class="debug-toggle" onclick="toggleDebug()">📊 Event Log <span class="count" id="debugCount">0</span></button>
+    <div class="debug-panel" id="debugPanel" style="height:300px;">
+        <div class="debug-header">
+            <h3>🔍 Ecom360 Real-Time Event Stream</h3>
+            <div class="stats">
+                Session: <span id="dbgSession">—</span> &nbsp;|&nbsp; Events: <span id="dbgEvents">0</span> &nbsp;|&nbsp; Queue: <span id="dbgQueue">0</span>
+            </div>
+            <button class="debug-clear" onclick="clearDebugLog()">Clear</button>
+        </div>
+        <div class="debug-log" id="debugLog"></div>
+    </div>
+
+    <!-- ═══════ Ecom360 Tracker SDK ═══════ -->
+    <script src="/js/ecom360-tracker.js"></script>
+    <script>
+        // ─────────────────────────────────────────────────────────
+        //  Configuration — UPDATE THESE VALUES
+        // ─────────────────────────────────────────────────────────
+        var API_KEY = 'ek_AjmzmuTa4fieRbj1fqBY0CGZS1SqEr3K3gkx2Cjrz44hNupx';
+        var ENDPOINT = window.location.origin + '/api/v1';
+
+        // ─────────────────────────────────────────────────────────
+        //  Product Catalog
+        // ─────────────────────────────────────────────────────────
+        var PRODUCTS = [{
+            id: 'prod_001',
+            name: 'MacBook Pro 16"',
+            price: 2499.00,
+            category: 'Electronics',
+            brand: 'Apple',
+            emoji: '💻',
+            sku: 'MBP-16-2026'
+        }, {
+            id: 'prod_002',
+            name: 'iPhone 17 Pro',
+            price: 1199.00,
+            category: 'Electronics',
+            brand: 'Apple',
+            emoji: '📱',
+            sku: 'IP17P-256'
+        }, {
+            id: 'prod_003',
+            name: 'AirPods Pro 3',
+            price: 279.00,
+            category: 'Audio',
+            brand: 'Apple',
+            emoji: '🎧',
+            sku: 'APP3-2026'
+        }, {
+            id: 'prod_004',
+            name: 'Sony WH-1000XM6',
+            price: 399.00,
+            category: 'Audio',
+            brand: 'Sony',
+            emoji: '🎵',
+            sku: 'WH1000XM6'
+        }, {
+            id: 'prod_005',
+            name: 'Samsung Galaxy S26',
+            price: 999.00,
+            category: 'Electronics',
+            brand: 'Samsung',
+            emoji: '📲',
+            sku: 'SGS26-128'
+        }, {
+            id: 'prod_006',
+            name: 'Apple Watch Ultra 3',
+            price: 849.00,
+            category: 'Wearables',
+            brand: 'Apple',
+            emoji: '⌚',
+            sku: 'AWU3-49'
+        }, {
+            id: 'prod_007',
+            name: 'Dell XPS 15 (2026)',
+            price: 1899.00,
+            category: 'Electronics',
+            brand: 'Dell',
+            emoji: '🖥️',
+            sku: 'XPS15-2026'
+        }, {
+            id: 'prod_008',
+            name: 'iPad Air M4',
+            price: 699.00,
+            category: 'Electronics',
+            brand: 'Apple',
+            emoji: '📝',
+            sku: 'IPADM4-256'
+        }, {
+            id: 'prod_009',
+            name: 'Bose QC Ultra Earbuds',
+            price: 329.00,
+            category: 'Audio',
+            brand: 'Bose',
+            emoji: '🔊',
+            sku: 'BQCU-2026'
+        }, {
+            id: 'prod_010',
+            name: 'Garmin Fenix 8',
+            price: 749.00,
+            category: 'Wearables',
+            brand: 'Garmin',
+            emoji: '🏃',
+            sku: 'GF8-2026'
+        }, {
+            id: 'prod_011',
+            name: 'Samsung Galaxy Watch 7',
+            price: 349.00,
+            category: 'Wearables',
+            brand: 'Samsung',
+            emoji: '⏱️',
+            sku: 'SGW7-44'
+        }, {
+            id: 'prod_012',
+            name: 'Sony WF-1000XM6 Earbuds',
+            price: 299.00,
+            category: 'Audio',
+            brand: 'Sony',
+            emoji: '🎶',
+            sku: 'WF1000XM6'
+        }];
+
+        var cart = [];
+        var debugEntries = [];
+        var eventCount = 0;
+        var debugVisible = true;
+
+        // ─────────────────────────────────────────────────────────
+        //  Initialize Ecom360 Tracker
+        // ─────────────────────────────────────────────────────────
+        Ecom360.init({
+            apiKey: API_KEY,
+            endpoint: ENDPOINT,
+            debug: true,
+            autoTrackPageViews: true,
+            autoTrackScroll: true,
+            autoTrackClicks: true,
+            autoTrackForms: true,
+            trackTimeOnPage: true,
+            trackSpa: true
+        });
+
+        // Hook into the debug stream.
+        Ecom360.onDebug(function(msg) {
+            // We handle our own logging via event interception.
+        });
+
+        // Monitor the event queue for the debug panel.
+        var origTrack = Ecom360.track;
+
+        // Intercept all enqueue calls by monkey-patching the internal buildEvent.
+        // Instead, we'll use a MutationObserver-like pattern via debug callbacks.
+
+        // ─────────────────────────────────────────────────────────
+        //  Debug Panel Logging
+        // ─────────────────────────────────────────────────────────
+        function logEvent(eventType, details) {
+            eventCount++;
+            var ts = new Date().toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            });
+            var entry = {
+                ts: ts,
+                type: eventType,
+                msg: details || ''
+            };
+            debugEntries.push(entry);
+
+            // Keep max 500 entries.
+            if (debugEntries.length > 500) debugEntries.shift();
+
+            renderDebugLog();
+            updateDebugStats();
+        }
+
+        function renderDebugLog() {
+            var logEl = document.getElementById('debugLog');
+            var html = '';
+            for (var i = debugEntries.length - 1; i >= Math.max(0, debugEntries.length - 100); i--) {
+                var e = debugEntries[i];
+                html += '<div class="entry"><span class="ts">' + e.ts + '</span><span class="type ' + e.type + '">' + e.type + '</span><span class="msg">' + e.msg + '</span></div>';
+            }
+            logEl.innerHTML = html;
+        }
+
+        function updateDebugStats() {
+            document.getElementById('dbgSession').textContent = Ecom360.getSessionId() || '—';
+            document.getElementById('dbgEvents').textContent = eventCount;
+            document.getElementById('dbgQueue').textContent = Ecom360.getState().queueSize;
+            document.getElementById('debugCount').textContent = eventCount;
+        }
+
+        function clearDebugLog() {
+            debugEntries = [];
+            eventCount = 0;
+            renderDebugLog();
+            updateDebugStats();
+        }
+
+        function toggleDebug() {
+            var panel = document.getElementById('debugPanel');
+            debugVisible = !debugVisible;
+            panel.style.height = debugVisible ? '300px' : '0';
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Product Grid
+        // ─────────────────────────────────────────────────────────
+        function renderProducts(products, title) {
+            document.getElementById('sectionTitle').textContent = title || 'All Products';
+            var grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            if (products.length === 0) {
+                grid.innerHTML = '<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px;">No products found.</p>';
+                return;
+            }
+
+            products.forEach(function(p) {
+                var card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = '<div class="product-img">' + p.emoji + '</div>' +
+                    '<div class="product-info">' +
+                    '<div class="product-name">' + p.name + '</div>' +
+                    '<div class="product-category">' + p.brand + ' · ' + p.category + '</div>' +
+                    '<div class="product-price">$' + p.price.toFixed(2) + '</div>' +
+                    '<div class="product-actions">' +
+                    '<button class="btn btn-primary" onclick="addToCart(\'' + p.id + '\')">Add to Cart</button>' +
+                    '<button class="btn btn-outline" onclick="viewProduct(\'' + p.id + '\')">View</button>' +
+                    '</div>' +
+                    '</div>';
+
+                // Track product impression.
+                card.addEventListener('mouseenter', function() {
+                    viewProduct(p.id);
+                }, {
+                    once: true
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function showAllProducts() {
+            renderProducts(PRODUCTS, 'All Products');
+            Ecom360.trackCategoryView('All Products', PRODUCTS);
+            logEvent('category_view', 'All Products (' + PRODUCTS.length + ' items)');
+        }
+
+        function filterByCategory(cat) {
+            var filtered = PRODUCTS.filter(function(p) {
+                return p.category === cat;
+            });
+            renderProducts(filtered, cat);
+            Ecom360.trackCategoryView(cat, filtered);
+            logEvent('category_view', cat + ' (' + filtered.length + ' items)');
+        }
+
+        function searchProducts(query) {
+            document.getElementById('searchInput').value = query;
+            doSearch();
+        }
+
+        function doSearch() {
+            var query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!query) {
+                showAllProducts();
+                return;
+            }
+
+            var results = PRODUCTS.filter(function(p) {
+                return p.name.toLowerCase().indexOf(query) !== -1 ||
+                    p.category.toLowerCase().indexOf(query) !== -1 ||
+                    p.brand.toLowerCase().indexOf(query) !== -1;
+            });
+
+            renderProducts(results, 'Search: "' + query + '"');
+            Ecom360.trackSearch(query, results.length);
+            logEvent('search', '"' + query + '" → ' + results.length + ' results');
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Product View
+        // ─────────────────────────────────────────────────────────
+        function viewProduct(productId) {
+            var p = PRODUCTS.find(function(x) {
+                return x.id === productId;
+            });
+            if (!p) return;
+
+            Ecom360.trackProductView(p);
+            logEvent('product_view', p.name + ' ($' + p.price.toFixed(2) + ')');
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Cart Management
+        // ─────────────────────────────────────────────────────────
+        function getCartState() {
+            var total = 0;
+            var items = cart.map(function(item) {
+                total += item.price * item.qty;
+                return {
+                    id: item.id,
+                    name: item.name,
+                    qty: item.qty,
+                    price: item.price
+                };
+            });
+            return {
+                items: items,
+                total: Math.round(total * 100) / 100
+            };
+        }
+
+        function addToCart(productId) {
+            var p = PRODUCTS.find(function(x) {
+                return x.id === productId;
+            });
+            if (!p) return;
+
+            var existing = cart.find(function(i) {
+                return i.id === productId;
+            });
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    emoji: p.emoji,
+                    qty: 1
+                });
+            }
+
+            Ecom360.trackAddToCart(p, getCartState());
+            logEvent('add_to_cart', p.name + ' (qty: ' + (existing ? existing.qty : 1) + ') | Cart: $' + getCartState().total.toFixed(2));
+
+            updateCartUI();
+        }
+
+        function removeFromCart(productId) {
+            var item = cart.find(function(i) {
+                return i.id === productId;
+            });
+            if (!item) return;
+
+            var p = PRODUCTS.find(function(x) {
+                return x.id === productId;
+            }) || item;
+            cart = cart.filter(function(i) {
+                return i.id !== productId;
+            });
+
+            Ecom360.trackRemoveFromCart(p, getCartState());
+            logEvent('remove_from_cart', item.name + ' removed | Cart: $' + getCartState().total.toFixed(2));
+
+            updateCartUI();
+        }
+
+        function updateQty(productId, delta) {
+            var item = cart.find(function(i) {
+                return i.id === productId;
+            });
+            if (!item) return;
+
+            item.qty = Math.max(1, item.qty + delta);
+            Ecom360.trackCartUpdate(getCartState());
+            logEvent('cart_update', item.name + ' qty → ' + item.qty + ' | Cart: $' + getCartState().total.toFixed(2));
+
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            var count = cart.reduce(function(sum, i) {
+                return sum + i.qty;
+            }, 0);
+            document.getElementById('cartCount').textContent = count;
+
+            var itemsEl = document.getElementById('cartItems');
+            var cartState = getCartState();
+            document.getElementById('cartTotal').textContent = '$' + cartState.total.toFixed(2);
+            document.getElementById('checkoutBtn').disabled = cart.length === 0;
+
+            if (cart.length === 0) {
+                itemsEl.innerHTML = '<div class="cart-empty"><p style="font-size:40px;margin-bottom:8px;">🛒</p><p>Your cart is empty</p></div>';
+                return;
+            }
+
+            var html = '';
+            cart.forEach(function(item) {
+                html += '<div class="cart-item">' +
+                    '<div class="cart-item-img">' + item.emoji + '</div>' +
+                    '<div class="cart-item-details">' +
+                    '<div class="cart-item-name">' + item.name + '</div>' +
+                    '<div class="cart-item-price">$' + item.price.toFixed(2) + '</div>' +
+                    '<div class="cart-item-qty">' +
+                    '<button class="qty-btn" onclick="updateQty(\'' + item.id + '\', -1)">−</button>' +
+                    '<span>' + item.qty + '</span>' +
+                    '<button class="qty-btn" onclick="updateQty(\'' + item.id + '\', 1)">+</button>' +
+                    '</div>' +
+                    '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.id + '\')">✕ Remove</button>' +
+                    '</div>' +
+                    '</div>';
+            });
+            itemsEl.innerHTML = html;
+        }
+
+        function openCart() {
+            document.getElementById('cartOverlay').classList.add('open');
+            document.getElementById('cartDrawer').classList.add('open');
+            logEvent('cart_open', cart.length + ' items, $' + getCartState().total.toFixed(2));
+        }
+
+        function closeCart() {
+            document.getElementById('cartOverlay').classList.remove('open');
+            document.getElementById('cartDrawer').classList.remove('open');
+        }
+
+        function resetCart() {
+            cart = [];
+            updateCartUI();
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Checkout Flow
+        // ─────────────────────────────────────────────────────────
+        function beginCheckout() {
+            if (cart.length === 0) return;
+
+            closeCart();
+            document.getElementById('checkoutModal').classList.add('open');
+            document.getElementById('checkoutForm').style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+
+            Ecom360.trackBeginCheckout(getCartState());
+            logEvent('begin_checkout', cart.length + ' items, $' + getCartState().total.toFixed(2));
+        }
+
+        function completePurchase(e) {
+            e.preventDefault();
+
+            // Capture customer identity.
+            var email = document.getElementById('custEmail').value;
+            if (email) {
+                Ecom360.identify('email', email, {
+                    name: document.getElementById('custName').value,
+                    phone: document.getElementById('custPhone').value,
+                    address: document.getElementById('custAddress').value
+                });
+                logEvent('identify', 'email = ' + email);
+            }
+
+            // Generate order ID.
+            var orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
+            var cartState = getCartState();
+
+            // Track purchase.
+            Ecom360.trackPurchase({
+                id: orderId,
+                total: cartState.total,
+                currency: 'USD',
+                tax: Math.round(cartState.total * 0.0875 * 100) / 100,
+                shipping: 9.99,
+                coupon: document.getElementById('couponCode').value || null,
+                items: cartState.items
+            });
+
+            logEvent('purchase', orderId + ' — $' + cartState.total.toFixed(2) + ' (' + cartState.items.length + ' items)');
+
+            // Show success.
+            document.getElementById('checkoutForm').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('orderIdDisplay').textContent = 'Order: ' + orderId;
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('open');
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Behavioral Intervention Demo
+        // ─────────────────────────────────────────────────────────
+        Ecom360.onIntervention(function(data) {
+            logEvent('intervention', data.action_type + ': ' + (data.action_payload.title || data.rule_name));
+
+            if (data.action_type === 'popup' || data.action_type === 'discount') {
+                alert('🎯 Intervention: ' + (data.action_payload.title || 'Special Offer') + '\n' +
+                    (data.action_payload.body || '') + '\n' +
+                    (data.action_payload.discount_code ? 'Code: ' + data.action_payload.discount_code : ''));
+            }
+        });
+
+        // ─────────────────────────────────────────────────────────
+        //  Initialize
+        // ─────────────────────────────────────────────────────────
+        showAllProducts();
+        updateCartUI();
+        updateDebugStats();
+
+        // Update stats every second.
+        setInterval(updateDebugStats, 1000);
+
+        // Log initial page view.
+        logEvent('page_view', window.location.pathname + ' | ' + document.title);
+
+        console.log('%c Ecom360 Analytics Test Store ', 'background:#4f46e5;color:#fff;font-size:14px;font-weight:bold;padding:4px 12px;border-radius:4px;');
+        console.log('SDK State:', Ecom360.getState());
+        console.log('Available methods: Ecom360.track(), .trackProductView(), .trackAddToCart(), .trackPurchase(), .identify(), .flush(), .getState()');
+    </script>
+</body>
+
+</html>

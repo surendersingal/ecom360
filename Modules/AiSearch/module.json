@@ -1,0 +1,11 @@
+{
+    "name": "AiSearch",
+    "alias": "aisearch",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AiSearch\\Providers\\AiSearchServiceProvider"
+    ],
+    "files": []
+}
