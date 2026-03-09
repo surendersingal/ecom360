@@ -8,6 +8,7 @@ use App\Events\IntegrationEvent;
 use App\Listeners\EventBusRouter;
 use App\Services\SettingsRegistry;
 use App\Services\WidgetRegistry;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -44,5 +45,7 @@ class AppServiceProvider extends ServiceProvider
             IntegrationEvent::class,
             EventBusRouter::class,
         );
+
+        Paginator::useBootstrapFour();
     }
 }
