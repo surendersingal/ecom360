@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tests/full_audit.py)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 -c \"import json,sys; r=json.load\\(sys.stdin\\); [print\\(x[''method''],''|'',x[''uri''],''|'',x.get\\(''action'',''''\\)\\) for x in r]\")",
+      "Bash(python3 -:*)",
+      "Bash(php artisan tinker --execute=\":*)",
+      "Bash(ssh ddfapp-aws \"grep -E ''bi/intel|cdp|CdpController|RevenueIntel|ProductIntel|CustomerIntel|OperationsIntel|CrossModuleIntel|all-pages|NaturalLanguage'' /var/www/ecom360/storage/logs/laravel.log | grep ERROR | tail -30\")",
+      "Bash(curl -s -H \"Authorization: Bearer 27|Q4blPK7ETXNPBLhn5BucMKtCaGciZLstQpsifLu1216a8ae2\" \"https://ecom.buildnetic.com/api/v1/cdp/dashboard\")",
+      "Bash(python3 -m json.tool)"
+    ]
+  }
+}
