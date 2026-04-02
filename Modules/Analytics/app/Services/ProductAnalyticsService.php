@@ -29,21 +29,31 @@ final class ProductAnalyticsService
 
         $collection = $this->collection();
 
+        $dateFilter = [
+            '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
+            '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
+        ];
+
+        // Purchase events store product data in metadata.items[] (Magento)
+        // or metadata.products[] (SDK) — need to $unwind them.
+        if ($metric === 'purchase') {
+            return $this->getTopProductsByPurchase($tenantId, $dateFilter, $limit);
+        }
+
+        // product_view / add_to_cart — each event has metadata.product_id
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
                 'event_type' => $metric,
-                'created_at' => [
-                    '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
-                    '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
-                ],
+                'created_at' => $dateFilter,
                 'metadata.product_id' => ['$exists' => true],
             ]],
             ['$group' => [
                 '_id'   => '$metadata.product_id',
                 'name'  => ['$first' => '$metadata.product_name'],
+                'sku'   => ['$first' => '$metadata.sku'],
                 'count' => ['$sum' => 1],
-                'revenue' => ['$sum' => ['$ifNull' => ['$metadata.product_price', 0]]],
+                'revenue' => ['$sum' => ['$ifNull' => ['$metadata.price', 0]]],
             ]],
             ['$sort' => ['count' => -1]],
             ['$limit' => $limit],
@@ -54,6 +64,67 @@ final class ProductAnalyticsService
         return array_map(fn ($row) => [
             'product_id'   => $row['_id'] ?? 'unknown',
             'product_name' => $row['name'] ?? 'Unknown Product',
+            'sku'          => $row['sku'] ?? '',
+            'count'        => (int) ($row['count'] ?? 0),
+            'revenue'      => round((float) ($row['revenue'] ?? 0), 2),
+        ], $results);
+    }
+
+    /**
+     * Top products extracted from purchase events by unwinding the
+     * items/products array inside each order's metadata.
+     */
+    private function getTopProductsByPurchase(int|string $tenantId, array $dateFilter, int $limit): array
+    {
+        $collection = $this->collection();
+
+        // Magento tracker uses "items", SDK / test scripts may use "products"
+        // Merge both into a single "_items" array.
+        $pipeline = [
+            ['$match' => [
+                'tenant_id'  => $tenantId,
+                'event_type' => 'purchase',
+                'created_at' => $dateFilter,
+                '$or' => [
+                    ['metadata.items'    => ['$exists' => true]],
+                    ['metadata.products' => ['$exists' => true]],
+                ],
+            ]],
+            // Normalise: combine items + products into _items
+            ['$addFields' => [
+                '_items' => [
+                    '$concatArrays' => [
+                        ['$ifNull' => ['$metadata.items', []]],
+                        ['$ifNull' => ['$metadata.products', []]],
+                    ],
+                ],
+            ]],
+            ['$unwind' => '$_items'],
+            ['$group' => [
+                '_id'  => ['$ifNull' => ['$_items.product_id', ['$ifNull' => ['$_items.sku', 'unknown']]]],
+                'name' => ['$first' => ['$ifNull' => ['$_items.name', 'Unknown Product']]],
+                'sku'  => ['$first' => ['$ifNull' => ['$_items.sku', '']]],
+                'count' => ['$sum' => ['$ifNull' => ['$_items.qty', 1]]],
+                'revenue' => ['$sum' => [
+                    '$ifNull' => [
+                        '$_items.row_total',
+                        ['$multiply' => [
+                            ['$ifNull' => ['$_items.price', 0]],
+                            ['$ifNull' => ['$_items.qty', 1]],
+                        ]],
+                    ],
+                ]],
+            ]],
+            ['$sort' => ['revenue' => -1]],
+            ['$limit' => $limit],
+        ];
+
+        $results = iterator_to_array($collection->aggregate($pipeline));
+
+        return array_map(fn ($row) => [
+            'product_id'   => $row['_id'] ?? 'unknown',
+            'product_name' => $row['name'] ?? 'Unknown Product',
+            'sku'          => $row['sku'] ?? '',
             'count'        => (int) ($row['count'] ?? 0),
             'revenue'      => round((float) ($row['revenue'] ?? 0), 2),
         ], $results);
@@ -68,16 +139,17 @@ final class ProductAnalyticsService
 
         $collection = $this->collection();
 
-        $eventTypes = ['product_view', 'add_to_cart', 'purchase'];
+        $dateFilter = [
+            '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
+            '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
+        ];
 
-        $pipeline = [
+        // ── 1) Views & cart adds (each event has metadata.product_id) ──
+        $viewCartPipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
-                'event_type' => ['$in' => $eventTypes],
-                'created_at' => [
-                    '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
-                    '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
-                ],
+                'event_type' => ['$in' => ['product_view', 'add_to_cart']],
+                'created_at' => $dateFilter,
                 'metadata.product_id' => ['$exists' => true],
             ]],
             ['$group' => [
@@ -86,16 +158,73 @@ final class ProductAnalyticsService
                     'event_type' => '$event_type',
                 ],
                 'name'  => ['$first' => '$metadata.product_name'],
+                'sku'   => ['$first' => '$metadata.sku'],
                 'count' => ['$sum' => 1],
-                'revenue' => ['$sum' => ['$ifNull' => ['$metadata.order_total', 0]]],
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $viewCartResults = iterator_to_array($collection->aggregate($viewCartPipeline));
 
-        // Pivot by product
+        // ── 2) Purchases — unwind items/products array from orders ──
+        $purchasePipeline = [
+            ['$match' => [
+                'tenant_id'  => $tenantId,
+                'event_type' => 'purchase',
+                'created_at' => $dateFilter,
+                '$or' => [
+                    ['metadata.items'    => ['$exists' => true]],
+                    ['metadata.products' => ['$exists' => true]],
+                ],
+            ]],
+            ['$addFields' => [
+                '_items' => [
+                    '$concatArrays' => [
+                        ['$ifNull' => ['$metadata.items', []]],
+                        ['$ifNull' => ['$metadata.products', []]],
+                    ],
+                ],
+            ]],
+            ['$unwind' => '$_items'],
+            ['$group' => [
+                '_id'  => ['$ifNull' => ['$_items.product_id', ['$ifNull' => ['$_items.sku', 'unknown']]]],
+                'name' => ['$first' => ['$ifNull' => ['$_items.name', 'Unknown Product']]],
+                'sku'  => ['$first' => ['$ifNull' => ['$_items.sku', '']]],
+                'purchases' => ['$sum' => ['$ifNull' => ['$_items.qty', 1]]],
+                'revenue'   => ['$sum' => [
+                    '$ifNull' => [
+                        '$_items.row_total',
+                        ['$multiply' => [
+                            ['$ifNull' => ['$_items.price', 0]],
+                            ['$ifNull' => ['$_items.qty', 1]],
+                        ]],
+                    ],
+                ]],
+            ]],
+        ];
+
+        $purchaseResults = iterator_to_array($collection->aggregate($purchasePipeline));
+
+        // ── Build purchase lookup (by product_id AND by sku for cross-matching) ──
+        $purchaseMap = [];
+        $skuToPurchase = [];
+        foreach ($purchaseResults as $row) {
+            $pid = $row['_id'] ?? 'unknown';
+            $entry = [
+                'purchases' => (int) ($row['purchases'] ?? 0),
+                'revenue'   => round((float) ($row['revenue'] ?? 0), 2),
+                'name'      => $row['name'] ?? 'Unknown Product',
+                'sku'       => $row['sku'] ?? '',
+            ];
+            $purchaseMap[$pid] = $entry;
+            // Also index by sku so we can match view products by their sku
+            if (! empty($entry['sku'])) {
+                $skuToPurchase[$entry['sku']] = $entry;
+            }
+        }
+
+        // ── Pivot views & cart adds by product ──
         $products = [];
-        foreach ($results as $row) {
+        foreach ($viewCartResults as $row) {
             $pid = $row['_id']['product_id'] ?? 'unknown';
             $evt = $row['_id']['event_type'] ?? '';
 
@@ -103,6 +232,7 @@ final class ProductAnalyticsService
                 $products[$pid] = [
                     'product_id'   => $pid,
                     'product_name' => $row['name'] ?? 'Unknown Product',
+                    'sku'          => $row['sku'] ?? '',
                     'views'        => 0,
                     'cart_adds'    => 0,
                     'purchases'    => 0,
@@ -111,15 +241,48 @@ final class ProductAnalyticsService
             }
 
             match ($evt) {
-                'product_view' => $products[$pid]['views']     = (int) $row['count'],
-                'add_to_cart'  => $products[$pid]['cart_adds']  = (int) $row['count'],
-                'purchase'     => $products[$pid]['purchases']  = (int) $row['count'],
+                'product_view' => $products[$pid]['views']    = (int) $row['count'],
+                'add_to_cart'  => $products[$pid]['cart_adds'] = (int) $row['count'],
                 default        => null,
             };
+        }
 
-            if ($evt === 'purchase') {
-                $products[$pid]['revenue'] = round((float) ($row['revenue'] ?? 0), 2);
+        // ── Merge purchase data — match by product_id first, then by sku ──
+        $usedPurchaseKeys = [];
+        foreach ($products as $pid => &$prod) {
+            // Direct match by product_id
+            if (isset($purchaseMap[$pid])) {
+                $prod['purchases'] = $purchaseMap[$pid]['purchases'];
+                $prod['revenue']   = $purchaseMap[$pid]['revenue'];
+                $usedPurchaseKeys[$pid] = true;
             }
+            // Fallback: match by sku
+            elseif (! empty($prod['sku']) && isset($skuToPurchase[$prod['sku']])) {
+                $prod['purchases'] = $skuToPurchase[$prod['sku']]['purchases'];
+                $prod['revenue']   = $skuToPurchase[$prod['sku']]['revenue'];
+                $usedPurchaseKeys[$prod['sku']] = true;
+            }
+        }
+        unset($prod);
+
+        // Add any purchase-only products not yet in the list
+        foreach ($purchaseMap as $pid => $pdata) {
+            if (isset($usedPurchaseKeys[$pid]) || isset($products[$pid])) {
+                continue;
+            }
+            // Also skip if matched by sku already
+            if (! empty($pdata['sku']) && isset($usedPurchaseKeys[$pdata['sku']])) {
+                continue;
+            }
+            $products[$pid] = [
+                'product_id'   => $pid,
+                'product_name' => $pdata['name'],
+                'sku'          => $pdata['sku'],
+                'views'        => 0,
+                'cart_adds'    => 0,
+                'purchases'    => $pdata['purchases'],
+                'revenue'      => $pdata['revenue'],
+            ];
         }
 
         // Calculate conversion rates
@@ -137,7 +300,7 @@ final class ProductAnalyticsService
     }
 
     /**
-     * Frequently bought together — products that appear in the same session's purchases.
+     * Frequently bought together — products that appear in the same order's items.
      */
     public function getFrequentlyBoughtTogether(int|string $tenantId, string $dateRange = '30d', int $limit = 10): array
     {
@@ -145,7 +308,7 @@ final class ProductAnalyticsService
 
         $collection = $this->collection();
 
-        // Get sessions with multiple product purchases
+        // Unwind items/products from purchase events, then find co-occurrences
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
@@ -154,22 +317,25 @@ final class ProductAnalyticsService
                     '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
-                'metadata.product_id' => ['$exists' => true],
+                '$or' => [
+                    ['metadata.items'    => ['$exists' => true]],
+                    ['metadata.products' => ['$exists' => true]],
+                ],
             ]],
+            ['$addFields' => [
+                '_items' => [
+                    '$concatArrays' => [
+                        ['$ifNull' => ['$metadata.items', []]],
+                        ['$ifNull' => ['$metadata.products', []]],
+                    ],
+                ],
+            ]],
+            // Only orders with 2+ items
+            ['$match' => ['_items.1' => ['$exists' => true]]],
+            ['$unwind' => '$_items'],
             ['$group' => [
-                '_id'      => '$session_id',
-                'products' => ['$addToSet' => [
-                    'id'   => '$metadata.product_id',
-                    'name' => '$metadata.product_name',
-                ]],
-            ]],
-            ['$match' => [
-                'products.1' => ['$exists' => true], // At least 2 products
-            ]],
-            ['$unwind' => '$products'],
-            ['$group' => [
-                '_id'   => '$products.id',
-                'name'  => ['$first' => '$products.name'],
+                '_id'   => ['$ifNull' => ['$_items.product_id', ['$ifNull' => ['$_items.sku', 'unknown']]]],
+                'name'  => ['$first' => ['$ifNull' => ['$_items.name', 'Unknown']]],
                 'count' => ['$sum' => 1],
             ]],
             ['$sort' => ['count' => -1]],
@@ -215,7 +381,7 @@ final class ProductAnalyticsService
 
         $cartResults = iterator_to_array($collection->aggregate($cartPipeline));
 
-        // Get products purchased
+        // Get products purchased — unwind items/products from purchase events
         $purchasePipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
@@ -224,11 +390,23 @@ final class ProductAnalyticsService
                     '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
-                'metadata.product_id' => ['$exists' => true],
+                '$or' => [
+                    ['metadata.items'    => ['$exists' => true]],
+                    ['metadata.products' => ['$exists' => true]],
+                ],
             ]],
+            ['$addFields' => [
+                '_items' => [
+                    '$concatArrays' => [
+                        ['$ifNull' => ['$metadata.items', []]],
+                        ['$ifNull' => ['$metadata.products', []]],
+                    ],
+                ],
+            ]],
+            ['$unwind' => '$_items'],
             ['$group' => [
-                '_id'       => '$metadata.product_id',
-                'purchases' => ['$sum' => 1],
+                '_id'       => ['$ifNull' => ['$_items.product_id', ['$ifNull' => ['$_items.sku', 'unknown']]]],
+                'purchases' => ['$sum' => ['$ifNull' => ['$_items.qty', 1]]],
             ]],
         ];
 

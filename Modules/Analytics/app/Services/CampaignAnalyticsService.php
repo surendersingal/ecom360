@@ -14,7 +14,7 @@ use MongoDB\Laravel\Connection;
 final class CampaignAnalyticsService
 {
     /**
-     * Campaign performance breakdown from campaign_event tracking events.
+     * Campaign performance breakdown from UTM-tagged events.
      */
     public function getCampaignPerformance(int|string $tenantId, string $dateRange = '30d'): array
     {
@@ -25,18 +25,18 @@ final class CampaignAnalyticsService
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
-                'event_type' => 'campaign_event',
+                'metadata.utm.campaign' => ['$exists' => true, '$ne' => null],
                 'created_at' => [
                     '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
             ]],
             ['$group' => [
-                '_id' => ['$ifNull' => ['$metadata.campaign_name', '$metadata.utm_campaign', 'Unknown']],
+                '_id' => '$metadata.utm.campaign',
                 'impressions' => ['$sum' => 1],
                 'sessions'    => ['$addToSet' => '$session_id'],
-                'source'      => ['$first' => ['$ifNull' => ['$metadata.utm_source', '$metadata.source', 'direct']]],
-                'medium'      => ['$first' => ['$ifNull' => ['$metadata.utm_medium', '$metadata.medium', 'none']]],
+                'source'      => ['$first' => ['$ifNull' => ['$metadata.utm.source', 'direct']]],
+                'medium'      => ['$first' => ['$ifNull' => ['$metadata.utm.medium', 'none']]],
             ]],
             ['$project' => [
                 '_id'         => 1,
@@ -68,7 +68,7 @@ final class CampaignAnalyticsService
 
         $collection = $this->collection();
 
-        // Parse UTM params from URLs
+        // Parse UTM params from metadata.utm or URL query string
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
@@ -82,6 +82,7 @@ final class CampaignAnalyticsService
             ['$group' => [
                 '_id'       => '$session_id',
                 'first_url' => ['$first' => '$url'],
+                'utm'       => ['$first' => '$metadata.utm'],
             ]],
         ];
 
@@ -92,12 +93,21 @@ final class CampaignAnalyticsService
         $campaigns = [];
 
         foreach ($results as $row) {
-            $url = $row['first_url'] ?? '';
-            $parsed = $this->parseUtmParams($url);
+            $utm = $row['utm'] ?? null;
 
-            $src = $parsed['utm_source'] ?? 'direct';
-            $med = $parsed['utm_medium'] ?? 'none';
-            $cmp = $parsed['utm_campaign'] ?? 'none';
+            // Check metadata.utm first (set by PublicIngestionController)
+            if ($utm && (is_array($utm) || $utm instanceof \ArrayAccess)) {
+                $src = $utm['source'] ?? 'direct';
+                $med = $utm['medium'] ?? 'none';
+                $cmp = $utm['campaign'] ?? 'none';
+            } else {
+                // Fallback to URL query string parsing
+                $url = $row['first_url'] ?? '';
+                $parsed = $this->parseUtmParams($url);
+                $src = $parsed['utm_source'] ?? 'direct';
+                $med = $parsed['utm_medium'] ?? 'none';
+                $cmp = $parsed['utm_campaign'] ?? 'none';
+            }
 
             $sources[$src] = ($sources[$src] ?? 0) + 1;
             $mediums[$med] = ($mediums[$med] ?? 0) + 1;

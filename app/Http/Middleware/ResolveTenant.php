@@ -38,6 +38,9 @@ final class ResolveTenant
             abort(403, 'You do not have access to this store.');
         }
 
+        // Set Spatie team scope so permission/role checks are tenant-aware
+        \setPermissionsTeamId($tenant->id);
+
         // Share tenant with all views and bind to container
         view()->share('tenant', $tenant);
         app()->instance('currentTenant', $tenant);

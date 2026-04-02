@@ -1,0 +1,467 @@
+<?php
+
+namespace App\Http\Controllers\Tenant;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Modules\BusinessIntelligence\Services\RevenueIntelService;
+use Modules\BusinessIntelligence\Services\ProductIntelService;
+use Modules\BusinessIntelligence\Services\CustomerIntelService;
+use Modules\BusinessIntelligence\Services\OperationsIntelService;
+use Modules\BusinessIntelligence\Services\CrossModuleIntelService;
+
+/**
+ * BI Intelligence Controller
+ *
+ * Web pages: return blade views (data loaded via AJAX → API methods below)
+ * API methods: call service layer → return JSON
+ */
+final class BiController extends Controller
+{
+    public function __construct(
+        private readonly RevenueIntelService    $revenue,
+        private readonly ProductIntelService    $product,
+        private readonly CustomerIntelService   $customer,
+        private readonly OperationsIntelService $operations,
+        private readonly CrossModuleIntelService $crossModule,
+    ) {}
+
+    private function tid(Request $request): int
+    {
+        return (int) $request->attributes->get('tenant')->id;
+    }
+
+    /* ═══════════════════════════════════════
+     *  WEB PAGES (AJAX-driven, return views)
+     * ═══════════════════════════════════════ */
+
+    public function revenue(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.revenue');
+    }
+
+    public function products(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.products');
+    }
+
+    public function customers(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.customers');
+    }
+
+    public function cohorts(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.cohorts');
+    }
+
+    public function operations(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.operations');
+    }
+
+    public function coupons(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.coupons');
+    }
+
+    public function attribution(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.attribution');
+    }
+
+    public function searchRevenue(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.search-revenue');
+    }
+
+    public function chatbotImpact(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.chatbot-impact');
+    }
+
+    public function copilot(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.bi.copilot');
+    }
+
+    /* ═══════════════════════════════════════
+     *  API ENDPOINTS — Revenue Intelligence
+     * ═══════════════════════════════════════ */
+
+    public function apiRevenueCommandCenter(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->commandCenter($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueByHour(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->revenueByHour($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueByDay(Request $request): JsonResponse
+    {
+        $tid  = $this->tid($request);
+        $from = $request->query('from');
+        $to   = $request->query('to');
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->revenueByDay($tid, $from, $to),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueTrend(Request $request): JsonResponse
+    {
+        $tid  = $this->tid($request);
+        $days = (int) $request->query('days', 90);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->trendAnalysis($tid, $days),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueBreakdown(Request $request): JsonResponse
+    {
+        $tid       = $this->tid($request);
+        $dimension = $request->query('dimension', 'category');
+        $from      = $request->query('from');
+        $to        = $request->query('to');
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->revenueBreakdown($tid, $dimension, $from, $to),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueMargin(Request $request): JsonResponse
+    {
+        $tid  = $this->tid($request);
+        $from = $request->query('from');
+        $to   = $request->query('to');
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->marginAnalysis($tid, $from, $to),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiRevenueTopPerformers(Request $request): JsonResponse
+    {
+        $tid   = $this->tid($request);
+        $from  = $request->query('from');
+        $to    = $request->query('to');
+        $limit = (int) $request->query('limit', 10);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->revenue->topPerformers($tid, $from, $to, $limit),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /* ═══════════════════════════════════════
+     *  API — Product Intelligence
+     * ═══════════════════════════════════════ */
+
+    public function apiProductLeaderboard(Request $request): JsonResponse
+    {
+        $tid    = $this->tid($request);
+        $sortBy = $request->query('sort', 'revenue');
+        $from   = $request->query('from');
+        $to     = $request->query('to');
+        $limit  = (int) $request->query('limit', 25);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->product->leaderboard($tid, $sortBy, $from, $to, $limit),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiProductStars(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->product->risingFallingStars($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCategoryMatrix(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->product->categoryMatrix($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiParetoAnalysis(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->product->paretoAnalysis($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /* ═══════════════════════════════════════
+     *  API — Customer Intelligence
+     * ═══════════════════════════════════════ */
+
+    public function apiCustomerOverview(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->overview($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCustomerAcquisition(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->acquisitionTrend($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCustomerGeo(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->geoDistribution($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCohortRetention(Request $request): JsonResponse
+    {
+        $tid    = $this->tid($request);
+        $months = (int) $request->query('months', 6);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->cohortRetention($tid, $months),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiValueDistribution(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->valueDistribution($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiNewVsReturning(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->customer->newVsReturning($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /* ═══════════════════════════════════════
+     *  API — Operations Intelligence
+     * ═══════════════════════════════════════ */
+
+    public function apiOrderPipeline(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->operations->orderPipeline($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiDailyOrderVolume(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->operations->dailyOrderVolume($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiHeatmap(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->operations->activityHeatmap($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCouponIntelligence(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->operations->couponIntelligence($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiPaymentAnalysis(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->operations->paymentAnalysis($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /* ═══════════════════════════════════════
+     *  API — Cross-Module Intelligence
+     * ═══════════════════════════════════════ */
+
+    public function apiMarketingAttribution(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->crossModule->marketingAttribution($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiSearchRevenue(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->crossModule->searchRevenue($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiChatbotImpact(Request $request): JsonResponse
+    {
+        $tid = $this->tid($request);
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->crossModule->chatbotImpact($tid),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function apiCustomer360(Request $request): JsonResponse
+    {
+        $tid   = $this->tid($request);
+        $email = $request->query('email');
+        if (!$email) {
+            return response()->json(['success' => false, 'error' => 'Email is required'], 422);
+        }
+        try {
+            return response()->json([
+                'success' => true,
+                'data'    => $this->crossModule->customer360($tid, $email),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+}

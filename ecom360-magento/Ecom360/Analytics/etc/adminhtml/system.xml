@@ -123,6 +123,13 @@
                     <comment>Number of records per sync batch (max 100).</comment>
                     <validate>required-entry validate-digits validate-digits-range digits-range-1-100</validate>
                 </field>
+
+                <field id="brand_attribute" translate="label comment" type="select" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Brand Attribute</label>
+                    <source_model>Ecom360\Analytics\Model\Config\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[Select which product attribute represents the brand. This value is synced as the <strong>brand</strong> field to Ecom360. Default: <em>manufacturer</em>.]]></comment>
+                </field>
             </group>
 
             <!-- ═══ Event Tracking ═══ -->
@@ -611,6 +618,16 @@
                     <label>Visual Search (Image Upload)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Allow customers to search by uploading product images.</comment>
+                    <depends>
+                        <field id="ai_search_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="ai_search_voice_enabled" translate="label comment" type="select" sortOrder="62"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Voice Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Allow customers to search by speaking. Uses the browser Web Speech API.</comment>
                     <depends>
                         <field id="ai_search_enabled">1</field>
                     </depends>

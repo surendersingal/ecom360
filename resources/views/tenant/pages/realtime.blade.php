@@ -3,107 +3,99 @@
 @section('title', 'Real-Time Traffic')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0 font-size-18">Real-Time Traffic</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Real-Time</li>
-                    </ol>
+    <div class="e360-page-header">
+        <div>
+            <h4>Real-Time Pulse</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Real-Time</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="header-actions">
+            <span class="e360-live-badge" style="font-size:13px;"><span class="live-dot"></span> Live Data</span>
+        </div>
+    </div>
+
+    {{-- KPI Cards --}}
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Active Sessions</span>
+                    <span class="kpi-icon visitors"><i class="bx bx-user"></i></span>
                 </div>
+                <div class="kpi-value">{{ $rt['active_sessions'] ?? 0 }}</div>
+                <div class="kpi-trend up">
+                    <span class="e360-live-badge" style="font-size:11px;padding:2px 8px;"><span class="live-dot"></span> Live</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Events / Minute</span>
+                    <span class="kpi-icon orders"><i class="bx bx-pulse"></i></span>
+                </div>
+                <div class="kpi-value">{{ $rt['events_per_minute'] ?? 0 }}</div>
+                <div class="kpi-sub">Throughput rate</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Active Pages</span>
+                    <span class="kpi-icon revenue"><i class="bx bx-file"></i></span>
+                </div>
+                <div class="kpi-value">{{ count($rt['top_pages'] ?? []) }}</div>
+                <div class="kpi-sub">Unique page views</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Countries</span>
+                    <span class="kpi-icon conversion"><i class="bx bx-globe"></i></span>
+                </div>
+                <div class="kpi-value">{{ count($rt['geo_breakdown'] ?? []) }}</div>
+                <div class="kpi-sub">Geographic reach</div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <p class="text-muted fw-medium">Active Sessions</p>
-                            <h4 class="mb-0">{{ $rt['active_sessions'] ?? 0 }}</h4>
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <span class="badge bg-success rounded-pill px-3 py-2">Live</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <p class="text-muted fw-medium">Events / Minute</p>
-                            <h4 class="mb-0">{{ $rt['events_per_minute'] ?? 0 }}</h4>
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-primary mini-stat-icon">
-                                <span class="avatar-title"><i class="bx bx-pulse font-size-24"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <p class="text-muted fw-medium">Top Pages</p>
-                            <h4 class="mb-0">{{ count($rt['top_pages'] ?? []) }}</h4>
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-info mini-stat-icon">
-                                <span class="avatar-title bg-info"><i class="bx bx-file font-size-24"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="flex-grow-1">
-                            <p class="text-muted fw-medium">Countries</p>
-                            <h4 class="mb-0">{{ count($rt['geo_breakdown'] ?? []) }}</h4>
-                        </div>
-                        <div class="flex-shrink-0 align-self-center">
-                            <div class="avatar-sm rounded-circle bg-warning mini-stat-icon">
-                                <span class="avatar-title bg-warning"><i class="bx bx-globe font-size-24"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
+    {{-- Content Row --}}
+    <div class="row g-3">
         <div class="col-xl-6">
-            <div class="card">
+            <div class="card" style="height:100%;">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Active Pages</h4>
+                    <h5 class="card-title">Active Pages</h5>
                     <div class="table-responsive">
                         <table class="table table-nowrap mb-0">
-                            <thead class="table-light">
-                                <tr><th>Page URL</th><th class="text-end">Active Users</th></tr>
+                            <thead>
+                                <tr>
+                                    <th>Page URL</th>
+                                    <th class="text-end">Active Users</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 @forelse($rt['top_pages'] ?? [] as $page)
                                 <tr>
-                                    <td class="text-truncate" style="max-width:300px;">{{ $page['url'] ?? $page['page'] ?? '-' }}</td>
-                                    <td class="text-end">{{ $page['count'] ?? $page['active'] ?? 0 }}</td>
+                                    <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;">{{ $page['url'] ?? $page['page'] ?? '-' }}</td>
+                                    <td class="text-end">
+                                        <span class="mono" style="font-weight:600;color:var(--primary-500);">{{ $page['count'] ?? $page['active'] ?? 0 }}</span>
+                                    </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="2" class="text-center text-muted">No active pages</td></tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="e360-empty-state" style="padding:24px 0;">
+                                            <div class="empty-icon">🌐</div>
+                                            <h3>No active pages</h3>
+                                            <p>Pages will appear here when visitors are browsing your store.</p>
+                                        </div>
+                                    </td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -112,10 +104,10 @@
             </div>
         </div>
         <div class="col-xl-6">
-            <div class="card">
+            <div class="card" style="height:100%;">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Geographic Breakdown</h4>
-                    <div id="geo-chart" style="height: 300px;"></div>
+                    <h5 class="card-title">Geographic Breakdown</h5>
+                    <div id="geo-chart" style="height: 320px;"></div>
                 </div>
             </div>
         </div>
@@ -130,12 +122,18 @@
         $geoValues = collect($rt['geo_breakdown'] ?? [])->pluck('count')->take(10)->toArray();
     @endphp
     new ApexCharts(document.querySelector("#geo-chart"), {
-        chart: { type: 'bar', height: 300, toolbar: { show: false } },
+        chart: { type: 'bar', height: 320, toolbar: { show: false } },
         series: [{ name: 'Visitors', data: @json(count($geoValues) ? $geoValues : [0]) }],
         xaxis: { categories: @json(count($geoLabels) ? $geoLabels : ['No Data']) },
-        plotOptions: { bar: { horizontal: true } },
-        colors: ['#556ee6'],
-        dataLabels: { enabled: true }
+        plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
+        colors: ['var(--primary-500, #1A56DB)'],
+        fill: {
+            type: 'gradient',
+            gradient: { shadeIntensity: 1, opacityFrom: 0.9, opacityTo: 0.6, stops: [0, 100] }
+        },
+        dataLabels: { enabled: true, style: { fontSize: '12px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 } },
+        grid: { borderColor: '#E2E8F0', strokeDashArray: 4 }
     }).render();
 </script>
+@endsection
 @endsection

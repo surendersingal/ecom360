@@ -8,6 +8,8 @@ use Nwidart\Modules\Traits\PathNamespace;
 use Modules\Chatbot\Services\ChatService;
 use Modules\Chatbot\Services\IntentService;
 use Modules\Chatbot\Services\OrderTrackingService;
+use Modules\Chatbot\Services\AdvancedChatService;
+use Modules\Chatbot\Services\ProactiveSupportService;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -42,6 +44,8 @@ class ChatbotServiceProvider extends ServiceProvider
 
         $this->app->singleton(IntentService::class);
         $this->app->singleton(OrderTrackingService::class);
+        $this->app->singleton(AdvancedChatService::class);
+        $this->app->singleton(ProactiveSupportService::class);
         $this->app->singleton(ChatService::class, function ($app) {
             return new ChatService(
                 $app->make(IntentService::class),

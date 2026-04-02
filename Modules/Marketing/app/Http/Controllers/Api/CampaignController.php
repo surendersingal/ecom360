@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Modules\Marketing\Services\CampaignService;
 use Modules\Marketing\Jobs\SendCampaignJob;
 
@@ -30,14 +31,26 @@ final class CampaignController extends Controller
             'name' => 'required|string|max:255',
             'channel' => 'required|in:email,whatsapp,rcs,push,sms',
             'type' => 'required|in:one_time,recurring,triggered,ab_test',
-            'template_id' => 'required|integer|exists:marketing_templates,id',
+            'template_id' => 'nullable|integer',
             'audience' => 'required|array',
             'audience.type' => 'required|in:list,segment,tags,all,contact_ids',
             'schedule' => 'nullable|array',
         ]);
 
+        $data = $request->all();
+        // Null out template_id if the referenced template doesn't exist (avoids FK constraint failure)
+        if (!empty($data['template_id'])) {
+            $exists = \Illuminate\Support\Facades\DB::table('marketing_templates')
+                ->where('tenant_id', $this->tenantId())
+                ->where('id', (int) $data['template_id'])
+                ->exists();
+            if (!$exists) {
+                $data['template_id'] = null;
+            }
+        }
+
         $service = app(CampaignService::class);
-        $campaign = $service->create($this->tenantId(), $request->all());
+        $campaign = $service->create($this->tenantId(), $data);
 
         return $this->successResponse($campaign, 201);
     }

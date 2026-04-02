@@ -1,0 +1,717 @@
+<?php
+/** @var \Ecom360\Analytics\Block\SearchResults $block */
+if (!$block->isEnabled()) {
+    echo '<div class="message info"><span>AI Search is not enabled.</span></div>';
+    return;
+}
+$configJson = $block->getConfigJson();
+$initialQuery = $block->escapeHtml($block->getSearchQuery());
+?>
+<!--
+  Ecom360 AI Search Results Page v6
+  Fixes: direct image src (no lazy-load conflict), brand/manufacturer filter,
+  improved filter rendering
+-->
+
+<!-- Codazon theme responsive grid layout CSS (from native product listing) -->
+<style type="text/css">
+.page-products .products-grid.ctst{margin-left:0}
+.page-products .products-grid.ctst .product-items .item-group{margin-left:0}
+@media (min-width:1900px){.page-products .products-grid.ctst .product-items .item-group{width:calc(25% - 20px)}}
+@media (min-width:1600px) and (max-width:1899px){.page-products .products-grid.ctst .product-items .item-group{width:calc(25% - 20px)}}
+@media (min-width:1420px) and (max-width:1599px){.page-products .products-grid.ctst .product-items .item-group{width:calc(25% - 20px)}}
+@media (min-width:1280px) and (max-width:1419px){.page-products .products-grid.ctst .product-items .item-group{width:calc(25% - 20px)}}
+@media (min-width:980px) and (max-width:1279px){.page-products .products-grid.ctst .product-items .item-group{width:calc(33.333333333333% - 20px)}}
+@media (min-width:768px) and (max-width:979px){.page-products .products-grid.ctst .product-items .item-group{width:calc(50% - 20px)}}
+@media (min-width:480px) and (max-width:767px){.page-products .products-grid.ctst .product-items .item-group{width:calc(50% - 10px)}}
+@media (min-width:320px) and (max-width:479px){.page-products .products-grid.ctst .product-items .item-group{width:calc(50% - 10px)}}
+@media (max-width:319px){.page-products .products-grid.ctst .product-items .item-group{width:calc(50% - 10px)}}
+@media(min-width:768px){.page-products .products-grid.ctst{margin-right:-20px}.page-products .ctst .product-items .item-group{margin-bottom:20px}.page-products .products-grid.ctst .product-items .item-group{margin-right:20px}}
+@media(max-width:767px){.page-products .products-grid.ctst{margin-right:-10px}.page-products .ctst .product-items .item-group{margin-bottom:20px}.page-products .products-grid.ctst .product-items .item-group{margin-right:10px}}
+</style>
+
+<!-- NLQ interpretation / fallback hints -->
+<div id="ecom360-srp-meta" style="display:none"></div>
+
+<!-- Toolbar (top) — matches native catalogsearch toolbar exactly -->
+<div class="toolbar toolbar-products" id="ecom360-srp-toolbar-top" style="display:none">
+    <div class="modes">
+        <strong class="modes-label" id="modes-label">View as</strong>
+        <strong title="Grid" class="modes-mode active mode-grid" data-value="grid" id="ecom360-mode-grid"><span>Grid</span></strong>
+        <a class="modes-mode mode-list" title="List" href="#" data-role="mode-switcher" data-value="list" id="ecom360-mode-list" aria-labelledby="modes-label ecom360-mode-list"><span>List</span></a>
+    </div>
+    <p class="toolbar-amount" id="ecom360-toolbar-amount"></p>
+    <div class="pages">
+        <strong class="label pages-label" id="ecom360-paging-label">Page</strong>
+        <ul class="items pages-items" id="ecom360-srp-pages-top" aria-labelledby="ecom360-paging-label"></ul>
+    </div>
+    <div class="field limiter" id="ecom360-limiter-top">
+        <label class="label" for="ecom360-limiter"><span>Show</span></label>
+        <div class="control">
+            <select id="ecom360-limiter" data-role="limiter" class="limiter-options">
+                <option value="12">12</option>
+                <option value="24" selected="selected">24</option>
+                <option value="36">36</option>
+            </select>
+        </div>
+        <span class="limiter-text">per page</span>
+    </div>
+    <div class="toolbar-sorter sorter" id="ecom360-sorter">
+        <label class="sorter-label" for="ecom360-srp-sort">Sort By</label>
+        <select id="ecom360-srp-sort" data-role="sorter" class="sorter-options">
+            <option value="relevance" selected="selected">Relevance</option>
+            <option value="name">Product Name</option>
+            <option value="price_asc">Price</option>
+        </select>
+        <a title="Set Ascending Direction" href="#" id="ecom360-sort-dir" class="action sorter-action sort-desc" data-role="direction-switcher" data-value="asc">
+            <span>Set Ascending Direction</span>
+        </a>
+    </div>
+</div>
+
+<!-- Products Grid -->
+<div class="products wrapper cat-product-list-style product-list-style-03 ctst grid products-grid"
+     id="ecom360-srp-grid">
+    <div class="products list items product-items wrap-right flex-grid">
+        <div class="message notice" style="width:100%;text-align:center;padding:40px 0"><span>Searching...</span></div>
+    </div>
+</div>
+
+<!-- Toolbar (bottom) -->
+<div class="toolbar toolbar-products" id="ecom360-srp-toolbar-bottom" style="display:none">
+    <p class="toolbar-amount" id="ecom360-toolbar-amount-bot"></p>
+    <div class="pages">
+        <strong class="label pages-label">Page</strong>
+        <ul class="items pages-items" id="ecom360-srp-pages-bottom"></ul>
+    </div>
+    <div class="field limiter" id="ecom360-limiter-bot">
+        <label class="label" for="ecom360-limiter-bot-sel"><span>Show</span></label>
+        <div class="control">
+            <select id="ecom360-limiter-bot-sel" data-role="limiter" class="limiter-options">
+                <option value="12">12</option>
+                <option value="24" selected="selected">24</option>
+                <option value="36">36</option>
+            </select>
+        </div>
+        <span class="limiter-text">per page</span>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var cfg = <?= /* @noEscape */ $configJson ?>;
+
+    var NO_IMG_SVG = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+
+    /* DOM refs */
+    var metaDiv       = document.getElementById('ecom360-srp-meta');
+    var sortSelect    = document.getElementById('ecom360-srp-sort');
+    var sortDir       = document.getElementById('ecom360-sort-dir');
+    var gridWrap      = document.getElementById('ecom360-srp-grid');
+    var filtersDiv    = document.getElementById('ecom360-srp-filters');
+    var activeDiv     = document.getElementById('ecom360-srp-active-filters');
+    var pagesTopUl    = document.getElementById('ecom360-srp-pages-top');
+    var pagesBotUl    = document.getElementById('ecom360-srp-pages-bottom');
+    var toolbarTop    = document.getElementById('ecom360-srp-toolbar-top');
+    var toolbarBot    = document.getElementById('ecom360-srp-toolbar-bottom');
+    var toolbarAmt    = document.getElementById('ecom360-toolbar-amount');
+    var toolbarAmtBot = document.getElementById('ecom360-toolbar-amount-bot');
+    var pageTitle     = document.querySelector('.page-title-wrapper');
+    var modeGrid      = document.getElementById('ecom360-mode-grid');
+    var modeList      = document.getElementById('ecom360-mode-list');
+    var limiterTop    = document.getElementById('ecom360-limiter');
+    var limiterBot    = document.getElementById('ecom360-limiter-bot-sel');
+
+    /* State */
+    var state = {
+        query:    cfg.query || '',
+        page:     1,
+        perPage:  24,
+        sortBy:   'relevance',
+        sortDir:  'desc',
+        filters:  {},
+        total:    0,
+        results:  [],
+        facets:   {},
+        viewMode: 'grid'
+    };
+
+    /* INR formatter */
+    function formatINR(num) {
+        num = parseFloat(num);
+        if (isNaN(num) || num <= 0) return '';
+        var s = Math.round(num).toString();
+        var lastThree = s.substring(s.length - 3);
+        var otherNumbers = s.substring(0, s.length - 3);
+        if (otherNumbers !== '') lastThree = ',' + lastThree;
+        return '\u20B9' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+    }
+
+    function isValidImage(url) {
+        if (!url) return false;
+        if (url.indexOf('no_selection') !== -1) return false;
+        if (url.indexOf('placeholder') !== -1 && url.indexOf('data:') === -1) return false;
+        return true;
+    }
+
+    function buildUrl(path) {
+        if (!path) return '#';
+        if (path.indexOf('http') === 0) return path;
+        return window.location.origin + path;
+    }
+
+    /* Fetch from API */
+    function fetchResults() {
+        var params = 'q=' + encodeURIComponent(state.query)
+            + '&per_page=' + state.perPage
+            + '&page=' + state.page
+            + '&sort_by=' + state.sortBy;
+
+        Object.keys(state.filters).forEach(function(k) {
+            var val = state.filters[k];
+            if (k === 'price_ranges' && val) {
+                var parts = val.split('-');
+                if (parts[0]) params += '&min_price=' + parts[0];
+                if (parts[1]) params += '&max_price=' + parts[1];
+            } else if (val) {
+                params += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(val);
+            }
+        });
+
+        var pi = gridWrap.querySelector('.product-items');
+        if (pi) pi.innerHTML = '<div class="message notice" style="width:100%;text-align:center;padding:40px 0"><span>Searching...</span></div>';
+        pagesTopUl.innerHTML = '';
+        pagesBotUl.innerHTML = '';
+        toolbarTop.style.display = 'none';
+        toolbarBot.style.display = 'none';
+        metaDiv.style.display = 'none';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', cfg.endpoint + '/search?' + params, true);
+        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                state.results = res.results || [];
+                state.total   = res.total || 0;
+                state.facets  = res.facets || {};
+
+                renderMeta(res);
+                renderToolbar();
+                renderGrid();
+                renderFilters();
+                renderPagination();
+                renderActiveFilters();
+
+                if (pageTitle) {
+                    var base = pageTitle.querySelector('.base');
+                    if (base) base.textContent = "Search results for: '" + state.query + "'";
+                }
+
+                var url = cfg.resultsUrl + '?q=' + encodeURIComponent(state.query);
+                if (state.page > 1) url += '&page=' + state.page;
+                window.history.replaceState(null, '', url);
+            } catch(e) {
+                console.error('Ecom360 SRP error:', e);
+                var pi2 = gridWrap.querySelector('.product-items');
+                if (pi2) pi2.innerHTML = '<div class="message error" style="width:100%;text-align:center;padding:40px 0"><span>Search error. Please try again.</span></div>';
+            }
+        };
+        xhr.onerror = function() {
+            var pi3 = gridWrap.querySelector('.product-items');
+            if (pi3) pi3.innerHTML = '<div class="message error" style="width:100%;text-align:center;padding:40px 0"><span>Network error. Check your connection.</span></div>';
+        };
+        xhr.send();
+    }
+
+    /* Toolbar */
+    function renderToolbar() {
+        if (state.total > 0) {
+            toolbarTop.style.display = '';
+            var s = (state.page - 1) * state.perPage + 1;
+            var e = Math.min(state.page * state.perPage, state.total);
+            var amtHtml = ' Items <span class="toolbar-number">' + s
+                + '</span>-<span class="toolbar-number">' + e
+                + '</span> of <span class="toolbar-number">' + state.total + '</span>';
+            toolbarAmt.innerHTML = amtHtml;
+            if (toolbarAmtBot) toolbarAmtBot.innerHTML = amtHtml;
+        }
+    }
+
+    /* NLQ Meta */
+    function renderMeta(res) {
+        var interpreted  = res.interpreted_as || null;
+        var fallbackHint = res.fallback_hint  || null;
+        if (interpreted || fallbackHint) {
+            var html = '';
+            if (interpreted)  html += '<div class="message info"><span>' + escapeHtml(interpreted) + '</span></div>';
+            if (fallbackHint) html += '<div class="message warning"><span>' + escapeHtml(fallbackHint) + '</span></div>';
+            metaDiv.innerHTML = html;
+            metaDiv.style.display = '';
+        } else {
+            metaDiv.style.display = 'none';
+            metaDiv.innerHTML = '';
+        }
+    }
+
+    /* Product Grid — exact Codazon theme HTML structure
+       v6 FIX: images use src directly (no lazy-load conflict on re-render) */
+    function renderGrid() {
+        var productItemsDiv = gridWrap.querySelector('.product-items');
+        if (!productItemsDiv) {
+            gridWrap.innerHTML = '<div class="products list items product-items wrap-right flex-grid"></div>';
+            productItemsDiv = gridWrap.querySelector('.product-items');
+        }
+
+        if (!state.results.length) {
+            productItemsDiv.innerHTML =
+                '<div class="message notice" style="width:100%;text-align:center;padding:40px 0"><span>No results found. Try a different search term.</span></div>'
+                + '<div id="ecom360-suggestions" style="width:100%"></div>';
+            loadSuggestions();
+            return;
+        }
+
+        var html = '';
+        state.results.forEach(function(item) {
+            var url   = buildUrl(item.url);
+            var name  = item.name || '';
+            var image = item.image || '';
+            var hasImg = isValidImage(image);
+            var imgSrc = hasImg ? image : NO_IMG_SVG;
+
+            html += '<div class="item-group">';
+            html += '<div class="item product product-item">';
+            html += '<div class="product-item-info" data-container="product-grid">';
+
+            /* product-item-top: photo with main-img + hovered-img */
+            html += '<div class="product-item-top">';
+            html += '<a href="' + escapeAttr(url) + '" class="product photo product-item-photo">';
+            html += '<span class="product-image-container">';
+            html += '<span class="product-image-wrapper" style="padding-bottom: 100%;">';
+            /* v6: Set src directly to real image URL — no lazy-load needed for dynamically rendered content */
+            html += '<img data-hasoptions="0" class="product-image-photo main-img" '
+                  + 'src="' + escapeAttr(imgSrc) + '" '
+                  + 'alt="' + escapeAttr(name) + '" />';
+            html += '<img class="product-image-photo hovered-img" '
+                  + 'src="' + escapeAttr(imgSrc) + '" '
+                  + 'alt="' + escapeAttr(name) + '" />';
+            html += '</span></span></a>';
+            html += '</div>';
+
+            /* product-item-details: brand + name + price */
+            html += '<div class="product details product-item-details">';
+
+            /* Brand name (from API brand field) */
+            if (item.brand) {
+                html += '<div class="brand_name"><span class="product-item-brand">' + escapeHtml(item.brand) + '</span></div>';
+            }
+
+            html += '<strong class="product name product-item-name">';
+            html += '<a class="product-item-link" href="' + escapeAttr(url) + '">' + escapeHtml(name) + '</a>';
+            html += '</strong>';
+            html += buildPriceHtml(item);
+            html += '</div>';
+
+            /* product-item-inner: View Product + wishlist */
+            html += '<div class="product-item-inner">';
+            html += '<div class="product actions product-item-actions">';
+            html += '<div class="actions-primary">';
+            html += '<a href="' + escapeAttr(url) + '" class="action tocart primary" title="View Product"><span>View Product</span></a>';
+            html += '</div>';
+            html += '<div data-role="add-to-links" class="actions-secondary">';
+            html += '<a href="#" class="action towishlist" title="Add to Wish List" data-action="add-to-wishlist"><span>Add to Wish List</span></a>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '</div></div></div>';
+        });
+
+        /* Set wrapper classes based on view mode */
+        if (state.viewMode === 'list') {
+            gridWrap.className = 'products wrapper cat-product-list-style product-list-style-03 ctst list products-list';
+        } else {
+            gridWrap.className = 'products wrapper cat-product-list-style product-list-style-03 ctst grid products-grid';
+        }
+        productItemsDiv.innerHTML = html;
+    }
+
+    /* Price HTML — matches native price-box structure */
+    function buildPriceHtml(item) {
+        var price   = parseFloat(item.price);
+        var special = parseFloat(item.special_price);
+        var html = '<div class="price-box price-final_price" data-role="priceBox">';
+
+        if (special > 0 && special < price) {
+            html += '<span class="special-price">';
+            html += '<span class="price-container price-final_price tax weee">';
+            html += '<span class="price-wrapper"><span class="price">' + formatINR(special) + '</span></span>';
+            html += '</span></span>';
+            html += '<span class="old-price">';
+            html += '<span class="price-container">';
+            html += '<span class="price-wrapper"><span class="price">' + formatINR(price) + '</span></span>';
+            html += '</span></span>';
+        } else if (price > 0) {
+            html += '<span class="price-container price-final_price tax weee">';
+            html += '<span class="price-wrapper"><span class="price">' + formatINR(price) + '</span></span>';
+            html += '</span>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    /* Sidebar Filters — exact Codazon checkbox layered nav structure
+       Facet order: Brands → Categories → Price Ranges */
+    function renderFilters() {
+        if (!filtersDiv) {
+            filtersDiv = document.getElementById('ecom360-srp-filters');
+        }
+        if (!filtersDiv) return;
+
+        var keys = Object.keys(state.facets);
+        if (!keys.length) { filtersDiv.innerHTML = ''; return; }
+
+        /* Display order: brands first, then categories, then price_ranges */
+        var orderedKeys = [];
+        if (state.facets['brands']) orderedKeys.push('brands');
+        if (state.facets['categories']) orderedKeys.push('categories');
+        if (state.facets['price_ranges']) orderedKeys.push('price_ranges');
+        /* Add any remaining keys */
+        keys.forEach(function(k) {
+            if (orderedKeys.indexOf(k) === -1) orderedKeys.push(k);
+        });
+
+        var html = '';
+        orderedKeys.forEach(function(facetKey) {
+            var vals = state.facets[facetKey];
+            if (!Array.isArray(vals) || !vals.length) return;
+
+            var friendlyName = facetKey === 'brands' ? 'Manufacturer'
+                : facetKey === 'price_ranges' ? 'Price'
+                : facetKey.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+
+            html += '<div data-role="collapsible" class="filter-options-item active">';
+            html += '<div data-role="title" class="filter-options-title">' + escapeHtml(friendlyName) + '</div>';
+            html += '<div data-role="content" class="filter-options-content">';
+            html += '<div class="filter-options-content-outer">';
+            html += '<div class="filter-options-content-inner">';
+            html += '<div class="checkbox-container">';
+            html += '<ul class="items filter-checkbox">';
+
+            vals.forEach(function(v, vi) {
+                var label = v.label || v.value || v;
+                var value = v.value || label;
+                var count = v.count || '';
+                var isActive = (state.filters[facetKey] === value);
+                var cbId = 'ecom360-filter-' + facetKey.replace(/[^a-z0-9]/gi,'') + '-' + vi;
+
+                html += '<li>';
+                html += '<input type="checkbox" class="js-cdz-checkbox" id="' + cbId + '"'
+                      + ' value="' + escapeAttr(value) + '"'
+                      + ' data-facet="' + escapeAttr(facetKey) + '"'
+                      + (isActive ? ' checked' : '') + '>';
+                html += '<label for="' + cbId + '">' + escapeHtml(label);
+                if (count) html += ' <span class="count">' + count + '</span>';
+                html += '</label>';
+                html += '</li>';
+            });
+
+            html += '</ul></div></div></div></div></div>';
+        });
+
+        filtersDiv.innerHTML = html;
+
+        /* Update filter count badge */
+        var filterTitle = document.querySelector('#ecom360-filter-block .filter-title');
+        if (filterTitle) filterTitle.setAttribute('data-count', orderedKeys.length);
+
+        /* Make sure the filter block is visible/active */
+        var filterBlock = document.getElementById('ecom360-filter-block');
+        if (filterBlock) {
+            filterBlock.classList.add('active');
+            var fc = filterBlock.querySelector('.filter-content');
+            if (fc) fc.style.display = '';
+        }
+
+        /* Collapse toggle */
+        var titles = filtersDiv.querySelectorAll('.filter-options-title');
+        for (var i = 0; i < titles.length; i++) {
+            (function(el) {
+                el.addEventListener('click', function() {
+                    el.parentElement.classList.toggle('active');
+                });
+            })(titles[i]);
+        }
+
+        /* Checkbox filter selection */
+        var cbs = filtersDiv.querySelectorAll('input.js-cdz-checkbox');
+        for (var j = 0; j < cbs.length; j++) {
+            (function(cb) {
+                cb.addEventListener('change', function() {
+                    var fk = cb.dataset.facet;
+                    var fv = cb.value;
+                    if (cb.checked) {
+                        state.filters[fk] = fv;
+                    } else {
+                        delete state.filters[fk];
+                    }
+                    state.page = 1;
+                    fetchResults();
+                });
+            })(cbs[j]);
+        }
+    }
+
+    /* Active Filters */
+    function renderActiveFilters() {
+        if (!activeDiv) {
+            activeDiv = document.getElementById('ecom360-srp-active-filters');
+        }
+        if (!activeDiv) return;
+
+        var keys = Object.keys(state.filters);
+        if (!keys.length) { activeDiv.innerHTML = ''; return; }
+
+        var html = '<div class="filter-current"><ol class="items">';
+        keys.forEach(function(k) {
+            var label = k === 'brands' ? 'Manufacturer'
+                : k === 'price_ranges' ? 'Price'
+                : k.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+            var value = state.filters[k];
+            var displayVal = value;
+            if (k === 'price_ranges') {
+                var parts = value.split('-');
+                displayVal = formatINR(parts[0] || 0) + ' - ' + (parts[1] ? formatINR(parts[1]) : 'Any');
+            }
+            html += '<li class="item">';
+            html += '<span class="filter-label">' + escapeHtml(label) + '</span>: ';
+            html += '<span class="filter-value">' + escapeHtml(displayVal) + '</span> ';
+            html += '<a class="action remove" href="#" data-key="' + escapeAttr(k) + '" title="Remove"><span>Remove</span></a>';
+            html += '</li>';
+        });
+        html += '</ol></div>';
+
+        if (keys.length > 1) {
+            html += '<div class="filter-actions"><a href="#" class="action clear filter-clear"><span>Clear All</span></a></div>';
+        }
+
+        activeDiv.innerHTML = html;
+
+        var removeLinks = activeDiv.querySelectorAll('.action.remove');
+        for (var i = 0; i < removeLinks.length; i++) {
+            (function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    delete state.filters[el.dataset.key];
+                    state.page = 1;
+                    fetchResults();
+                });
+            })(removeLinks[i]);
+        }
+
+        var clearBtn = activeDiv.querySelector('.filter-clear');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                state.filters = {};
+                state.page = 1;
+                fetchResults();
+            });
+        }
+    }
+
+    /* Pagination */
+    function renderPagination() {
+        var totalPages = Math.ceil(state.total / state.perPage);
+        if (totalPages <= 1) {
+            pagesTopUl.innerHTML = '';
+            pagesBotUl.innerHTML = '';
+            toolbarBot.style.display = 'none';
+            return;
+        }
+
+        toolbarBot.style.display = '';
+        var html = '';
+        var start = Math.max(1, state.page - 3);
+        var end   = Math.min(totalPages, state.page + 3);
+
+        if (state.page > 1) {
+            html += '<li class="item"><a class="action previous" href="#" data-page="' + (state.page - 1) + '"><span>Prev</span></a></li>';
+        }
+
+        if (start > 1) {
+            html += '<li class="item"><a href="#" class="page" data-page="1"><span class="label">Page</span> <span>1</span></a></li>';
+            if (start > 2) html += '<li class="item"><span>...</span></li>';
+        }
+
+        for (var i = start; i <= end; i++) {
+            if (i === state.page) {
+                html += '<li class="item current"><strong class="page"><span class="label">You\'re currently reading page</span> <span>' + i + '</span></strong></li>';
+            } else {
+                html += '<li class="item"><a href="#" class="page" data-page="' + i + '"><span class="label">Page</span> <span>' + i + '</span></a></li>';
+            }
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) html += '<li class="item"><span>...</span></li>';
+            html += '<li class="item"><a href="#" class="page" data-page="' + totalPages + '"><span class="label">Page</span> <span>' + totalPages + '</span></a></li>';
+        }
+
+        if (state.page < totalPages) {
+            html += '<li class="item pages-item-next"><a class="action next" href="#" data-page="' + (state.page + 1) + '"><span class="label">Page</span> <span>Next</span></a></li>';
+        }
+
+        pagesTopUl.innerHTML = html;
+        pagesBotUl.innerHTML = html;
+
+        [pagesTopUl, pagesBotUl].forEach(function(ul) {
+            var links = ul.querySelectorAll('a[data-page]');
+            for (var k = 0; k < links.length; k++) {
+                (function(a) {
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var p = parseInt(a.dataset.page);
+                        if (p && p !== state.page) {
+                            state.page = p;
+                            fetchResults();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    });
+                })(links[k]);
+            }
+        });
+    }
+
+    /* Suggestions on empty results */
+    function loadSuggestions() {
+        var sugDiv = document.getElementById('ecom360-suggestions');
+        if (!sugDiv) return;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', cfg.endpoint + '/trending?limit=8', true);
+        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                var items = (res.data && res.data.trending) || res.trending || [];
+                if (items.length) {
+                    var html = '<div class="block"><div class="block-title"><strong>Try searching for</strong></div>';
+                    html += '<div class="block-content"><ul class="items">';
+                    items.forEach(function(s) {
+                        var q = s.query || s;
+                        html += '<li class="item"><a href="#" data-q="' + escapeAttr(q) + '">' + escapeHtml(q) + '</a></li>';
+                    });
+                    html += '</ul></div></div>';
+                    sugDiv.innerHTML = html;
+                    var sugLinks = sugDiv.querySelectorAll('a[data-q]');
+                    for (var i = 0; i < sugLinks.length; i++) {
+                        (function(el) {
+                            el.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                var si = document.getElementById('search');
+                                state.query = el.dataset.q;
+                                state.page  = 1;
+                                state.filters = {};
+                                if (si) si.value = state.query;
+                                fetchResults();
+                            });
+                        })(sugLinks[i]);
+                    }
+                }
+            } catch(e) {}
+        };
+        xhr.send();
+    }
+
+    /* Utilities */
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(s || ''));
+        return d.innerHTML;
+    }
+    function escapeAttr(s) {
+        return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /* --- Event Handlers --- */
+
+    /* Sort change */
+    sortSelect.addEventListener('change', function() {
+        state.sortBy = sortSelect.value;
+        state.page = 1;
+        fetchResults();
+    });
+
+    /* Sort direction toggle */
+    sortDir.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (sortDir.classList.contains('sort-desc')) {
+            sortDir.classList.remove('sort-desc');
+            sortDir.classList.add('sort-asc');
+            sortDir.setAttribute('data-value', 'desc');
+            sortDir.querySelector('span').textContent = 'Set Descending Direction';
+            state.sortDir = 'asc';
+        } else {
+            sortDir.classList.remove('sort-asc');
+            sortDir.classList.add('sort-desc');
+            sortDir.setAttribute('data-value', 'asc');
+            sortDir.querySelector('span').textContent = 'Set Ascending Direction';
+            state.sortDir = 'desc';
+        }
+        state.page = 1;
+        fetchResults();
+    });
+
+    /* Limiter change */
+    function onLimiterChange(val) {
+        state.perPage = parseInt(val) || 24;
+        state.page = 1;
+        limiterTop.value = val;
+        limiterBot.value = val;
+        fetchResults();
+    }
+    limiterTop.addEventListener('change', function() { onLimiterChange(this.value); });
+    limiterBot.addEventListener('change', function() { onLimiterChange(this.value); });
+
+    /* View mode */
+    modeGrid.addEventListener('click', function() {
+        state.viewMode = 'grid';
+        modeGrid.classList.add('active');
+        modeList.classList.remove('active');
+        renderGrid();
+    });
+
+    modeList.addEventListener('click', function(e) {
+        e.preventDefault();
+        state.viewMode = 'list';
+        modeList.classList.add('active');
+        modeGrid.classList.remove('active');
+        renderGrid();
+    });
+
+    /* Intercept Magento default search form to redirect to our page */
+    var defaultSearchForm = document.getElementById('search_mini_form');
+    if (defaultSearchForm) {
+        defaultSearchForm.addEventListener('submit', function(e) {
+            var input = defaultSearchForm.querySelector('#search');
+            if (input && input.value.trim()) {
+                e.preventDefault();
+                state.query = input.value.trim();
+                state.page = 1;
+                state.filters = {};
+                fetchResults();
+                window.history.replaceState(null, '', cfg.resultsUrl + '?q=' + encodeURIComponent(state.query));
+            }
+        });
+    }
+
+    /* Init */
+    if (state.query) {
+        fetchResults();
+    } else {
+        var pi = gridWrap.querySelector('.product-items');
+        if (pi) pi.innerHTML = '<div class="message notice" style="width:100%;text-align:center;padding:40px 0"><span>Enter a search term above to find products.</span></div>';
+    }
+
+}); /* end DOMContentLoaded */
+</script>

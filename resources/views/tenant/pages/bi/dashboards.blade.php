@@ -3,46 +3,39 @@
 @section('title', 'BI Dashboards')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0 font-size-18">BI Dashboards</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
-                        <li class="breadcrumb-item">Business Intelligence</li>
-                        <li class="breadcrumb-item active">Dashboards</li>
-                    </ol>
-                </div>
-            </div>
+    <div class="e360-page-header">
+        <div>
+            <h4>BI Dashboards</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
+                    <li class="breadcrumb-item">Business Intel</li>
+                    <li class="breadcrumb-item active">Dashboards</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-new-dashboard"><i class="bx bx-plus me-1"></i> New Dashboard</button>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Your Dashboards</h4>
-                        <button type="button" class="btn btn-primary btn-sm" id="btn-new-dashboard"><i class="bx bx-plus me-1"></i> New Dashboard</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="dashboards-table" class="table table-centered table-nowrap mb-0 w-100">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Widgets</th>
-                                    <th>Default</th>
-                                    <th>Public</th>
-                                    <th>Updated</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
+    <div class="card" data-module="bi">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dashboards-table" class="table table-nowrap mb-0 w-100">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Widgets</th>
+                            <th class="text-center">Default</th>
+                            <th class="text-center">Public</th>
+                            <th>Updated</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -101,7 +101,7 @@ final class RevenueWaterfallService
         ];
     }
 
-    private function byCustomerType(int $tid, string $start, string $end, string $prevStart, string $prevEnd): array
+    private function byCustomerType(int|string $tid, string $start, string $end, string $prevStart, string $prevEnd): array
     {
         // New customers: first_seen_at within period
         $newCustomerEmails = DB::connection('mongodb')->table('customer_profiles')
@@ -147,7 +147,7 @@ final class RevenueWaterfallService
         ];
     }
 
-    private function byChannel(int $tid, string $start, string $end): array
+    private function byChannel(int|string $tid, string $start, string $end): array
     {
         $results = DB::connection('mongodb')->table('tracking_events')
             ->raw(function ($col) use ($tid, $start, $end) {
@@ -173,7 +173,7 @@ final class RevenueWaterfallService
         ], $results);
     }
 
-    private function byProductCategory(int $tid, string $start, string $end): array
+    private function byProductCategory(int|string $tid, string $start, string $end): array
     {
         $results = DB::connection('mongodb')->table('tracking_events')
             ->raw(function ($col) use ($tid, $start, $end) {
@@ -200,7 +200,7 @@ final class RevenueWaterfallService
         ], $results);
     }
 
-    private function byGeography(int $tid, string $start, string $end): array
+    private function byGeography(int|string $tid, string $start, string $end): array
     {
         $results = DB::connection('mongodb')->table('tracking_events')
             ->raw(function ($col) use ($tid, $start, $end) {
@@ -227,7 +227,7 @@ final class RevenueWaterfallService
         ], $results);
     }
 
-    private function byDevice(int $tid, string $start, string $end): array
+    private function byDevice(int|string $tid, string $start, string $end): array
     {
         $results = DB::connection('mongodb')->table('tracking_events')
             ->raw(function ($col) use ($tid, $start, $end) {

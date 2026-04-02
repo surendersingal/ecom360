@@ -31,10 +31,13 @@ final class ReportController extends Controller
             'config' => 'required|array',
         ]);
 
-        $service = app(ReportService::class);
-        $report = $service->create($this->tenantId(), $request->all());
-
-        return $this->successResponse($report, 201);
+        try {
+            $service = app(ReportService::class);
+            $report = $service->create($this->tenantId(), $request->all());
+            return $this->successResponse($report, 201);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Report creation failed: ' . $e->getMessage(), 500);
+        }
     }
 
     public function show(int $id): JsonResponse
@@ -79,12 +82,17 @@ final class ReportController extends Controller
 
     public function createFromTemplate(Request $request): JsonResponse
     {
-        $request->validate(['template' => 'required|string']);
+        $request->validate([
+            'template' => 'required|string|in:revenue_overview,customer_acquisition,campaign_performance',
+        ]);
 
         $service = app(ReportService::class);
-        $report = $service->createFromTemplate($this->tenantId(), $request->input('template'), $request->input('name'));
-
-        return $this->successResponse($report, 201);
+        try {
+            $report = $service->createFromTemplate($this->tenantId(), $request->input('template'), $request->input('name'));
+            return $this->successResponse($report, 201);
+        } catch (\RuntimeException $e) {
+            return $this->errorResponse($e->getMessage(), 422);
+        }
     }
 
     private function tenantId(): int

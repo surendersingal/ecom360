@@ -3,88 +3,95 @@
 @section('title', 'Data Sync — Sync Logs')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0 font-size-18">Sync Logs</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
-                        <li class="breadcrumb-item">Data Sync</li>
-                        <li class="breadcrumb-item active">Logs</li>
-                    </ol>
-                </div>
-            </div>
+    <div class="e360-page-header">
+        <div>
+            <h4>Sync Logs</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
+                    <li class="breadcrumb-item">DataSync</li>
+                    <li class="breadcrumb-item active">Logs</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="header-actions">
+            <span style="font-size:13px;color:var(--neutral-400);">{{ $logs->total() }} {{ Str::plural('record', $logs->total()) }}</span>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Recent Sync Activity</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-nowrap mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Entity</th>
-                                    <th>Platform</th>
-                                    <th>Direction</th>
-                                    <th>Status</th>
-                                    <th>Received</th>
-                                    <th>Created</th>
-                                    <th>Updated</th>
-                                    <th>Failed</th>
-                                    <th>Duration</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($logs as $log)
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ $log->entity }}</span></td>
-                                        <td><span class="badge bg-primary">{{ $log->platform }}</span></td>
-                                        <td>
-                                            @if($log->direction === 'inbound')
-                                                <i class="bx bx-download text-success"></i> Inbound
-                                            @else
-                                                <i class="bx bx-upload text-info"></i> Outbound
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @php
-                                                $statusColor = match($log->status) {
-                                                    'completed' => 'success',
-                                                    'partial'   => 'warning',
-                                                    'failed'    => 'danger',
-                                                    'running'   => 'info',
-                                                    default     => 'secondary',
-                                                };
-                                            @endphp
-                                            <span class="badge bg-{{ $statusColor }}">{{ ucfirst($log->status) }}</span>
-                                        </td>
-                                        <td>{{ number_format($log->records_received ?? 0) }}</td>
-                                        <td class="text-success">{{ number_format($log->records_created ?? 0) }}</td>
-                                        <td class="text-info">{{ number_format($log->records_updated ?? 0) }}</td>
-                                        <td class="{{ ($log->records_failed ?? 0) > 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($log->records_failed ?? 0) }}</td>
-                                        <td>
-                                            @if($log->duration_ms)
-                                                {{ number_format($log->duration_ms) }} ms
-                                            @else
-                                                —
-                                            @endif
-                                        </td>
-                                        <td>{{ $log->created_at->format('M d, H:i:s') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="10" class="text-center text-muted py-4">No sync activity yet.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-3">{{ $logs->links() }}</div>
-                </div>
+    <div class="card" data-module="datasync">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-nowrap mb-0">
+                    <thead>
+                        <tr>
+                            <th>Entity</th>
+                            <th>Platform</th>
+                            <th>Direction</th>
+                            <th>Status</th>
+                            <th class="text-end">Received</th>
+                            <th class="text-end">Created</th>
+                            <th class="text-end">Updated</th>
+                            <th class="text-end">Failed</th>
+                            <th class="text-end">Duration</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($logs as $log)
+                            @php
+                                $statusClass = match($log->status) {
+                                    'completed' => 'e360-badge-active',
+                                    'partial'   => 'e360-badge-pending',
+                                    'failed'    => 'e360-badge-error',
+                                    'running'   => 'e360-badge-info',
+                                    default     => '',
+                                };
+                                $hasFailed = ($log->records_failed ?? 0) > 0;
+                            @endphp
+                            <tr style="{{ $hasFailed ? 'background:var(--danger-bg);' : '' }}">
+                                <td><span class="e360-badge" style="background:var(--surface-2);color:var(--neutral-700);">{{ $log->entity }}</span></td>
+                                <td><span class="e360-badge" style="background:var(--primary-100);color:var(--primary-700);">{{ $log->platform }}</span></td>
+                                <td>
+                                    @if($log->direction === 'inbound')
+                                        <i class="bx bx-download" style="color:var(--success);margin-right:4px;"></i>
+                                        <span style="font-size:13px;color:var(--neutral-700);">Inbound</span>
+                                    @else
+                                        <i class="bx bx-upload" style="color:var(--info);margin-right:4px;"></i>
+                                        <span style="font-size:13px;color:var(--neutral-700);">Outbound</span>
+                                    @endif
+                                </td>
+                                <td><span class="e360-badge {{ $statusClass }}">{{ ucfirst($log->status) }}</span></td>
+                                <td class="text-end mono">{{ number_format($log->records_received ?? 0) }}</td>
+                                <td class="text-end mono" style="color:var(--success);font-weight:500;">{{ number_format($log->records_created ?? 0) }}</td>
+                                <td class="text-end mono" style="color:var(--info);font-weight:500;">{{ number_format($log->records_updated ?? 0) }}</td>
+                                <td class="text-end mono" style="{{ $hasFailed ? 'color:var(--danger);font-weight:700;' : '' }}">{{ number_format($log->records_failed ?? 0) }}</td>
+                                <td class="text-end mono" style="color:var(--neutral-500);font-size:12px;">
+                                    @if($log->duration_ms)
+                                        {{ number_format($log->duration_ms) }}ms
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td style="font-size:13px;color:var(--neutral-500);white-space:nowrap;">{{ $log->created_at->format('M d, H:i:s') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10">
+                                    <div class="e360-empty-state" style="padding:32px 0;">
+                                        <div class="empty-icon">📋</div>
+                                        <h3>No sync activity yet</h3>
+                                        <p>Sync logs will appear here once data starts flowing from your connected stores.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+            @if($logs->hasPages())
+            <div class="mt-4 d-flex justify-content-center">{{ $logs->links() }}</div>
+            @endif
         </div>
     </div>
 @endsection

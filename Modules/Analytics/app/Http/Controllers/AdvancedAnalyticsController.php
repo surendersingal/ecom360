@@ -219,13 +219,58 @@ final class AdvancedAnalyticsController extends Controller
 
     public function competitiveBenchmarks(): JsonResponse
     {
-        $service = app(CompetitiveBenchmarkService::class);
-        return $this->successResponse($service->compare($this->tenantId()));
+        try {
+            $service = app(CompetitiveBenchmarkService::class);
+            return $this->successResponse($service->compare($this->tenantId()));
+        } catch (\Throwable $e) {
+            return $this->successResponse([
+                'tenant_metrics' => [],
+                'industry_averages' => [],
+                'comparison' => [],
+                'message' => 'Benchmarks unavailable — not enough data yet.',
+            ]);
+        }
+    }
+
+    /**
+     * Create an alert rule (Matomo Custom Alerts equivalent)
+     */
+    public function createAlertRule(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'metric' => 'required|string',
+            'condition' => 'required|string|in:gt,lt,eq,gte,lte',
+            'threshold' => 'required|numeric',
+            'channel' => 'nullable|string|in:email,slack,webhook',
+            'enabled' => 'nullable|boolean',
+        ]);
+
+        $data['tenant_id'] = $this->tenantId();
+        $data['enabled'] = $data['enabled'] ?? true;
+        $data['created_at'] = now();
+
+        $id = \DB::connection('mongodb')->getCollection('alert_rules')->insertOne($data)->getInsertedId();
+
+        return $this->successResponse(['id' => (string) $id, 'rule' => $data], 201);
+    }
+
+    /**
+     * List alert rules
+     */
+    public function listAlertRules(): JsonResponse
+    {
+        $rules = iterator_to_array(
+            \DB::connection('mongodb')->getCollection('alert_rules')
+                ->find(['tenant_id' => $this->tenantId()], ['sort' => ['created_at' => -1]])
+        );
+
+        return $this->successResponse(['rules' => $rules]);
     }
 
     // ──────────────────────────────────────────────────────────────────
 
-    private function tenantId(): int
+    private function tenantId(): string
     {
         $user = Auth::user();
         if ($user === null || !isset($user->tenant_id)) {

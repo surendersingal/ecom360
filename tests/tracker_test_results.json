@@ -1,0 +1,1250 @@
+{
+  "total": 38,
+  "passed": 36,
+  "failed": 2,
+  "errors": 0,
+  "results": [
+    {
+      "test": "page_view",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb3f36d71451150720e5",
+          "event_type": "page_view",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:47+00:00"
+        }
+      }
+    },
+    {
+      "test": "product_view",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb3fe0cc53e7530fa8b2",
+          "event_type": "product_view",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:47+00:00"
+        }
+      }
+    },
+    {
+      "test": "add_to_cart",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb40d319fd6c6e0b29a3",
+          "event_type": "add_to_cart",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:48+00:00"
+        }
+      }
+    },
+    {
+      "test": "remove_from_cart",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb40bd19ec94ef012da2",
+          "event_type": "remove_from_cart",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:48+00:00"
+        }
+      }
+    },
+    {
+      "test": "search",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb402beacc4dd60b4282",
+          "event_type": "search",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:48+00:00"
+        }
+      }
+    },
+    {
+      "test": "checkout_step",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb4029081e020b0113c2",
+          "event_type": "checkout_step",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:48+00:00"
+        }
+      }
+    },
+    {
+      "test": "purchase",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb41dc4800a74000fa82",
+          "event_type": "purchase",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:49+00:00"
+        }
+      }
+    },
+    {
+      "test": "customer_login",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb41d9d123e5d70f7092",
+          "event_type": "customer_login",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:49+00:00"
+        }
+      }
+    },
+    {
+      "test": "customer_logout",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb41e0cc53e7530fa8b3",
+          "event_type": "customer_logout",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:49+00:00"
+        }
+      }
+    },
+    {
+      "test": "add_to_wishlist",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb4236d71451150720e6",
+          "event_type": "add_to_wishlist",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:50+00:00"
+        }
+      }
+    },
+    {
+      "test": "review_submit",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb429c0065053f09d9c2",
+          "event_type": "review_submit",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:50+00:00"
+        }
+      }
+    },
+    {
+      "test": "scroll_depth",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb42255d7d6c9a00fcb2",
+          "event_type": "scroll_depth",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:50+00:00"
+        }
+      }
+    },
+    {
+      "test": "engagement_time",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb422beacc4dd60b4283",
+          "event_type": "engagement_time",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:50+00:00"
+        }
+      }
+    },
+    {
+      "test": "exit_intent",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb43ac1ceef31403fa82",
+          "event_type": "exit_intent",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:51+00:00"
+        }
+      }
+    },
+    {
+      "test": "rage_click",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb43c311753b1e092782",
+          "event_type": "rage_click",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:51+00:00"
+        }
+      }
+    },
+    {
+      "test": "cart_update",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb43905df1411b0f8572",
+          "event_type": "cart_update",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:51+00:00"
+        }
+      }
+    },
+    {
+      "test": "free_shipping_qualified",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "OK",
+        "data": {
+          "id": "69abcb439c0065053f09d9c3",
+          "event_type": "free_shipping_qualified",
+          "session_id": "copilot-test-a097b547",
+          "ts": "2026-03-07T06:52:51+00:00"
+        }
+      }
+    },
+    {
+      "test": "batch_10_events",
+      "status": "PASS",
+      "code": 201,
+      "response": {
+        "success": true,
+        "message": "10/10 events ingested.",
+        "data": {
+          "ingested": 10,
+          "total": 10,
+          "errors": []
+        }
+      }
+    },
+    {
+      "test": "sync_products",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Products synced.",
+        "data": {
+          "success": true,
+          "entity": "products",
+          "received": 1,
+          "created": 0,
+          "updated": 1,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    {
+      "test": "sync_categories",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Categories synced.",
+        "data": {
+          "success": true,
+          "entity": "categories",
+          "received": 1,
+          "created": 0,
+          "updated": 1,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    {
+      "test": "sync_customers",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Customers synced.",
+        "data": {
+          "success": true,
+          "entity": "customers",
+          "received": 1,
+          "created": 0,
+          "updated": 1,
+          "failed": 0,
+          "errors": []
+        }
+      }
+    },
+    {
+      "test": "interventions_poll",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "data": []
+      }
+    },
+    {
+      "test": "analytics_overview",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "traffic": {
+            "unique_sessions": 5,
+            "total_events": 5,
+            "event_type_breakdown": {
+              "test_evt_3cfa71": 1,
+              "test_evt_fe2730": 1,
+              "test_evt_baddcb": 1,
+              "test_evt_2b7fed": 1,
+              "test_evt_7c1f65": 1
+            },
+            "date_from": "2026-02-05",
+            "date_to": "2026-03-07"
+          },
+          "revenue": {
+            "current": {
+              "revenue": 0,
+              "orders": 0
+            },
+            "previous": {
+              "revenue": 0,
+              "orders": 0
+            },
+            "revenue_change": 0,
+            "orders_change": 0
+          },
+          "sessions": {
+            "total_sessions": 5,
+            "bounce_rate": 100,
+            "bounce_sessions": 5,
+            "avg_pages_per_session": 0,
+            "avg_events_per_session": 1,
+            "avg_session_duration_seconds": 0,
+            "avg_session_duration_formatted": "0s",
+            "duration_distribution": [
+              {
+                "label": "0-10s",
+                "count": 5
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "test": "analytics_traffic",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "unique_sessions": 5,
+          "total_events": 5,
+          "event_type_breakdown": {
+            "test_evt_fe2730": 1,
+            "test_evt_baddcb": 1,
+            "test_evt_7c1f65": 1,
+            "test_evt_2b7fed": 1,
+            "test_evt_3cfa71": 1
+          },
+          "date_from": "2026-02-05",
+          "date_to": "2026-03-07"
+        }
+      }
+    },
+    {
+      "test": "analytics_realtime",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "active_sessions_5min": 0,
+          "active_sessions_15min": 0,
+          "events_last_hour": 0,
+          "purchases_last_hour": 0,
+          "events_per_minute": 0,
+          "recent_event_types": [],
+          "timestamp": "2026-03-07T06:52:54+00:00"
+        }
+      }
+    },
+    {
+      "test": "analytics_revenue",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "daily": {
+            "dates": [],
+            "revenues": [],
+            "orders": [],
+            "aov": [],
+            "total_revenue": 0,
+            "total_orders": 0,
+            "average_order_value": 0
+          },
+          "by_source": [],
+          "hourly_pattern": {
+            "hours": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "revenue": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "orders": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "comparison": {
+            "current": {
+              "revenue": 0,
+              "orders": 0
+            },
+            "previous": {
+              "revenue": 0,
+              "orders": 0
+            },
+            "revenue_change": 0,
+            "orders_change": 0
+          }
+        }
+      }
+    },
+    {
+      "test": "analytics_products",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "top_by_purchases": [],
+          "top_by_views": [],
+          "performance": [],
+          "frequently_bought_together": [],
+          "cart_abandonment": []
+        }
+      }
+    },
+    {
+      "test": "analytics_categories",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "category_views": [],
+          "category_purchases": []
+        }
+      }
+    },
+    {
+      "test": "analytics_sessions",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "metrics": {
+            "total_sessions": 5,
+            "bounce_rate": 100,
+            "bounce_sessions": 5,
+            "avg_pages_per_session": 0,
+            "avg_events_per_session": 1,
+            "avg_session_duration_seconds": 0,
+            "avg_session_duration_formatted": "0s",
+            "duration_distribution": [
+              {
+                "label": "0-10s",
+                "count": 5
+              }
+            ]
+          },
+          "daily_trend": {
+            "dates": [
+              "2026-03-05"
+            ],
+            "sessions": [
+              5
+            ]
+          },
+          "new_vs_returning": {
+            "total_sessions": 5,
+            "new_sessions": 5,
+            "returning_sessions": 0,
+            "new_pct": 100,
+            "returning_pct": 0
+          },
+          "top_landing_pages": [],
+          "top_exit_pages": []
+        }
+      }
+    },
+    {
+      "test": "analytics_page_visits",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "top_landing_pages": [],
+          "top_exit_pages": []
+        }
+      }
+    },
+    {
+      "test": "analytics_funnel",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "stages": [
+            {
+              "stage": "product_view",
+              "unique_sessions": 0,
+              "drop_off_pct": 0
+            },
+            {
+              "stage": "add_to_cart",
+              "unique_sessions": 0,
+              "drop_off_pct": 0
+            },
+            {
+              "stage": "begin_checkout",
+              "unique_sessions": 0,
+              "drop_off_pct": 0
+            },
+            {
+              "stage": "purchase",
+              "unique_sessions": 0,
+              "drop_off_pct": 0
+            }
+          ],
+          "overall_conversion_pct": 0,
+          "date_from": "2026-02-05",
+          "date_to": "2026-03-07"
+        }
+      }
+    },
+    {
+      "test": "analytics_customers",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "clv_by_segment": [
+            {
+              "segment": "VIP",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Loyal",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "At Risk",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Hibernating",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Churned",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            }
+          ],
+          "repeat_purchase": {
+            "total_customers": 0,
+            "repeat_customers": 0,
+            "one_time_customers": 0,
+            "repeat_purchase_rate": 0,
+            "frequency_distribution": []
+          },
+          "retention_cohorts": {
+            "months": [
+              "2025-10",
+              "2025-11",
+              "2025-12",
+              "2026-01",
+              "2026-02",
+              "2026-03"
+            ],
+            "retention_matrix": [
+              {
+                "cohort_month": "2025-10",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2025-11",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2025-12",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-01",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-02",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-03",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "test": "analytics_cohorts",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "retention": {
+            "months": [
+              "2025-10",
+              "2025-11",
+              "2025-12",
+              "2026-01",
+              "2026-02",
+              "2026-03"
+            ],
+            "retention_matrix": [
+              {
+                "cohort_month": "2025-10",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2025-11",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2025-12",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-01",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-02",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "cohort_month": "2026-03",
+                "cohort_size": 0,
+                "retention": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          },
+          "repeat_purchase": {
+            "total_customers": 0,
+            "repeat_customers": 0,
+            "one_time_customers": 0,
+            "repeat_purchase_rate": 0,
+            "frequency_distribution": []
+          },
+          "clv_by_segment": [
+            {
+              "segment": "VIP",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Loyal",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "At Risk",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Hibernating",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            },
+            {
+              "segment": "Churned",
+              "count": 0,
+              "avg_clv": 0,
+              "total_value": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "analytics_campaigns",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "performance": [],
+          "utm_breakdown": {
+            "sources": [],
+            "mediums": [],
+            "campaigns": []
+          },
+          "channel_attribution": {
+            "total_revenue": 0,
+            "channels": []
+          },
+          "referrer_sources": []
+        }
+      }
+    },
+    {
+      "test": "analytics_geographic",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "by_country": [
+            {
+              "country": "India",
+              "sessions": 5,
+              "unique_cities": 1
+            }
+          ],
+          "by_city": [
+            {
+              "city": "Gurugram",
+              "country": "India",
+              "sessions": 5
+            }
+          ],
+          "devices": {
+            "devices": {
+              "desktop": 5,
+              "mobile": 0,
+              "tablet": 0,
+              "other": 0
+            },
+            "browsers": {
+              "Other": 5
+            },
+            "total_sessions": 5
+          },
+          "traffic_by_hour": {
+            "hours": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "views": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    {
+      "test": "analytics_export",
+      "status": "PASS",
+      "code": 200,
+      "response": {
+        "success": true,
+        "message": "Request successful",
+        "data": {
+          "events": [
+            {
+              "session_id": "sess_0a9ccbf0",
+              "event_type": "test_evt_2b7fed",
+              "url": "https://example.com/test-page",
+              "metadata": {
+                "key": "value",
+                "geo": {
+                  "country": "India",
+                  "country_code": "IN",
+                  "region": "Haryana",
+                  "city": "Gurugram",
+                  "lat": 28.4597,
+                  "lon": 77.0282,
+                  "timezone": "Asia/Kolkata",
+                  "isp": "TRIPLEPLAY",
+                  "org": ""
+                },
+                "device": {
+                  "device_type": "Desktop",
+                  "browser": "Unknown",
+                  "os": "Unknown"
+                }
+              },
+              "custom_data": [],
+              "ip_address": "150.242.64.97",
+              "user_agent": "python-requests/2.32.3",
+              "created_at": {
+                "$date": {
+                  "$numberLong": "1772700241021"
+                }
+              },
+              "_id": "69a94251e91899b15e0c8fe2"
+            },
+            {
+              "session_id": "sess_dd999c85",
+              "event_type": "test_evt_7c1f65",
+              "url": "https://example.com/test-page",
+              "metadata": {
+                "key": "value",
+                "geo": {
+                  "country": "India",
+                  "country_code": "IN",
+                  "region": "Haryana",
+                  "city": "Gurugram",
+                  "lat": 28.4597,
+                  "lon": 77.0282,
+                  "timezone": "Asia/Kolkata",
+                  "isp": "TRIPLEPLAY",
+                  "org": ""
+                },
+                "device": {
+                  "device_type": "Desktop",
+                  "browser": "Unknown",
+                  "os": "Unknown"
+                }
+              },
+              "custom_data": [],
+              "ip_address": "150.242.64.97",
+              "user_agent": "python-requests/2.32.3",
+              "created_at": {
+                "$date": {
+                  "$numberLong": "1772699446149"
+                }
+              },
+              "_id": "69a93f36239168f809002632"
+            },
+            {
+              "session_id": "sess_7de0c8e3",
+              "event_type": "test_evt_baddcb",
+              "url": "https://example.com/test-page",
+              "metadata": {
+                "key": "value",
+                "geo": {
+                  "country": "India",
+                  "country_code": "IN",
+                  "region": "Haryana",
+                  "city": "Gurugram",
+                  "lat": 28.4597,
+                  "lon": 77.0282,
+                  "timezone": "Asia/Kolkata",
+                  "isp": "TRIPLEPLAY",
+                  "org": ""
+                },
+                "device": {
+                  "device_type": "Desktop",
+                  "browser": "Unknown",
+                  "os": "Unknown"
+                }
+              },
+              "custom_data": [],
+              "ip_address": "150.242.64.97",
+              "user_agent": "python-requests/2.32.3",
+              "created_at": {
+                "$date": {
+                  "$numberLong": "1772697926987"
+                }
+              },
+              "_id": "69a93946322546c0af07bf02"
+            },
+            {
+              "session_id": "sess_65f792f0",
+              "event_type": "test_evt_fe2730",
+              "url": "https://example.com/test-page",
+              "metadata": {
+                "key": "value",
+                "geo": {
+                  "country": "India",
+                  "country_code": "IN",
+                  "region": "Haryana",
+                  "city": "Gurugram",
+                  "lat": 28.4597,
+                  "lon": 77.0282,
+                  "timezone": "Asia/Kolkata",
+                  "isp": "TRIPLEPLAY",
+                  "org": ""
+                },
+                "device": {
+                  "device_type": "Desktop",
+                  "browser": "Unknown",
+                  "os": "Unknown"
+                }
+              },
+              "custom_data": [],
+              "ip_address": "150.242.64.97",
+              "user_agent": "python-requests/2.32.3",
+              "created_at": {
+                "$date": {
+                  "$numberLong": "1772696758341"
+                }
+              },
+              "_id": "69a934b6d343cd8fe803cf42"
+            },
+            {
+              "session_id": "sess_6e107112",
+              "event_type": "test_evt_3cfa71",
+              "url": "https://example.com/test-page",
+              "metadata": {
+                "key": "value",
+                "geo": {
+                  "country": "India",
+                  "country_code": "IN",
+                  "region": "Haryana",
+                  "city": "Gurugram",
+                  "lat": 28.4597,
+                  "lon": 77.0282,
+                  "timezone": "Asia/Kolkata",
+                  "isp": "TRIPLEPLAY",
+                  "org": ""
+                },
+                "device": {
+                  "device_type": "Desktop",
+                  "browser": "Unknown",
+                  "os": "Unknown"
+                }
+              },
+              "custom_data": [],
+              "ip_address": "150.242.64.97",
+              "user_agent": "python-requests/2.32.3",
+              "created_at": {
+                "$date": {
+                  "$numberLong": "1772695907537"
+                }
+              },
+              "_id": "69a93163eb77f23e70006362"
+            }
+          ],
+          "pagination": {
+            "total": 5,
+            "page": 1,
+            "per_page": 100,
+            "total_pages": 1,
+            "has_more": false
+          },
+          "filters": {
+            "date_range": "7d",
+            "event_type": null
+          }
+        }
+      }
+    },
+    {
+      "test": "missing_session_id (expect 422)",
+      "status": "FAIL",
+      "code": 200,
+      "response": "<!doctype html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Login | Ecom360</title>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta content=\"E"
+    },
+    {
+      "test": "invalid_api_key (expect 401/403)",
+      "status": "FAIL",
+      "code": 403,
+      "response": {
+        "success": false,
+        "message": "Invalid or inactive API key."
+      }
+    }
+  ]
+}

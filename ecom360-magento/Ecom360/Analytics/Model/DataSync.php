@@ -14,6 +14,7 @@ use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerC
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -37,6 +38,7 @@ class DataSync
     private SyncLogFactory $syncLogFactory;
     private ResourceModel\SyncLog $syncLogResource;
     private StoreManagerInterface $storeManager;
+    private EavConfig $eavConfig;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -54,6 +56,7 @@ class DataSync
         SyncLogFactory $syncLogFactory,
         ResourceModel\SyncLog $syncLogResource,
         StoreManagerInterface $storeManager,
+        EavConfig $eavConfig,
         LoggerInterface $logger
     ) {
         $this->config = $config;
@@ -70,6 +73,7 @@ class DataSync
         $this->syncLogFactory = $syncLogFactory;
         $this->syncLogResource = $syncLogResource;
         $this->storeManager = $storeManager;
+        $this->eavConfig = $eavConfig;
         $this->logger = $logger;
     }
 
@@ -83,13 +87,21 @@ class DataSync
 
         $log = $this->createLog(SyncLog::ENTITY_TYPE_PRODUCT, $storeId);
         $batchSize = $this->config->getSyncBatchSize($storeId);
+        $brandAttrCode = $this->config->getBrandAttribute($storeId);
         $synced = 0;
         $failed = 0;
 
         try {
             $collection = $this->productCollectionFactory->create();
-            $collection->addAttributeToSelect(['name', 'sku', 'price', 'special_price', 'status', 'visibility',
-                'description', 'short_description', 'image', 'weight', 'url_key', 'meta_title', 'meta_description']);
+            $selectAttrs = ['name', 'sku', 'price', 'special_price', 'status', 'visibility',
+                'description', 'short_description', 'image', 'weight', 'url_key', 'meta_title', 'meta_description'];
+
+            // Dynamically include the configured brand attribute
+            if ($brandAttrCode && !in_array($brandAttrCode, $selectAttrs, true)) {
+                $selectAttrs[] = $brandAttrCode;
+            }
+
+            $collection->addAttributeToSelect($selectAttrs);
             $collection->addStoreFilter($storeId ?? 0);
             $collection->setPageSize($batchSize);
 
@@ -131,6 +143,7 @@ class DataSync
                         'categories'        => $categoryNames,
                         'category_ids'      => $categoryIds,
                         'image_url'         => $product->getImage() ? $product->getMediaConfig()->getMediaUrl($product->getImage()) : null,
+                        'brand'             => $this->resolveBrandValue($product, $brandAttrCode, $storeId),
                         'created_at'        => $product->getCreatedAt(),
                         'updated_at'        => $product->getUpdatedAt(),
                     ];
@@ -138,9 +151,10 @@ class DataSync
 
                 if (!empty($batch)) {
                     $result = $this->apiClient->syncData('/api/v1/sync/products', [
-                        'products' => $batch,
-                        'store_id' => $storeId ?? 0,
-                        'platform' => 'magento2',
+                        'products'    => $batch,
+                        'store_id'    => $storeId ?? 0,
+                        'platform'    => 'magento2',
+                        'sync_config' => $this->config->getSyncConfig($storeId),
                     ], $storeId);
 
                     if ($result['success']) {
@@ -534,6 +548,44 @@ class DataSync
     }
 
     /* ══════════════════════════ Helpers ═══════════════════════════════ */
+
+    /**
+     * Resolve the brand text from the configured attribute.
+     * Handles select/multiselect (option ID → label) and text attributes.
+     */
+    private function resolveBrandValue($product, string $brandAttrCode, ?int $storeId): ?string
+    {
+        if (!$brandAttrCode) {
+            return null;
+        }
+
+        try {
+            $rawValue = $product->getData($brandAttrCode);
+            if ($rawValue === null || $rawValue === '' || $rawValue === false) {
+                return null;
+            }
+
+            // Check if this is a select/multiselect attribute (stores option IDs)
+            $attribute = $this->eavConfig->getAttribute('catalog_product', $brandAttrCode);
+            if ($attribute && $attribute->getId()) {
+                $frontendInput = $attribute->getFrontendInput();
+                if (in_array($frontendInput, ['select', 'multiselect'], true)) {
+                    // Resolve option ID(s) to label(s)
+                    $optionText = $product->getAttributeText($brandAttrCode);
+                    if ($optionText) {
+                        return is_array($optionText) ? implode(', ', $optionText) : (string) $optionText;
+                    }
+                    return null;
+                }
+            }
+
+            // For text/textarea attributes, return the raw value
+            return (string) $rawValue;
+        } catch (\Exception $e) {
+            $this->logger->debug("Brand resolve error for attr '{$brandAttrCode}': " . $e->getMessage());
+            return null;
+        }
+    }
 
     private function createLog(string $entityType, ?int $storeId): SyncLog
     {

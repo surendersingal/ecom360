@@ -112,7 +112,7 @@ final class CompetitiveBenchmarkService
 
     // ── Metric Calculation ───────────────────────────────────────────
 
-    private function getTenantMetrics(int $tid): array
+    private function getTenantMetrics(int|string $tid): array
     {
         $cacheKey = "competitive_benchmarks:tenant:{$tid}";
 

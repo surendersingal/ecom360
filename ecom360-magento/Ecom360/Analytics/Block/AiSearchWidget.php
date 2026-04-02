@@ -38,6 +38,11 @@ class AiSearchWidget extends Template
         return $this->config->isAiSearchVisualEnabled();
     }
 
+    public function isVoiceSearchEnabled(): bool
+    {
+        return $this->config->isAiSearchVoiceEnabled();
+    }
+
     public function getApiEndpoint(): string
     {
         return $this->config->getServerUrl() . '/api/v1/search';
@@ -54,6 +59,7 @@ class AiSearchWidget extends Template
             'endpoint'     => $this->getApiEndpoint(),
             'apiKey'       => $this->getApiKey(),
             'visualSearch' => $this->isVisualSearchEnabled(),
+            'voiceSearch'  => $this->isVoiceSearchEnabled(),
         ]);
     }
 }

@@ -40,6 +40,7 @@ final class TrackingEvent extends Model
         'custom_data',
         'ip_address',
         'user_agent',
+        'created_at',
     ];
 
     /**

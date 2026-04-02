@@ -1,0 +1,353 @@
+{
+  "timestamp": "2026-03-07T13:06:59.994167",
+  "events_sent": 277,
+  "events_ingested": 277,
+  "passed": 65,
+  "failed": 0,
+  "pass_rate": "100.0%",
+  "event_counts": {
+    "page_view": 55,
+    "category_view": 20,
+    "product_view": 46,
+    "scroll_depth": 34,
+    "engagement_time": 30,
+    "search": 11,
+    "add_to_cart": 18,
+    "newsletter_signup": 2,
+    "page_exit": 20,
+    "wishlist_add": 4,
+    "compare_add": 4,
+    "remove_from_cart": 2,
+    "checkout_start": 10,
+    "checkout_step": 16,
+    "product_review": 2,
+    "purchase": 3
+  },
+  "results": [
+    {
+      "test": "Event Ingestion",
+      "status": "PASS",
+      "detail": "277/277 events ingested"
+    },
+    {
+      "test": "Overview - returns data",
+      "status": "PASS",
+      "detail": "total_events=2222, unique_sessions=835"
+    },
+    {
+      "test": "Traffic - total events",
+      "status": "PASS",
+      "detail": "total_events=2222"
+    },
+    {
+      "test": "Traffic - unique sessions",
+      "status": "PASS",
+      "detail": "unique_sessions=835"
+    },
+    {
+      "test": "Traffic - event breakdown",
+      "status": "PASS",
+      "detail": "83 event types"
+    },
+    {
+      "test": "All Pages - returns pages",
+      "status": "PASS",
+      "detail": "20 unique pages"
+    },
+    {
+      "test": "All Pages - has url field",
+      "status": "PASS",
+      "detail": "top page: https://stagingddf.gmraerodutyfree.in/"
+    },
+    {
+      "test": "All Pages - has pageviews",
+      "status": "PASS",
+      "detail": "pageviews=86"
+    },
+    {
+      "test": "All Pages - has real unique (no fake 0.8)",
+      "status": "PASS",
+      "detail": "unique=80"
+    },
+    {
+      "test": "Search - total searches",
+      "status": "PASS",
+      "detail": "API says 43, we sent 11"
+    },
+    {
+      "test": "Search - unique keywords",
+      "status": "PASS",
+      "detail": "unique_keywords=20"
+    },
+    {
+      "test": "Search - no_result_rate exists",
+      "status": "PASS",
+      "detail": "no_result_rate=18.6%"
+    },
+    {
+      "test": "Search - keywords list",
+      "status": "PASS",
+      "detail": "20 keywords returned"
+    },
+    {
+      "test": "Search - keyword has avg_results",
+      "status": "PASS",
+      "detail": "keyword='johnnie walker', avg_results=12"
+    },
+    {
+      "test": "Events - total events",
+      "status": "PASS",
+      "detail": "total_events=2222"
+    },
+    {
+      "test": "Events - breakdown rows",
+      "status": "PASS",
+      "detail": "84 event breakdowns"
+    },
+    {
+      "test": "Events - categories",
+      "status": "PASS",
+      "detail": "84 categories"
+    },
+    {
+      "test": "Events - has category/action/count",
+      "status": "PASS",
+      "detail": "cat=page_view, action=page_view, count=564"
+    },
+    {
+      "test": "Frequency - returns buckets",
+      "status": "PASS",
+      "detail": "5 buckets returned"
+    },
+    {
+      "test": "Frequency - total visitors > 0",
+      "status": "PASS",
+      "detail": "total_visitors=835"
+    },
+    {
+      "test": "Frequency - has name/count/percentage",
+      "status": "PASS",
+      "detail": "first bucket: {'name': '1 visit', 'count': 835, 'percentage': 100}"
+    },
+    {
+      "test": "Frequency - counts add up",
+      "status": "PASS",
+      "detail": "sum=835, total=835"
+    },
+    {
+      "test": "Day-of-Week - 7 days",
+      "status": "PASS",
+      "detail": "7 days returned"
+    },
+    {
+      "test": "Day-of-Week - has traffic",
+      "status": "PASS",
+      "detail": "total traffic across days=2222"
+    },
+    {
+      "test": "Day-of-Week - today (Sat) has data",
+      "status": "PASS",
+      "detail": "Sat=1059"
+    },
+    {
+      "test": "Heatmap - has cells",
+      "status": "PASS",
+      "detail": "13 heatmap cells"
+    },
+    {
+      "test": "Heatmap - cells have day/hour/count",
+      "status": "PASS",
+      "detail": "first cell: day=5, hour=6, count=6"
+    },
+    {
+      "test": "Recent Events - returns events",
+      "status": "PASS",
+      "detail": "10 events returned"
+    },
+    {
+      "test": "Recent Events - has event_type",
+      "status": "PASS",
+      "detail": "latest: page_view"
+    },
+    {
+      "test": "Recent Events - has created_at",
+      "status": "PASS",
+      "detail": "ts: 2026-03-07T07:36:50+00:00"
+    },
+    {
+      "test": "Recent Events - has session_id",
+      "status": "PASS",
+      "detail": "session: sess_a3d4993f51e4"
+    },
+    {
+      "test": "Recent Events - includes page_view",
+      "status": "PASS",
+      "detail": "types in stream: {'page_view'}"
+    },
+    {
+      "test": "Geo - countries",
+      "status": "PASS",
+      "detail": "2 countries"
+    },
+    {
+      "test": "Devices - breakdown array",
+      "status": "PASS",
+      "detail": "4 device types"
+    },
+    {
+      "test": "Devices - includes Desktop",
+      "status": "PASS",
+      "detail": "types: ['Desktop', 'Other', 'Tablet', 'Mobile']"
+    },
+    {
+      "test": "Devices - multiple types with data",
+      "status": "PASS",
+      "detail": "desktop+mobile data present"
+    },
+    {
+      "test": "Browsers - breakdown",
+      "status": "PASS",
+      "detail": "5 browsers detected"
+    },
+    {
+      "test": "Browsers - real names",
+      "status": "PASS",
+      "detail": "browsers: ['Other', 'Chrome', 'Safari', 'Edge', 'Firefox']"
+    },
+    {
+      "test": "OS - breakdown",
+      "status": "PASS",
+      "detail": "6 OS types detected"
+    },
+    {
+      "test": "OS - real names",
+      "status": "PASS",
+      "detail": "OS: ['Other', 'macOS', 'Windows 10/11', 'Linux', 'ChromeOS', 'Android']"
+    },
+    {
+      "test": "Hourly traffic",
+      "status": "PASS",
+      "detail": "2 hour slots"
+    },
+    {
+      "test": "Sessions - total_sessions > 0",
+      "status": "PASS",
+      "detail": "total_sessions=835"
+    },
+    {
+      "test": "Sessions - has new_vs_returning",
+      "status": "PASS",
+      "detail": "new_vs_returning={'total_sessions': 835, 'new_sessions': 835, 'returning_sessions': 0, 'new_pct': 100, 'returning_pct': 0}"
+    },
+    {
+      "test": "Sessions - daily trend",
+      "status": "PASS",
+      "detail": "daily entries: 2"
+    },
+    {
+      "test": "Revenue - total > 0",
+      "status": "PASS",
+      "detail": "total_revenue=4535.46 (from daily breakdown)"
+    },
+    {
+      "test": "Revenue - orders > 0",
+      "status": "PASS",
+      "detail": "total_orders=195 (from daily breakdown)"
+    },
+    {
+      "test": "Products - product views",
+      "status": "PASS",
+      "detail": "20 products with views"
+    },
+    {
+      "test": "Products - purchases tracked",
+      "status": "PASS",
+      "detail": "0 products with purchases"
+    },
+    {
+      "test": "Campaigns - UTM breakdown",
+      "status": "PASS",
+      "detail": "utm_breakdown=3 entries"
+    },
+    {
+      "test": "Funnel - stages",
+      "status": "PASS",
+      "detail": "4 funnel stages"
+    },
+    {
+      "test": "Cohorts - returns data",
+      "status": "PASS",
+      "detail": "keys: ['retention', 'repeat_purchase', 'clv_by_segment']"
+    },
+    {
+      "test": "Realtime - active sessions",
+      "status": "PASS",
+      "detail": "active_5min=60"
+    },
+    {
+      "test": "Realtime - events/min",
+      "status": "PASS",
+      "detail": "events_per_minute=17.65"
+    },
+    {
+      "test": "Categories - views",
+      "status": "PASS",
+      "detail": "10 categories with views"
+    },
+    {
+      "test": "Staging store accessible",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "test": "Tracker JS present",
+      "status": "PASS",
+      "detail": "ecom360 tracker found in page source"
+    },
+    {
+      "test": "API key in tracker",
+      "status": "PASS",
+      "detail": "API key prefix 'ek_Z3KoaSn...' present"
+    },
+    {
+      "test": "Cross-check: homepage in all-pages",
+      "status": "PASS",
+      "detail": "found https://stagingddf.gmraerodutyfree.in in 20 pages"
+    },
+    {
+      "test": "Cross-check: search keywords match",
+      "status": "PASS",
+      "detail": "7/7 sent keywords found in API response"
+    },
+    {
+      "test": "Cross-check: page_view in breakdown",
+      "status": "PASS",
+      "detail": "found in API categories"
+    },
+    {
+      "test": "Cross-check: product_view in breakdown",
+      "status": "PASS",
+      "detail": "found in API categories"
+    },
+    {
+      "test": "Cross-check: add_to_cart in breakdown",
+      "status": "PASS",
+      "detail": "found in API categories"
+    },
+    {
+      "test": "Cross-check: search in breakdown",
+      "status": "PASS",
+      "detail": "found in API categories"
+    },
+    {
+      "test": "Cross-check: purchase in breakdown",
+      "status": "PASS",
+      "detail": "found in API categories"
+    },
+    {
+      "test": "Cross-check: recent events match sessions",
+      "status": "PASS",
+      "detail": "50/50 match our injected sessions"
+    }
+  ]
+}

@@ -1,0 +1,810 @@
+{
+  "run_at": "2026-03-05T05:44:39.089197",
+  "server": "https://ecom.buildnetic.com/api/v1",
+  "total": 29,
+  "passed": 29,
+  "warned": 0,
+  "failed": 0,
+  "pass_rate": 100.0,
+  "results": [
+    {
+      "story_id": "US-DS-001",
+      "title": "New Merchant Connects Magento Store",
+      "module": "DataSync",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true,
+          "details": "Got 200"
+        },
+        {
+          "label": "Connection active",
+          "pass": true,
+          "details": "conn=found"
+        },
+        {
+          "label": "Platform is magento2",
+          "pass": true,
+          "details": "platform=magento2"
+        },
+        {
+          "label": "Heartbeat present",
+          "pass": true,
+          "details": "heartbeat=2026-03-05T04:31:17+00:00"
+        },
+        {
+          "label": "Store URL present",
+          "pass": true,
+          "details": "url=https://stagingddf.gmraerodutyfree.in"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.061279"
+    },
+    {
+      "story_id": "US-DS-002",
+      "title": "200 Products Sync Instantly",
+      "module": "DataSync",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "HTTP 200",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Product sync records exist",
+          "pass": true,
+          "details": "product_syncs=found"
+        },
+        {
+          "label": "Search returns products",
+          "pass": true,
+          "details": "Search HTTP 200, products=2"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.201148"
+    },
+    {
+      "story_id": "US-DS-003",
+      "title": "Customer Places Order \u2014 Every Detail Captured",
+      "module": "DataSync",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Analytics overview 200",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Revenue/orders data present",
+          "pass": true,
+          "details": "keys=['traffic', 'revenue', 'sessions']"
+        },
+        {
+          "label": "Orders synced",
+          "pass": true,
+          "details": "order_sync=found"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.333954"
+    },
+    {
+      "story_id": "US-DS-004",
+      "title": "Product Goes Out of Stock \u2014 Low Stock Alert",
+      "module": "DataSync + BI",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "BI alerts endpoint 200",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Inventory data synced",
+          "pass": true,
+          "details": "inv_sync=found"
+        },
+        {
+          "label": "Alert evaluate endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.515875"
+    },
+    {
+      "story_id": "US-DS-005",
+      "title": "Abandoned Cart Recovery Flow",
+      "module": "DataSync + Marketing",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Sync status accessible",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Abandoned cart sync present",
+          "pass": true,
+          "details": "cart_sync=found"
+        },
+        {
+          "label": "Marketing flows accessible",
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.645364"
+    },
+    {
+      "story_id": "US-AN-001",
+      "title": "Why Revenue Dropped \u2014 Why Engine",
+      "module": "Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Why endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Returns contributing factors",
+          "pass": true,
+          "details": "keys=['metric', 'current_value', 'previous_value', 'change', 'change_percent', 'direction', 'explanation', 'top_factors']"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.709611"
+    },
+    {
+      "story_id": "US-AN-002",
+      "title": "Real-Time Pulse",
+      "module": "Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Pulse endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Has visitor data",
+          "pass": true,
+          "details": "keys=['active_sessions', 'events_change_percent', 'events_current_window', 'events_previous_window', 'health', 'purchases_in_window', 'timestamp', 'window_minutes']"
+        },
+        {
+          "label": "Has revenue data",
+          "pass": false,
+          "details": "keys=['active_sessions', 'events_change_percent', 'events_current_window', 'events_previous_window', 'health', 'purchases_in_window', 'timestamp', 'window_minutes']"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.767579"
+    },
+    {
+      "story_id": "US-AN-003",
+      "title": "RFM Customer Segmentation",
+      "module": "Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Customers endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Segments present",
+          "pass": true,
+          "details": "has_segments=True has_rfm=False"
+        },
+        {
+          "label": "Audience segments endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.876894"
+    },
+    {
+      "story_id": "US-AN-004",
+      "title": "Cross-Device Identity Resolution",
+      "module": "Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Journey endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Journey data structure valid",
+          "pass": true,
+          "details": "type=dict"
+        },
+        {
+          "label": "Customers endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:35.990685"
+    },
+    {
+      "story_id": "US-AN-005",
+      "title": "Natural Language Query",
+      "module": "Analytics",
+      "priority": "Medium",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "NLQ endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Returns query results",
+          "pass": true,
+          "details": "keys=['question', 'understood', 'metric', 'period', 'dimension', 'answer', 'data', 'query_interpretation']"
+        },
+        {
+          "label": "Suggest endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.127593"
+    },
+    {
+      "story_id": "US-MK-001",
+      "title": "Email Campaign Send",
+      "module": "Marketing",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Campaigns endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Campaign list accessible",
+          "pass": true,
+          "details": "type=list"
+        },
+        {
+          "label": "Templates endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Contacts endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.298456"
+    },
+    {
+      "story_id": "US-MK-002",
+      "title": "Abandoned Cart Recovery Email",
+      "module": "Marketing",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Flows endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Flow list accessible",
+          "pass": true,
+          "details": "type=list"
+        },
+        {
+          "label": "Templates available",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.412793"
+    },
+    {
+      "story_id": "US-MK-003",
+      "title": "Welcome Sequence Flow",
+      "module": "Marketing",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Flows endpoint 200",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Welcome flow findable",
+          "pass": true,
+          "details": "flows=0"
+        },
+        {
+          "label": "Channels endpoint 200",
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.521631"
+    },
+    {
+      "story_id": "US-MK-004",
+      "title": "VIP Champions Exclusive Early Sale",
+      "module": "Marketing + Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Audience segments 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing lists 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Campaigns 200",
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.688080"
+    },
+    {
+      "story_id": "US-CB-001",
+      "title": "Order Tracking via Chatbot",
+      "module": "Chatbot",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Chatbot send 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Intent is order_tracking",
+          "pass": true,
+          "details": "intent=order_tracking"
+        },
+        {
+          "label": "Response mentions order",
+          "pass": true,
+          "details": "msg=i couldn't find order #10045. please double-check the order number or provide th"
+        },
+        {
+          "label": "Response < 5s",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Unknown order handled gracefully",
+          "pass": true,
+          "details": "msg=i couldn't find order #99999. please double-check the order number or provide th"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.806642"
+    },
+    {
+      "story_id": "US-CB-002",
+      "title": "Rage Click Proactive Intervention",
+      "module": "Chatbot",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Rage-click endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Response offers help",
+          "pass": true,
+          "details": "msg=having trouble adding to cart? let me help! sometimes items may be out of stock "
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.861063"
+    },
+    {
+      "story_id": "US-CB-003",
+      "title": "Return Request via Chatbot",
+      "module": "Chatbot",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Chatbot send 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Intent is return_request",
+          "pass": true,
+          "details": "intent=return_request"
+        },
+        {
+          "label": "Response mentions return/replacement",
+          "pass": true,
+          "details": "msg=our return policy allows returns within 30 days of delivery for most items. woul"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:36.915927"
+    },
+    {
+      "story_id": "US-CB-004",
+      "title": "Proactive Help High-Intent Browser",
+      "module": "Chatbot + Analytics",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Proactive VIP endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Returns personalised message",
+          "pass": true,
+          "details": "msg=welcome back, there! \ud83c\udf1f"
+        },
+        {
+          "label": "Widget config accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.026204"
+    },
+    {
+      "story_id": "US-AS-001",
+      "title": "Semantic Natural Language Search",
+      "module": "AI Search",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Search endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Returns product results",
+          "pass": true,
+          "details": "count=5"
+        },
+        {
+          "label": "Products have name field",
+          "pass": true,
+          "details": "keys=['id', 'name', 'sku', 'price', 'special_price', 'currency', 'image', 'category']"
+        },
+        {
+          "label": "Zero result graceful",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.205531"
+    },
+    {
+      "story_id": "US-AS-002",
+      "title": "Visual Search Upload",
+      "module": "AI Search",
+      "priority": "Medium",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Visual search endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Response structure valid",
+          "pass": true,
+          "details": "type=dict"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.260926"
+    },
+    {
+      "story_id": "US-AS-003",
+      "title": "Personalised Search Results",
+      "module": "AI Search",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Search A 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Search B 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Both return results",
+          "pass": true,
+          "details": "A=2 B=2"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.397187"
+    },
+    {
+      "story_id": "US-BI-001",
+      "title": "Revenue Report Export to Excel",
+      "module": "BI",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Reports endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Report templates 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Exports endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Insights query 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.618600"
+    },
+    {
+      "story_id": "US-BI-002",
+      "title": "Demand Forecast Prediction",
+      "module": "BI",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Predictions endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Response structure valid",
+          "pass": true,
+          "details": "type=dict"
+        },
+        {
+          "label": "Predictions list 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.731073"
+    },
+    {
+      "story_id": "US-BI-003",
+      "title": "Revenue Alert Target Missed",
+      "module": "BI",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Alerts list 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Alert evaluate responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "KPIs endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.896577"
+    },
+    {
+      "story_id": "US-BI-004",
+      "title": "Churn Prediction",
+      "module": "BI",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Churn prediction responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Response structure valid",
+          "pass": true,
+          "details": "type=dict"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:37.950942"
+    },
+    {
+      "story_id": "US-E2E-001",
+      "title": "Complete Customer Lifecycle",
+      "module": "ALL MODULES",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "Modules OK: ingest=True search=True chat=True sync=True mkt=True bi=True",
+      "checks": [
+        {
+          "label": "Analytics ingest works",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Search works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Chatbot works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI works",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:38.337023"
+    },
+    {
+      "story_id": "US-E2E-002",
+      "title": "Flash Sale \u2014 All Modules Under Load",
+      "module": "ALL MODULES",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Analytics pulse < 5s",
+          "pass": true,
+          "details": "0.1s, HTTP 200"
+        },
+        {
+          "label": "Search < 3s",
+          "pass": true,
+          "details": "0.1s, HTTP 200"
+        },
+        {
+          "label": "Chatbot < 5s",
+          "pass": true,
+          "details": "0.1s, HTTP 200"
+        },
+        {
+          "label": "DataSync available",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI available",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:38.678795"
+    },
+    {
+      "story_id": "US-E2E-003",
+      "title": "GDPR Data Deletion",
+      "module": "DataSync + Analytics + Marketing",
+      "priority": "Critical",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Customer lookup by email works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contact lookup works",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync accessible for customer data",
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:38.863164"
+    },
+    {
+      "story_id": "US-E2E-004",
+      "title": "UAE Store AED Currency",
+      "module": "DataSync + Analytics + BI",
+      "priority": "High",
+      "status": "PASS",
+      "details": "",
+      "checks": [
+        {
+          "label": "Sync status 200",
+          "pass": true,
+          "details": ""
+        },
+        {
+          "label": "Revenue endpoint 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Revenue data structure valid",
+          "pass": true,
+          "details": "keys=['daily', 'by_source', 'hourly_pattern', 'comparison']"
+        },
+        {
+          "label": "BI query preserves data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "timestamp": "2026-03-05T05:44:39.088537"
+    }
+  ]
+}

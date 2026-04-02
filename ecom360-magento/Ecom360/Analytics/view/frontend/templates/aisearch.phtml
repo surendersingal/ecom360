@@ -4,57 +4,106 @@ if (!$block->isEnabled()) {
     return;
 }
 $configJson = $block->getConfigJson();
-$visualEnabled = $block->isVisualSearchEnabled();
+/* Local Magento admin fallbacks — overridden at runtime by widget-config API */
+$visualFallback = $block->isVisualSearchEnabled();
+$voiceFallback = $block->isVoiceSearchEnabled();
 ?>
-<!-- Ecom360 AI-Powered Search Enhancement -->
+<!-- Ecom360 AI-Powered Search Enhancement v3 — Dynamic feature flags from API -->
 <style>
-.ecom360-search-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999990}
-.ecom360-search-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding-top:80px}
-.ecom360-search-panel{background:#fff;width:680px;max-width:95vw;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;max-height:80vh;display:flex;flex-direction:column}
-.ecom360-search-top{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #eee;gap:12px}
-.ecom360-search-top input{flex:1;border:none;font-size:18px;outline:none;padding:8px 0}
-.ecom360-search-top .ecom360-search-close{background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:0}
-<?php if ($visualEnabled): ?>
-.ecom360-visual-btn{background:none;border:1px solid #ddd;border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
-.ecom360-visual-btn:hover{border-color:#667eea;color:#667eea}
-.ecom360-visual-btn svg{width:18px;height:18px}
-<?php endif; ?>
-.ecom360-search-results{flex:1;overflow-y:auto;padding:12px 20px}
+.ecom360-search-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:999990;backdrop-filter:blur(2px)}
+.ecom360-search-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding-top:70px}
+.ecom360-search-panel{background:#fff;width:780px;max-width:95vw;border-radius:14px;box-shadow:0 25px 60px rgba(0,0,0,.25);overflow:hidden;max-height:82vh;display:flex;flex-direction:column}
+/* Top search bar */
+.ecom360-search-top{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #eee;gap:10px;background:#fafafa}
+.ecom360-search-top input[type="text"]{flex:1;border:none;font-size:17px;outline:none;padding:8px 0;background:transparent;color:#333}
+.ecom360-search-top input[type="text"]::placeholder{color:#aaa}
+.ecom360-search-top .ecom360-search-close{background:none;border:none;font-size:22px;cursor:pointer;color:#999;padding:4px 8px;border-radius:6px;line-height:1}
+.ecom360-search-top .ecom360-search-close:hover{background:#f0f0f0;color:#333}
+.ecom360-search-kbd{font-size:11px;color:#bbb;border:1px solid #ddd;border-radius:4px;padding:2px 6px;margin-right:4px;font-family:monospace}
+/* Visual search button — always in DOM, hidden until API enables it */
+.ecom360-visual-btn{background:none;border:1px solid #ddd;border-radius:8px;padding:6px 10px;cursor:pointer;display:none;align-items:center;gap:5px;font-size:12px;color:#777;transition:all .2s}
+.ecom360-visual-btn.ecom360-feature-on{display:flex}
+.ecom360-visual-btn:hover{border-color:#333;color:#333}
+.ecom360-visual-btn svg{width:16px;height:16px}
+/* Voice search button — always in DOM, hidden until API enables it */
+.ecom360-voice-btn{background:none;border:1px solid #ddd;border-radius:8px;padding:6px 10px;cursor:pointer;display:none;align-items:center;gap:5px;font-size:12px;color:#777;transition:all .2s}
+.ecom360-voice-btn.ecom360-feature-on{display:flex}
+.ecom360-voice-btn:hover{border-color:#333;color:#333}
+.ecom360-voice-btn svg{width:16px;height:16px}
+.ecom360-voice-btn.listening{border-color:#e74c3c;color:#e74c3c;animation:ecom360-pulse 1.2s infinite}
+@keyframes ecom360-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* Suggestions bar */
 .ecom360-search-suggestions{padding:8px 20px;border-bottom:1px solid #f5f5f5}
-.ecom360-search-suggestions span{display:inline-block;padding:4px 12px;margin:4px;background:#f0f0f7;border-radius:16px;font-size:13px;cursor:pointer;color:#555}
-.ecom360-search-suggestions span:hover{background:#667eea;color:#fff}
-.ecom360-search-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5;cursor:pointer;align-items:center}
-.ecom360-search-item:hover{background:#fafafe;margin:0 -20px;padding:12px 20px}
-.ecom360-search-item img{width:60px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0}
-.ecom360-search-item-info h5{margin:0 0 4px;font-size:14px;font-weight:600;color:#333}
-.ecom360-search-item-info p{margin:0;font-size:13px;color:#999}
-.ecom360-search-item-price{margin-left:auto;font-weight:700;color:#667eea;font-size:15px;white-space:nowrap}
-.ecom360-search-facets{display:flex;gap:8px;padding:8px 20px;flex-wrap:wrap;border-bottom:1px solid #f5f5f5}
-.ecom360-search-facet{padding:4px 10px;border:1px solid #ddd;border-radius:12px;font-size:12px;cursor:pointer;color:#666}
-.ecom360-search-facet.active{border-color:#667eea;background:#667eea;color:#fff}
-.ecom360-search-empty{text-align:center;padding:40px 20px;color:#999;font-size:15px}
-.ecom360-search-trending-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 0 8px;font-weight:600}
+.ecom360-search-suggestions span{display:inline-block;padding:4px 12px;margin:3px;background:#f5f5f8;border-radius:20px;font-size:13px;cursor:pointer;color:#555;transition:all .15s}
+.ecom360-search-suggestions span:hover{background:#333;color:#fff}
+.ecom360-search-trending-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 0 6px;font-weight:600}
+/* Scrollable results area */
+.ecom360-search-results{flex:1;overflow-y:auto;padding:0}
+.ecom360-search-meta{padding:6px 20px;font-size:12px;color:#999;border-bottom:1px solid #f5f5f5;background:#fafafa}
+/* Group sections */
+.ecom360-group{padding:0}
+.ecom360-group-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px;background:#fafafa;border-bottom:1px solid #f0f0f0;position:sticky;top:0;z-index:1}
+.ecom360-group-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#999;font-weight:700}
+.ecom360-group-count{font-size:11px;color:#bbb}
+/* Product items */
+.ecom360-product-item{display:flex;gap:12px;padding:10px 20px;cursor:pointer;align-items:center;text-decoration:none;color:inherit;border-bottom:1px solid #f8f8f8;transition:background .1s}
+.ecom360-product-item:hover{background:#f7f7fb}
+.ecom360-product-item img{width:56px;height:56px;object-fit:contain;border-radius:6px;flex-shrink:0;background:#f8f8f8;border:1px solid #eee}
+.ecom360-product-item .ecom360-no-img{width:56px;height:56px;border-radius:6px;flex-shrink:0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#ddd}
+.ecom360-product-info{flex:1;min-width:0}
+.ecom360-product-info .ecom360-pname{margin:0;font-size:13px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.ecom360-product-info .ecom360-pbrand{font-size:11px;color:#999;margin:1px 0 0}
+.ecom360-product-info .ecom360-pcat{font-size:11px;color:#bbb;margin:1px 0 0}
+.ecom360-product-price{margin-left:auto;text-align:right;white-space:nowrap;flex-shrink:0}
+.ecom360-product-price .ecom360-current{font-weight:700;color:#222;font-size:14px}
+.ecom360-product-price .ecom360-original{text-decoration:line-through;color:#bbb;font-size:11px;display:block}
+.ecom360-product-price .ecom360-discount{background:#e74c3c;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:3px;font-weight:700}
+/* Brand items */
+.ecom360-brand-item{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;margin:4px;background:#f5f5f8;border-radius:8px;cursor:pointer;text-decoration:none;color:#333;font-size:13px;font-weight:500;transition:all .15s;border:1px solid transparent}
+.ecom360-brand-item:hover{background:#fff;border-color:#333;color:#111}
+.ecom360-brand-item .ecom360-bcount{color:#aaa;font-size:11px;font-weight:400}
+.ecom360-brand-list{padding:8px 16px 12px;display:flex;flex-wrap:wrap}
+/* Category items */
+.ecom360-cat-item{display:flex;align-items:center;gap:8px;padding:8px 20px;cursor:pointer;text-decoration:none;color:#444;font-size:13px;border-bottom:1px solid #f8f8f8;transition:all .1s}
+.ecom360-cat-item:hover{background:#f7f7fb;color:#111}
+.ecom360-cat-icon{width:28px;height:28px;border-radius:6px;background:#f0f0f5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ecom360-cat-icon svg{width:14px;height:14px;fill:#999}
+.ecom360-cat-name{flex:1;font-weight:500}
+.ecom360-cat-count{color:#bbb;font-size:12px}
+.ecom360-cat-arrow{color:#ccc;font-size:14px}
+/* View all */
+.ecom360-view-all{display:block;text-align:center;padding:14px 20px;color:#333;font-weight:600;font-size:13px;text-decoration:none;background:#fafafa;border-top:1px solid #eee;transition:all .15s}
+.ecom360-view-all:hover{background:#333;color:#fff}
+/* Empty state */
+.ecom360-search-empty{text-align:center;padding:40px 20px;color:#aaa;font-size:14px}
+.ecom360-search-empty svg{display:block;margin:0 auto 12px;opacity:.3}
 </style>
 
 <!-- AI Search Overlay -->
 <div class="ecom360-search-overlay" id="ecom360-search-overlay">
     <div class="ecom360-search-panel">
         <div class="ecom360-search-top">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="#999"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input type="text" id="ecom360-search-input" placeholder="Search products with AI..." autocomplete="off"/>
-            <?php if ($visualEnabled): ?>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#999"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="ecom360-search-input" placeholder="Search products, brands, categories..." autocomplete="off"/>
             <button class="ecom360-visual-btn" id="ecom360-visual-search-btn" title="Search by image">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-12.5-5.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                 Image
             </button>
             <input type="file" id="ecom360-visual-search-file" accept="image/*" style="display:none"/>
-            <?php endif; ?>
+            <button class="ecom360-voice-btn" id="ecom360-voice-search-btn" title="Search by voice">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                Voice
+            </button>
+            <span class="ecom360-search-kbd">ESC</span>
             <button class="ecom360-search-close" id="ecom360-search-close">&times;</button>
         </div>
         <div class="ecom360-search-suggestions" id="ecom360-search-suggestions"></div>
-        <div class="ecom360-search-facets" id="ecom360-search-facets" style="display:none"></div>
+        <div class="ecom360-search-meta" id="ecom360-search-meta" style="display:none"></div>
         <div class="ecom360-search-results" id="ecom360-search-results">
-            <div class="ecom360-search-empty">Start typing to search...</div>
+            <div class="ecom360-search-empty">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="#ccc"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                Start typing to search...
+            </div>
         </div>
     </div>
 </div>
@@ -66,26 +115,53 @@ $visualEnabled = $block->isVisualSearchEnabled();
     var input = document.getElementById('ecom360-search-input');
     var resultsDiv = document.getElementById('ecom360-search-results');
     var suggestionsDiv = document.getElementById('ecom360-search-suggestions');
-    var facetsDiv = document.getElementById('ecom360-search-facets');
+    var metaDiv = document.getElementById('ecom360-search-meta');
     var closeBtn = document.getElementById('ecom360-search-close');
     var debounceTimer = null;
-    var activeFacets = {};
 
-    // Hijack default Magento search
+    /* INR formatter */
+    function formatINR(num) {
+        num = parseFloat(num);
+        if (isNaN(num) || num <= 0) return '';
+        var s = Math.round(num).toString();
+        var lastThree = s.substring(s.length - 3);
+        var otherNumbers = s.substring(0, s.length - 3);
+        if (otherNumbers !== '') lastThree = ',' + lastThree;
+        return '\u20B9' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+    }
+
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(s || ''));
+        return d.innerHTML;
+    }
+
+    /* Enter -> go to full SRP */
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var q = input.value.trim();
+            if (q.length > 0) {
+                window.location.href = '/ecom360/search/results?q=' + encodeURIComponent(q);
+            }
+        }
+    });
+
+    /* Hijack native Magento search */
     document.addEventListener('DOMContentLoaded', function() {
         var searchForms = document.querySelectorAll('#search_mini_form, .search-form, form[action*="catalogsearch"]');
         searchForms.forEach(function(form) {
-            var searchInput = form.querySelector('input[name="q"], input#search');
-            if (searchInput) {
-                searchInput.addEventListener('focus', function(e) {
+            var si = form.querySelector('input[name="q"], input#search');
+            if (si) {
+                si.addEventListener('focus', function(e) {
                     e.preventDefault();
-                    openSearch(searchInput.value);
+                    openSearch(si.value);
                 });
             }
         });
     });
 
-    // Keyboard shortcut: Ctrl+K or Cmd+K
+    /* Keyboard shortcuts */
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
@@ -100,7 +176,11 @@ $visualEnabled = $block->isVisualSearchEnabled();
         overlay.classList.add('open');
         input.value = q || '';
         input.focus();
-        loadTrending();
+        if (q && q.trim().length >= 2) {
+            doSearch(q.trim());
+        } else {
+            loadTrending();
+        }
     }
 
     function closeSearch() {
@@ -115,104 +195,168 @@ $visualEnabled = $block->isVisualSearchEnabled();
         var q = input.value.trim();
         if (q.length < 2) {
             loadTrending();
-            facetsDiv.style.display = 'none';
+            metaDiv.style.display = 'none';
             return;
         }
         debounceTimer = setTimeout(function() { doSearch(q); }, 250);
     });
 
-    // Suggest / auto-complete as they type
-    input.addEventListener('input', function() {
-        var q = input.value.trim();
-        if (q.length < 2) { suggestionsDiv.innerHTML = ''; return; }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', cfg.endpoint + '/suggest?q=' + encodeURIComponent(q) + '&limit=6', true);
-        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
-        xhr.onload = function() {
-            try {
-                var res = JSON.parse(xhr.responseText);
-                var items = (res.data && res.data.suggestions) || [];
-                suggestionsDiv.innerHTML = items.map(function(s){ return '<span data-q="'+s+'">'+s+'</span>'; }).join('');
-                suggestionsDiv.querySelectorAll('span').forEach(function(el) {
-                    el.addEventListener('click', function() { input.value = el.dataset.q; doSearch(el.dataset.q); });
-                });
-            } catch(e) {}
-        };
-        xhr.send();
-    });
-
     function doSearch(q) {
-        var params = 'q=' + encodeURIComponent(q) + '&limit=20';
-        Object.keys(activeFacets).forEach(function(k) { params += '&' + k + '=' + encodeURIComponent(activeFacets[k]); });
-
         resultsDiv.innerHTML = '<div class="ecom360-search-empty">Searching...</div>';
+        metaDiv.style.display = 'none';
+        suggestionsDiv.innerHTML = '';
+
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', cfg.endpoint + '/search?' + params, true);
+        xhr.open('GET', cfg.endpoint + '/search?q=' + encodeURIComponent(q) + '&per_page=8', true);
         xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
         xhr.onload = function() {
             try {
                 var res = JSON.parse(xhr.responseText);
-                var items = (res.data && res.data.results) || [];
-                var facets = (res.data && res.data.facets) || {};
-                renderResults(items);
-                renderFacets(facets, q);
+                var products = res.results || [];
+                var facets = res.facets || {};
+                var total = res.total || 0;
+                var responseTime = res.response_time_ms || 0;
+                var brands = facets.brands || [];
+                var categories = facets.categories || [];
+                var interpreted = res.interpreted_as || null;
+
+                renderGroupedResults(q, products, brands, categories, total);
+                renderSearchMeta(total, responseTime, interpreted, res.fallback_hint);
             } catch(e) {
-                resultsDiv.innerHTML = '<div class="ecom360-search-empty">Search error</div>';
+                resultsDiv.innerHTML = '<div class="ecom360-search-empty">Search error. Please try again.</div>';
             }
         };
         xhr.onerror = function() {
-            resultsDiv.innerHTML = '<div class="ecom360-search-empty">Network error</div>';
+            resultsDiv.innerHTML = '<div class="ecom360-search-empty">Network error. Check your connection.</div>';
         };
         xhr.send();
     }
 
-    function renderResults(items) {
-        if (!items.length) {
-            resultsDiv.innerHTML = '<div class="ecom360-search-empty">No results found</div>';
+    /* Main grouped render: Products -> Brands -> Categories */
+    function renderGroupedResults(q, products, brands, categories, total) {
+        if (!products.length && !brands.length && !categories.length) {
+            resultsDiv.innerHTML = '<div class="ecom360-search-empty">' +
+                '<svg viewBox="0 0 24 24" width="40" height="40" fill="#ddd"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>' +
+                'No results found for "<strong>' + escapeHtml(q) + '</strong>"</div>';
             return;
         }
+
         var html = '';
-        items.forEach(function(item) {
-            var img = item.image || item.thumbnail || '';
-            var price = item.price ? ('$' + parseFloat(item.price).toFixed(2)) : '';
-            html += '<div class="ecom360-search-item" data-url="' + (item.url || '#') + '">';
-            if (img) html += '<img src="' + img + '" alt="" loading="lazy"/>';
-            html += '<div class="ecom360-search-item-info"><h5>' + (item.name || item.title || '') + '</h5>';
-            if (item.category) html += '<p>' + item.category + '</p>';
+
+        /* === PRODUCTS SECTION (Priority 1) === */
+        if (products.length) {
+            html += '<div class="ecom360-group">';
+            html += '<div class="ecom360-group-header">';
+            html += '<span class="ecom360-group-title">Products</span>';
+            html += '<span class="ecom360-group-count">' + total + ' found</span>';
             html += '</div>';
-            if (price) html += '<div class="ecom360-search-item-price">' + price + '</div>';
+
+            products.forEach(function(item) {
+                var url = item.url || '#';
+                var img = item.image || '';
+                var name = item.name || '';
+                var brand = item.brand || '';
+                var cat = item.category || '';
+
+                /* Price */
+                var priceHtml = '';
+                var price = parseFloat(item.price);
+                var special = parseFloat(item.special_price);
+                if (special > 0 && special < price) {
+                    var disc = Math.round((1 - special / price) * 100);
+                    priceHtml = '<span class="ecom360-original">' + formatINR(price) + '</span>';
+                    priceHtml += '<span class="ecom360-current">' + formatINR(special) + '</span>';
+                    if (disc > 0) priceHtml += '<span class="ecom360-discount">-' + disc + '%</span>';
+                } else if (price > 0) {
+                    priceHtml = '<span class="ecom360-current">' + formatINR(price) + '</span>';
+                }
+
+                html += '<a class="ecom360-product-item" href="' + url + '">';
+                if (img && img.indexOf('no_selection') === -1) {
+                    html += '<img src="' + img + '" alt="" loading="lazy" onerror="this.parentElement.querySelector(\'.ecom360-no-img\')&&(this.parentElement.querySelector(\'.ecom360-no-img\').style.display=\'flex\');this.style.display=\'none\'" />';
+                } else {
+                    html += '<div class="ecom360-no-img"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-12.5-5.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>';
+                }
+                html += '<div class="ecom360-product-info">';
+                html += '<div class="ecom360-pname">' + escapeHtml(name) + '</div>';
+                if (brand) html += '<div class="ecom360-pbrand">' + escapeHtml(brand) + '</div>';
+                else if (cat) html += '<div class="ecom360-pcat">' + escapeHtml(cat) + '</div>';
+                html += '</div>';
+                if (priceHtml) html += '<div class="ecom360-product-price">' + priceHtml + '</div>';
+                html += '</a>';
+            });
             html += '</div>';
-        });
+        }
+
+        /* === BRANDS SECTION (Priority 2) === */
+        if (brands.length) {
+            html += '<div class="ecom360-group">';
+            html += '<div class="ecom360-group-header">';
+            html += '<span class="ecom360-group-title">Brands</span>';
+            html += '<span class="ecom360-group-count">' + brands.length + ' matching</span>';
+            html += '</div>';
+            html += '<div class="ecom360-brand-list">';
+
+            /* Show top 8 brands */
+            var showBrands = brands.slice(0, 8);
+            showBrands.forEach(function(b) {
+                var label = b.label || b.value || b;
+                var value = b.value || label;
+                var count = b.count || '';
+                html += '<a class="ecom360-brand-item" href="/ecom360/search/results?q=' + encodeURIComponent(q) + '&brands=' + encodeURIComponent(value) + '">';
+                html += escapeHtml(label);
+                if (count) html += ' <span class="ecom360-bcount">(' + count + ')</span>';
+                html += '</a>';
+            });
+
+            html += '</div></div>';
+        }
+
+        /* === CATEGORIES SECTION (Priority 3) === */
+        if (categories.length) {
+            html += '<div class="ecom360-group">';
+            html += '<div class="ecom360-group-header">';
+            html += '<span class="ecom360-group-title">Categories</span>';
+            html += '<span class="ecom360-group-count">' + categories.length + ' matching</span>';
+            html += '</div>';
+
+            /* Show top 5 categories */
+            var showCats = categories.slice(0, 5);
+            showCats.forEach(function(c) {
+                var label = c.label || c.value || c;
+                var value = c.value || label;
+                var count = c.count || '';
+                html += '<a class="ecom360-cat-item" href="/ecom360/search/results?q=' + encodeURIComponent(q) + '&categories=' + encodeURIComponent(value) + '">';
+                html += '<span class="ecom360-cat-icon"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v4h8V4zm8 0h-6v6h8V6c0-1.1-.9-2-2-2zm-6 8H2v4c0 1.1.9 2 2 2h6v-6zm8 0h-6v6h6c1.1 0 2-.9 2-2v-4z"/></svg></span>';
+                html += '<span class="ecom360-cat-name">' + escapeHtml(label) + '</span>';
+                if (count) html += '<span class="ecom360-cat-count">' + count + ' products</span>';
+                html += '<span class="ecom360-cat-arrow">&rsaquo;</span>';
+                html += '</a>';
+            });
+            html += '</div>';
+        }
+
+        /* View All link */
+        if (total > 0) {
+            html += '<a class="ecom360-view-all" href="/ecom360/search/results?q=' + encodeURIComponent(q) + '">View All ' + total + ' Results &rarr;</a>';
+        }
+
         resultsDiv.innerHTML = html;
-        resultsDiv.querySelectorAll('.ecom360-search-item').forEach(function(el) {
-            el.addEventListener('click', function() { window.location.href = el.dataset.url; });
-        });
     }
 
-    function renderFacets(facets, q) {
-        var keys = Object.keys(facets);
-        if (!keys.length) { facetsDiv.style.display = 'none'; return; }
-        facetsDiv.style.display = 'flex';
-        var html = '';
-        keys.forEach(function(k) {
-            var vals = facets[k] || [];
-            vals.forEach(function(v) {
-                var label = v.label || v.value || v;
-                var isActive = activeFacets[k] === (v.value || label);
-                html += '<span class="ecom360-search-facet' + (isActive ? ' active' : '') + '" data-key="' + k + '" data-val="' + (v.value || label) + '">' + label + (v.count ? ' (' + v.count + ')' : '') + '</span>';
-            });
-        });
-        facetsDiv.innerHTML = html;
-        facetsDiv.querySelectorAll('.ecom360-search-facet').forEach(function(el) {
-            el.addEventListener('click', function() {
-                if (activeFacets[el.dataset.key] === el.dataset.val) {
-                    delete activeFacets[el.dataset.key];
-                } else {
-                    activeFacets[el.dataset.key] = el.dataset.val;
-                }
-                doSearch(q);
-            });
-        });
+    function renderSearchMeta(total, responseTime, interpreted, fallbackHint) {
+        if (total > 0 || interpreted || fallbackHint) {
+            metaDiv.style.display = 'block';
+            var parts = [];
+            if (total > 0) parts.push(total + ' result' + (total !== 1 ? 's' : ''));
+            if (responseTime) parts.push(responseTime + 'ms');
+            if (interpreted) parts.push('<em>' + escapeHtml(interpreted) + '</em>');
+            var html = parts.join(' &middot; ');
+            if (fallbackHint) html += '<br><span style="color:#e67e22;font-size:11px">' + escapeHtml(fallbackHint) + '</span>';
+            metaDiv.innerHTML = html;
+        } else {
+            metaDiv.style.display = 'none';
+        }
     }
 
     function loadTrending() {
@@ -222,47 +366,171 @@ $visualEnabled = $block->isVisualSearchEnabled();
         xhr.onload = function() {
             try {
                 var res = JSON.parse(xhr.responseText);
-                var items = (res.data && res.data.trending) || [];
+                var items = (res.data && res.data.trending) || res.trending || [];
                 if (items.length) {
                     suggestionsDiv.innerHTML = '<div class="ecom360-search-trending-label">Trending Searches</div>' +
-                        items.map(function(s){ var q = s.query || s; return '<span data-q="'+q+'">'+q+'</span>'; }).join('');
-                    suggestionsDiv.querySelectorAll('span').forEach(function(el) {
-                        if (el.dataset.q) el.addEventListener('click', function() { input.value = el.dataset.q; doSearch(el.dataset.q); });
+                        items.map(function(s){ var q = s.query || s; return '<span data-q="'+escapeHtml(q)+'">'+escapeHtml(q)+'</span>'; }).join('');
+                    suggestionsDiv.querySelectorAll('span[data-q]').forEach(function(el) {
+                        el.addEventListener('click', function() {
+                            input.value = el.dataset.q;
+                            doSearch(el.dataset.q);
+                        });
                     });
-                    resultsDiv.innerHTML = '<div class="ecom360-search-empty">Type to search or pick a trending query</div>';
+                    resultsDiv.innerHTML = '<div class="ecom360-search-empty">' +
+                        '<svg viewBox="0 0 24 24" width="40" height="40" fill="#ddd"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>' +
+                        'Search products, brands & categories</div>';
                 }
             } catch(e) {}
         };
         xhr.send();
     }
 
-    <?php if ($visualEnabled): ?>
-    // Visual search
+    <?php /* ── Feature-flag bootstrap: fetch config from API, fall back to local ── */ ?>
+
     var visualBtn = document.getElementById('ecom360-visual-search-btn');
     var visualFile = document.getElementById('ecom360-visual-search-file');
-    visualBtn.addEventListener('click', function() { visualFile.click(); });
-    visualFile.addEventListener('change', function() {
-        if (!this.files.length) return;
-        var formData = new FormData();
-        formData.append('image', this.files[0]);
-        resultsDiv.innerHTML = '<div class="ecom360-search-empty">Analyzing image...</div>';
+    var voiceBtn  = document.getElementById('ecom360-voice-search-btn');
+    var widgetConfigLoaded = false;
+
+    /**
+     * Enable or disable a feature button.
+     */
+    function setFeature(el, on) {
+        if (!el) return;
+        if (on) el.classList.add('ecom360-feature-on');
+        else    el.classList.remove('ecom360-feature-on');
+    }
+
+    /**
+     * Apply local Magento admin fallback values immediately so the UI
+     * matches local config before the API response arrives.
+     */
+    setFeature(visualBtn, <?= $visualFallback ? 'true' : 'false' ?>);
+    setFeature(voiceBtn,  <?= $voiceFallback  ? 'true' : 'false' ?>);
+
+    /**
+     * Fetch widget-config from the ecom360 backend API (same pattern
+     * as the chatbot widget). Overrides local Magento admin values so
+     * that toggling settings in the dashboard takes immediate effect.
+     */
+    function loadWidgetConfig() {
+        if (widgetConfigLoaded) return;
+        widgetConfigLoaded = true;
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', cfg.endpoint + '/visual-search', true);
+        xhr.open('GET', cfg.endpoint + '/widget-config', true);
         xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
         xhr.onload = function() {
             try {
                 var res = JSON.parse(xhr.responseText);
-                renderResults((res.data && res.data.results) || []);
-            } catch(e) {
-                resultsDiv.innerHTML = '<div class="ecom360-search-empty">Image search failed</div>';
-            }
+                var wc = res.data || res;
+                if (typeof wc.visual_search_enabled !== 'undefined') {
+                    setFeature(visualBtn, !!wc.visual_search_enabled);
+                    cfg.visualSearch = !!wc.visual_search_enabled;
+                }
+                if (typeof wc.voice_search_enabled !== 'undefined') {
+                    setFeature(voiceBtn, !!wc.voice_search_enabled);
+                    cfg.voiceSearch = !!wc.voice_search_enabled;
+                }
+                if (wc.widget_placeholder && input) {
+                    input.placeholder = wc.widget_placeholder;
+                }
+            } catch(e) { /* keep local fallback values */ }
         };
-        xhr.send(formData);
+        xhr.send();
+    }
+
+    /* Load widget config once on first search open */
+    var _origOpen = openSearch;
+    openSearch = function(q) {
+        loadWidgetConfig();
+        _origOpen(q);
+    };
+
+    /* ── Visual Search Handler ── */
+    visualBtn.addEventListener('click', function() { visualFile.click(); });
+    visualFile.addEventListener('change', function() {
+        if (!this.files.length) return;
+        var file = this.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+            resultsDiv.innerHTML = '<div class="ecom360-search-empty">Image too large (max 10 MB)</div>';
+            this.value = '';
+            return;
+        }
+        resultsDiv.innerHTML = '<div class="ecom360-search-empty">Analyzing image...</div>';
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var base64 = e.target.result; /* data:image/...;base64,XXXX */
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', cfg.endpoint + '/visual-search', true);
+            xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.onload = function() {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    var products = res.results || (res.data && res.data.results) || [];
+                    var features = res.detected_features || (res.data && res.data.detected_features) || null;
+                    if (products.length) {
+                        renderGroupedResults('', products, [], [], products.length);
+                        if (features) {
+                            metaDiv.style.display = 'block';
+                            var parts = [products.length + ' visual match' + (products.length !== 1 ? 'es' : '')];
+                            if (features.dominant_colors) parts.push('Colors: ' + features.dominant_colors.join(', '));
+                            if (features.category_guess) parts.push('Category: ' + features.category_guess);
+                            metaDiv.innerHTML = parts.join(' &middot; ');
+                        }
+                    } else {
+                        resultsDiv.innerHTML = '<div class="ecom360-search-empty">No visually similar products found.' +
+                            (features && features.dominant_colors ? '<br><small style="color:#999">Detected: ' + features.dominant_colors.join(', ') + '</small>' : '') +
+                            '</div>';
+                    }
+                } catch(e) {
+                    resultsDiv.innerHTML = '<div class="ecom360-search-empty">Image search failed. Please try again.</div>';
+                }
+            };
+            xhr.onerror = function() {
+                resultsDiv.innerHTML = '<div class="ecom360-search-empty">Network error during image search.</div>';
+            };
+            xhr.send(JSON.stringify({ image_base64: base64 }));
+        };
+        reader.readAsDataURL(file);
         this.value = '';
     });
-    <?php endif; ?>
 
-    // Expose globally
+    /* ── Voice Search Handler (Web Speech API) ── */
+    var recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = function(event) {
+            var transcript = event.results[0][0].transcript;
+            input.value = transcript;
+            voiceBtn.classList.remove('listening');
+            if (transcript.trim().length >= 2) {
+                doSearch(transcript.trim());
+            }
+        };
+        recognition.onerror = function() { voiceBtn.classList.remove('listening'); };
+        recognition.onend   = function() { voiceBtn.classList.remove('listening'); };
+    }
+
+    voiceBtn.addEventListener('click', function() {
+        if (!recognition) {
+            alert('Voice search is not supported in this browser.');
+            return;
+        }
+        if (voiceBtn.classList.contains('listening')) {
+            recognition.stop();
+        } else {
+            voiceBtn.classList.add('listening');
+            recognition.start();
+        }
+    });
+
     window.ecom360OpenSearch = openSearch;
 })();
 </script>

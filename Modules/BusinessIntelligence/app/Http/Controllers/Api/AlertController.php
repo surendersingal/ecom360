@@ -26,15 +26,31 @@ final class AlertController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'kpi_id' => 'required|integer|exists:bi_kpis,id',
+            'name'      => 'required|string|max:255',
             'condition' => 'required|in:above,below,change_percent,anomaly',
             'threshold' => 'required|numeric',
-            'channels' => 'required|array',
         ]);
 
+        // Map incoming fields to actual table schema (kpi_id → metric_key, channels → notify_channels)
+        $data = [
+            'name'            => $request->input('name'),
+            'condition'       => $request->input('condition'),
+            'threshold'       => $request->input('threshold'),
+            'channels'        => $request->input('channels', $request->input('notify_channels', [])),
+            'recipients'      => $request->input('recipients', []),
+            'is_active'       => $request->input('is_active', true),
+        ];
+
+        if ($request->filled('kpi_id')) {
+            $kpi = \Modules\BusinessIntelligence\Models\Kpi::where('tenant_id', $this->tenantId())
+                ->find((int) $request->input('kpi_id'));
+            $data['metric_key'] = $kpi?->metric ?? 'kpi_' . $request->input('kpi_id');
+        } else {
+            $data['metric_key'] = $request->input('metric_key', 'custom');
+        }
+
         $service = app(AlertService::class);
-        $alert = $service->create($this->tenantId(), $request->all());
+        $alert = $service->create($this->tenantId(), $data);
 
         return $this->successResponse($alert, 201);
     }

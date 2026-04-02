@@ -23,6 +23,7 @@ Route::prefix('v1/search')
         Route::match(['get', 'post'], '/search', [AiSearchController::class, 'search']);
 
         Route::get('/suggest', [AiSearchController::class, 'suggest']);
+        Route::get('/widget-config', [AiSearchController::class, 'widgetConfig']);
         Route::get('/trending', [AiSearchController::class, 'trending']);
         Route::get('/similar/{productId}', [AiSearchController::class, 'similar']);
         Route::get('/analytics', [AiSearchController::class, 'analytics']);
@@ -37,5 +38,6 @@ Route::options('v1/search/{any?}', function () {
         ->header('Access-Control-Allow-Origin', request()->header('Origin', '*'))
         ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, X-Ecom360-Key, X-Requested-With')
+        ->header('Access-Control-Allow-Credentials', 'true')
         ->header('Access-Control-Max-Age', '86400');
 })->where('any', '.*');

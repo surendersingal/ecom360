@@ -16,27 +16,62 @@ $posMap = [
 ];
 $posStyle = $posMap[$position] ?? $posMap['bottom-right'];
 ?>
-<!-- Ecom360 Chatbot Widget -->
+<!-- Ecom360 Chatbot Widget v2 — with Forms & Communication -->
 <style>
-#ecom360-chatbot-fab{position:fixed;<?= $posStyle ?>z-index:999998;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 4px 20px rgba(102,126,234,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .3s,box-shadow .3s;border:none}
-#ecom360-chatbot-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(102,126,234,.6)}
+:root{--ecom360-primary:#667eea;--ecom360-primary-hover:#5a6fd6;--ecom360-primary-light:rgba(102,126,234,.12);--ecom360-success:#22c55e;--ecom360-danger:#ef4444;--ecom360-warning:#f59e0b;--ecom360-width:400px;--ecom360-height:560px;}
+#ecom360-chatbot-fab{position:fixed;<?= $posStyle ?>z-index:999998;width:60px;height:60px;border-radius:50%;background:var(--ecom360-primary);box-shadow:0 4px 20px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .3s,box-shadow .3s;border:none}
+#ecom360-chatbot-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,0,0,.35)}
 #ecom360-chatbot-fab svg{width:28px;height:28px;fill:#fff}
-#ecom360-chatbot-panel{position:fixed;<?= $posStyle ?>z-index:999999;width:380px;height:520px;background:#fff;border-radius:16px;box-shadow:0 12px 50px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+#ecom360-chatbot-panel{position:fixed;<?= $posStyle ?>z-index:999999;width:var(--ecom360-width);height:var(--ecom360-height);max-height:90vh;background:#fff;border-radius:16px;box-shadow:0 12px 50px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 #ecom360-chatbot-panel.open{display:flex}
-.ecom360-chat-header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.ecom360-chat-header{background:var(--ecom360-primary);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
 .ecom360-chat-header h4{margin:0;font-size:16px;font-weight:600}
+.ecom360-chat-header .ecom360-status{font-size:11px;opacity:.85;margin-top:2px}
+.ecom360-chat-header .ecom360-status::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ade80;margin-right:5px;vertical-align:middle}
 .ecom360-chat-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 4px;opacity:.8}
 .ecom360-chat-close:hover{opacity:1}
 .ecom360-chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-.ecom360-chat-msg{max-width:80%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.ecom360-chat-msg{max-width:85%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word}
 .ecom360-chat-msg.bot{align-self:flex-start;background:#f0f0f7;color:#333;border-bottom-left-radius:4px}
-.ecom360-chat-msg.user{align-self:flex-end;background:#667eea;color:#fff;border-bottom-right-radius:4px}
+.ecom360-chat-msg.user{align-self:flex-end;background:var(--ecom360-primary);color:#fff;border-bottom-right-radius:4px}
+.ecom360-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;margin-top:4px}
+.ecom360-qr-btn{padding:6px 14px;border:1.5px solid var(--ecom360-primary);border-radius:20px;background:#fff;color:var(--ecom360-primary);cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;white-space:nowrap}
+.ecom360-qr-btn:hover{background:var(--ecom360-primary);color:#fff}
+.ecom360-product-card{align-self:flex-start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;max-width:85%;margin-bottom:4px}
+.ecom360-product-card img{width:100%;max-height:120px;object-fit:contain;border-radius:8px;margin-bottom:8px}
+.ecom360-product-card .pname{font-size:14px;font-weight:600;color:#333;margin-bottom:4px}
+.ecom360-product-card .pprice{font-size:15px;font-weight:700;color:var(--ecom360-primary);margin-bottom:6px}
+.ecom360-product-card .pbtn{display:inline-block;padding:6px 14px;background:var(--ecom360-primary);color:#fff;border-radius:20px;font-size:12px;text-decoration:none;font-weight:500}
+.ecom360-product-card .pbtn:hover{opacity:.9}
+/* Form styles */
+.ecom360-form-card{align-self:flex-start;background:#fff;border:1px solid #e2e4ea;border-radius:14px;padding:16px;max-width:95%;width:95%;margin-bottom:4px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ecom360-form-card .form-title{font-size:15px;font-weight:700;color:#333;margin:0 0 4px}
+.ecom360-form-card .form-subtitle{font-size:12px;color:#666;margin:0 0 14px}
+.ecom360-form-card .form-group{margin-bottom:12px}
+.ecom360-form-card label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:4px}
+.ecom360-form-card label .req{color:var(--ecom360-danger);margin-left:2px}
+.ecom360-form-card input,.ecom360-form-card textarea,.ecom360-form-card select{width:100%;box-sizing:border-box;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
+.ecom360-form-card input:focus,.ecom360-form-card textarea:focus,.ecom360-form-card select:focus{border-color:var(--ecom360-primary);box-shadow:0 0 0 3px var(--ecom360-primary-light)}
+.ecom360-form-card textarea{resize:vertical;min-height:60px}
+.ecom360-form-card select{appearance:auto}
+.ecom360-form-card .form-submit{width:100%;padding:10px;background:var(--ecom360-primary);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:4px}
+.ecom360-form-card .form-submit:hover{background:var(--ecom360-primary-hover)}
+.ecom360-form-card .form-submit:disabled{opacity:.6;cursor:not-allowed}
+.ecom360-form-card .form-error{color:var(--ecom360-danger);font-size:11px;margin-top:2px}
+/* Communication status badge */
+.ecom360-comm-status{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;margin-top:2px}
+.ecom360-comm-status.success{background:#dcfce7;color:#166534}
+.ecom360-comm-status.pending{background:#fef3c7;color:#92400e}
+.ecom360-comm-status.error{background:#fee2e2;color:#991b1b}
+.ecom360-comm-status svg{width:14px;height:14px}
+/* Input area */
 .ecom360-chat-input{display:flex;padding:12px 16px;border-top:1px solid #eee;gap:8px}
 .ecom360-chat-input input{flex:1;border:1px solid #ddd;border-radius:24px;padding:10px 16px;font-size:14px;outline:none}
-.ecom360-chat-input input:focus{border-color:#667eea}
-.ecom360-chat-input button{border:none;background:#667eea;color:#fff;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ecom360-chat-input button:hover{background:#5a6fd6}
+.ecom360-chat-input input:focus{border-color:var(--ecom360-primary)}
+.ecom360-chat-input button{border:none;background:var(--ecom360-primary);color:#fff;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ecom360-chat-input button:hover{background:var(--ecom360-primary-hover)}
 .ecom360-chat-typing{align-self:flex-start;padding:10px 14px;background:#f0f0f7;border-radius:16px;font-size:13px;color:#999;display:none}
+.ecom360-chat-footer{text-align:center;padding:4px;font-size:10px;color:#bbb;border-top:1px solid #f0f0f0}
 </style>
 
 <!-- Chat FAB -->
@@ -47,44 +82,273 @@ $posStyle = $posMap[$position] ?? $posMap['bottom-right'];
 <!-- Chat Panel -->
 <div id="ecom360-chatbot-panel">
     <div class="ecom360-chat-header">
-        <h4>💬 Ecom360 Assistant</h4>
+        <div>
+            <h4 id="ecom360-bot-name">Shopping Assistant</h4>
+            <div class="ecom360-status">Online</div>
+        </div>
         <button class="ecom360-chat-close" aria-label="Close chat">&times;</button>
     </div>
     <div class="ecom360-chat-messages" id="ecom360-chat-messages">
         <div class="ecom360-chat-msg bot"><?= $greeting ?></div>
     </div>
-    <div class="ecom360-chat-typing" id="ecom360-chat-typing">Typing...</div>
+    <div class="ecom360-chat-typing" id="ecom360-chat-typing">
+        <span>&#9679;</span> <span>&#9679;</span> <span>&#9679;</span>
+    </div>
     <div class="ecom360-chat-input">
-        <input type="text" id="ecom360-chat-input" placeholder="Type your message..." autocomplete="off"/>
+        <input type="text" id="ecom360-chat-input" placeholder="Search products or ask a question..." autocomplete="off"/>
         <button id="ecom360-chat-send" aria-label="Send">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
     </div>
+    <div class="ecom360-chat-footer">Powered by Ecom360 AI</div>
 </div>
 
 <script>
 (function(){
+    try {
     var cfg = <?= /* @noEscape */ $configJson ?>;
     var fab = document.getElementById('ecom360-chatbot-fab');
     var panel = document.getElementById('ecom360-chatbot-panel');
+    if (!fab || !panel) { return; }
     var closeBtn = panel.querySelector('.ecom360-chat-close');
     var messages = document.getElementById('ecom360-chat-messages');
     var input = document.getElementById('ecom360-chat-input');
     var sendBtn = document.getElementById('ecom360-chat-send');
     var typing = document.getElementById('ecom360-chat-typing');
+    var botNameEl = document.getElementById('ecom360-bot-name');
     var sessionId = (window.ecom360 && window.ecom360.getSessionId) ? window.ecom360.getSessionId() : 'chatbot_' + Date.now();
+    var conversationId = null;
+    var configLoaded = false;
 
-    fab.addEventListener('click', function(){ panel.classList.add('open'); fab.style.display='none'; input.focus(); });
-    closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); fab.style.display='flex'; });
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+    /** Apply theme from widget-config API */
+    function applyConfig(wc) {
+        if (!wc) return;
+        var root = document.documentElement;
+        if (wc.color) root.style.setProperty('--ecom360-primary', wc.color);
+        if (wc.width) root.style.setProperty('--ecom360-width', wc.width + 'px');
+        if (wc.height) root.style.setProperty('--ecom360-height', wc.height + 'px');
+        if (wc.name) botNameEl.textContent = wc.name;
+        if (wc.greeting_buttons && wc.greeting_buttons.length) {
+            renderQuickReplies(wc.greeting_buttons);
+        }
+    }
+
+    /** Fetch widget config from API (called once on first open) */
+    function loadWidgetConfig() {
+        if (configLoaded) return;
+        configLoaded = true;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', cfg.endpoint + '/widget-config', true);
+        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                if (res.data) applyConfig(res.data);
+            } catch(e) {}
+        };
+        xhr.send();
+    }
+
+    /** Add a text message bubble — supports markdown bold **text** */
     function addMessage(text, role) {
         var div = document.createElement('div');
         div.className = 'ecom360-chat-msg ' + (role === 'user' ? 'user' : 'bot');
-        div.textContent = text;
+        /* Convert bold and newlines to HTML */
+        var html = esc(text)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        div.innerHTML = html;
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
     }
 
+    /** Render quick reply buttons */
+    function renderQuickReplies(replies) {
+        if (!replies || !replies.length) return;
+        var wrap = document.createElement('div');
+        wrap.className = 'ecom360-qr-wrap';
+        for (var i = 0; i < replies.length; i++) {
+            var qr = replies[i];
+            var btn = document.createElement('button');
+            btn.className = 'ecom360-qr-btn';
+            var label = typeof qr === 'object' ? (qr.label || qr.value || '') : qr;
+            var value = typeof qr === 'object' ? (qr.value || qr.label || '') : qr;
+            btn.textContent = label;
+            btn.addEventListener('click', (function(v, w){ return function(){
+                if (w.parentNode) w.parentNode.removeChild(w);
+                input.value = v;
+                sendMessage();
+            }; })(value, wrap));
+            wrap.appendChild(btn);
+        }
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    /** Render product cards */
+    function renderProducts(products) {
+        if (!products || !products.length) return;
+        for (var i = 0; i < Math.min(products.length, 5); i++) {
+            var p = products[i];
+            var card = document.createElement('div');
+            card.className = 'ecom360-product-card';
+            var h = '';
+            if (p.image) h += '<img src="' + esc(p.image) + '" alt="' + esc(p.name||'') + '"/>';
+            h += '<div class="pname">' + esc(p.name||'Product') + '</div>';
+            if (p.special_price && p.special_price < p.price) {
+                h += '<div class="pprice"><span style="text-decoration:line-through;color:#999;font-size:12px">$' + p.price + '</span> $' + p.special_price + '</div>';
+            } else if (p.price) {
+                h += '<div class="pprice">$' + p.price + '</div>';
+            }
+            if (p.in_stock === false) h += '<div style="color:#ef4444;font-size:11px;margin-bottom:4px">Out of Stock</div>';
+            if (p.url && p.url !== '#') h += '<a href="' + esc(p.url) + '" target="_blank" class="pbtn">View Product</a>';
+            card.innerHTML = h;
+            messages.appendChild(card);
+        }
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    /** Render a dynamic form from action_payload / form data */
+    function renderForm(form) {
+        if (!form || !form.fields) return;
+        var card = document.createElement('div');
+        card.className = 'ecom360-form-card';
+        var html = '';
+        if (form.title) html += '<div class="form-title">' + esc(form.title) + '</div>';
+        if (form.subtitle) html += '<div class="form-subtitle">' + esc(form.subtitle) + '</div>';
+        html += '<form id="ecom360-form-' + esc(form.form_id || 'default') + '" autocomplete="off">';
+
+        for (var i = 0; i < form.fields.length; i++) {
+            var f = form.fields[i];
+            html += '<div class="form-group">';
+            html += '<label>' + esc(f.label || f.name) + (f.required ? '<span class="req">*</span>' : '') + '</label>';
+
+            if (f.type === 'textarea') {
+                html += '<textarea name="' + esc(f.name) + '" placeholder="' + esc(f.placeholder||'') + '"'
+                    + (f.required ? ' required' : '') + '></textarea>';
+            } else if (f.type === 'select' && f.options) {
+                html += '<select name="' + esc(f.name) + '"' + (f.required ? ' required' : '') + '>';
+                html += '<option value="">— Select —</option>';
+                for (var j = 0; j < f.options.length; j++) {
+                    var opt = f.options[j];
+                    html += '<option value="' + esc(opt.value||opt.label) + '">' + esc(opt.label) + '</option>';
+                }
+                html += '</select>';
+            } else {
+                html += '<input type="' + esc(f.type||'text') + '" name="' + esc(f.name) + '"'
+                    + ' placeholder="' + esc(f.placeholder||'') + '"'
+                    + (f.required ? ' required' : '') + '/>';
+            }
+            html += '<div class="form-error" data-for="' + esc(f.name) + '"></div>';
+            html += '</div>';
+        }
+
+        html += '<button type="submit" class="form-submit">' + esc(form.submit_label||'Submit') + '</button>';
+        html += '</form>';
+        card.innerHTML = html;
+        messages.appendChild(card);
+
+        /* Bind form submission */
+        var formEl = card.querySelector('form');
+        formEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm(formEl, form);
+        });
+
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    /** Submit form to API */
+    function submitForm(formEl, formConfig) {
+        /* Validate */
+        var formData = {};
+        var valid = true;
+        var fields = formConfig.fields || [];
+        for (var i = 0; i < fields.length; i++) {
+            var f = fields[i];
+            var el = formEl.querySelector('[name="' + f.name + '"]');
+            var errEl = formEl.querySelector('.form-error[data-for="' + f.name + '"]');
+            var val = el ? el.value.trim() : '';
+            if (f.required && !val) {
+                valid = false;
+                if (errEl) errEl.textContent = 'This field is required';
+                if (el) el.style.borderColor = '#ef4444';
+            } else {
+                if (errEl) errEl.textContent = '';
+                if (el) el.style.borderColor = '';
+                formData[f.name] = val;
+            }
+        }
+        if (!valid) return;
+
+        /* Disable submit */
+        var btn = formEl.querySelector('.form-submit');
+        if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', cfg.endpoint + '/form-submit', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Ecom360-Key', cfg.apiKey);
+        xhr.onload = function() {
+            try {
+                var res = JSON.parse(xhr.responseText);
+                var d = res.data || {};
+                /* Hide the form card */
+                var card = formEl.closest('.ecom360-form-card');
+                if (card) card.style.display = 'none';
+                /* Show success message */
+                addMessage(d.message || 'Thank you! Your submission has been received.', 'bot');
+                /* Show communication statuses */
+                if (d.communications) {
+                    renderCommStatuses(d.communications);
+                }
+            } catch(e) {
+                addMessage('Form submitted successfully!', 'bot');
+            }
+            if (btn) { btn.disabled = false; btn.textContent = formConfig.submit_label || 'Submit'; }
+        };
+        xhr.onerror = function() {
+            addMessage('Error submitting form. Please try again.', 'bot');
+            if (btn) { btn.disabled = false; btn.textContent = formConfig.submit_label || 'Submit'; }
+        };
+        xhr.send(JSON.stringify({
+            form_id: formConfig.form_id || 'unknown',
+            form_data: formData,
+            submit_action: formConfig.submit_action || '',
+            conversation_id: conversationId,
+            communications: formConfig.communications || []
+        }));
+    }
+
+    /** Render communication status badges */
+    function renderCommStatuses(comms) {
+        if (!comms || typeof comms !== 'object') return;
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;align-self:flex-start;margin-top:4px';
+        var labels = {
+            email_confirmation: 'Confirmation Email',
+            email_support_team: 'Support Notified',
+            agent_notification: 'Agent Alerted',
+            push_notification: 'Push Sent',
+            whatsapp_confirmation: 'WhatsApp Sent'
+        };
+        for (var key in comms) {
+            if (!comms.hasOwnProperty(key)) continue;
+            var c = comms[key];
+            var badge = document.createElement('div');
+            var cls = c.success ? 'success' : (c.queued ? 'pending' : 'error');
+            badge.className = 'ecom360-comm-status ' + cls;
+            var icon = c.success ? '✓' : (c.queued ? '⏳' : '✗');
+            badge.innerHTML = '<span>' + icon + '</span> ' + esc(labels[key] || key);
+            wrap.appendChild(badge);
+        }
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    /** Send message to API */
     function sendMessage() {
         var text = input.value.trim();
         if (!text) return;
@@ -100,18 +364,25 @@ $posStyle = $posMap[$position] ?? $posMap['bottom-right'];
             typing.style.display = 'none';
             try {
                 var res = JSON.parse(xhr.responseText);
-                addMessage(res.data && res.data.reply ? res.data.reply.content : (res.message || 'Sorry, I couldn\'t process that.'), 'bot');
-                // Handle quick replies
-                if (res.data && res.data.reply && res.data.reply.quick_replies) {
-                    var qr = res.data.reply.quick_replies;
-                    for (var i = 0; i < qr.length; i++) {
-                        var btn = document.createElement('button');
-                        btn.style.cssText = 'margin:4px 4px 0 0;padding:6px 12px;border:1px solid #667eea;border-radius:16px;background:#fff;color:#667eea;cursor:pointer;font-size:13px;';
-                        btn.textContent = qr[i];
-                        btn.addEventListener('click', (function(t){ return function(){ input.value = t; sendMessage(); }; })(qr[i]));
-                        messages.appendChild(btn);
-                    }
-                    messages.scrollTop = messages.scrollHeight;
+                var d = res.data || {};
+                var msg = d.message || res.message || "Sorry, I could not process that.";
+                addMessage(msg, 'bot');
+
+                if (d.conversation_id) conversationId = d.conversation_id;
+
+                /* Product cards */
+                if (d.content_type === 'products' && d.products) {
+                    renderProducts(d.products);
+                }
+
+                /* Form rendering */
+                if (d.content_type === 'form' && d.form) {
+                    renderForm(d.form);
+                }
+
+                /* Quick replies */
+                if (d.quick_replies && d.quick_replies.length) {
+                    renderQuickReplies(d.quick_replies);
                 }
             } catch(e) {
                 addMessage('Connection error. Please try again.', 'bot');
@@ -121,24 +392,37 @@ $posStyle = $posMap[$position] ?? $posMap['bottom-right'];
             typing.style.display = 'none';
             addMessage('Network error. Please check your connection.', 'bot');
         };
-        xhr.send(JSON.stringify({
+        var payload = {
             session_id: sessionId,
             message: text,
             page_url: window.location.href
-        }));
+        };
+        if (conversationId) payload.conversation_id = conversationId;
+        xhr.send(JSON.stringify(payload));
     }
+
+    /* -- Open / Close -- */
+    fab.addEventListener('click', function(){
+        panel.classList.add('open');
+        fab.style.display = 'none';
+        input.focus();
+        loadWidgetConfig();
+    });
+    closeBtn.addEventListener('click', function(){ panel.classList.remove('open'); fab.style.display = 'flex'; });
 
     sendBtn.addEventListener('click', sendMessage);
     input.addEventListener('keypress', function(e){ if(e.key==='Enter') sendMessage(); });
 
-    // Expose for rage-click trigger
+    /* Expose for rage-click trigger & proactive messages */
     window.ecom360OpenChatbot = function(msg) {
         panel.classList.add('open');
         fab.style.display = 'none';
+        loadWidgetConfig();
         if (msg) {
             input.value = msg;
             sendMessage();
         }
     };
+    } catch(e) { if (window.console) { console.warn('[Ecom360 Chatbot] Init error:', e.message); } }
 })();
 </script>

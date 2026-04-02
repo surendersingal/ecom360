@@ -84,6 +84,9 @@ final class SyncController extends Controller
 
         $connection->update(['last_heartbeat_at' => now()]);
 
+        // Store remote Magento sync configuration if provided
+        $this->storeRemoteSyncConfig($tenantId, $request->input('sync_config'));
+
         return $this->successResponse([
             'connection_id' => $connection->id,
             'is_active'     => $connection->is_active,
@@ -132,6 +135,9 @@ final class SyncController extends Controller
     {
         $tenantId = (int) $request->input('_tenant_id');
         $result   = $this->dataSyncService->syncProducts($tenantId, $request->all());
+
+        // Store remote Magento sync configuration if provided
+        $this->storeRemoteSyncConfig($tenantId, $request->input('sync_config'));
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Products synced.')
@@ -279,5 +285,63 @@ final class SyncController extends Controller
         });
 
         return $this->successResponse($data);
+    }
+
+    /**
+     * POST /api/v1/sync/webhook
+     *
+     * Receives real-time webhook notifications from the connected store.
+     * Topics: product/update, order/create, order/update, customer/create, inventory/update
+     */
+    public function syncWebhook(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $tenantId = (int) $request->input('_tenant_id');
+        $topic    = $request->input('topic', 'unknown');
+        $data     = $request->input('data', []);
+
+        \Illuminate\Support\Facades\Log::info("DataSync webhook received for tenant {$tenantId}", [
+            'topic' => $topic,
+        ]);
+
+        // Route to appropriate sync handler based on topic prefix
+        if (str_starts_with($topic, 'product/')) {
+            $this->dataSyncService->syncProducts($tenantId, ['products' => is_array($data) ? [$data] : []]);
+        } elseif (str_starts_with($topic, 'order/')) {
+            $this->dataSyncService->syncOrders($tenantId, ['orders' => is_array($data) ? [$data] : []]);
+        } elseif (str_starts_with($topic, 'customer/')) {
+            $this->dataSyncService->syncCustomers($tenantId, ['customers' => is_array($data) ? [$data] : []]);
+        } elseif (str_starts_with($topic, 'inventory/')) {
+            $this->dataSyncService->syncInventory($tenantId, ['inventory' => is_array($data) ? [$data] : []]);
+        }
+
+        return $this->successResponse(['received' => true, 'topic' => $topic]);
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Private Helpers
+    |----------------------------------------------------------------------
+    */
+
+    /**
+     * Store remote sync configuration reported by the Magento/WP module.
+     * Saved as TenantSettings under the "datasync_remote" module key
+     * so the admin dashboard can display what the store is configured to do.
+     */
+    private function storeRemoteSyncConfig(int $tenantId, mixed $syncConfig): void
+    {
+        if (empty($syncConfig) || !is_array($syncConfig)) {
+            return;
+        }
+
+        foreach ($syncConfig as $key => $value) {
+            \App\Models\TenantSetting::updateOrCreate(
+                ['tenant_id' => $tenantId, 'module' => 'datasync_remote', 'key' => $key],
+                ['value' => $value],
+            );
+        }
+
+        // Bust the cache
+        \Illuminate\Support\Facades\Cache::forget("tenant_settings:{$tenantId}:datasync_remote");
     }
 }

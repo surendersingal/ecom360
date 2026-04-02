@@ -17,32 +17,44 @@ class RelevanceService
 {
     /**
      * Score and rank search results.
+     * Accepts optional $settings array with tenant-specific weights and config.
      */
-    public function scoreResults(string|int $tenantId, $results, string $query, string $sortBy = 'relevance'): array
+    public function scoreResults(string|int $tenantId, $results, string $query, string $sortBy = 'relevance', array $settings = []): array
     {
-        $scored = $results->map(function ($product) use ($tenantId, $query) {
+        // Read weights from settings (0-100 scale → 0-1 scale)
+        $wText       = ((float) ($settings['weight_text_relevance'] ?? 60)) / 100;
+        $wMargin     = ((float) ($settings['weight_margin_boost'] ?? 15)) / 100;
+        $wPopularity = ((float) ($settings['weight_popularity'] ?? 10)) / 100;
+        $wFreshness  = ((float) ($settings['weight_freshness'] ?? 10)) / 100;
+        $wStock      = ((float) ($settings['weight_stock'] ?? 5)) / 100;
+
+        $currency    = $settings['search_currency_code'] ?? 'INR';
+        $baseUrl     = rtrim($settings['search_store_base_url'] ?? '', '/');
+        $urlPattern  = $settings['search_product_url_pattern'] ?? '/default/{url_key}.html';
+
+        $scored = $results->map(function ($product) use ($tenantId, $query, $wText, $wMargin, $wPopularity, $wFreshness, $wStock, $currency, $baseUrl, $urlPattern) {
             $product = $product instanceof \stdClass ? (array) $product : $product;
             $score = 0;
 
-            // Text relevance (60% weight) — Most important for search quality
+            // Text relevance — Most important for search quality
             $textScore = $this->calculateTextRelevance($product, $query);
-            $score += $textScore * 0.60;
+            $score += $textScore * $wText;
 
-            // Margin boost (15% weight) — Higher-margin products rank higher
+            // Margin boost — Higher-margin products rank higher
             $marginScore = $this->calculateMarginScore($product);
-            $score += $marginScore * 0.15;
+            $score += $marginScore * $wMargin;
 
-            // Popularity boost (10% weight)
+            // Popularity boost
             $popularityScore = $this->calculatePopularityScore($product);
-            $score += $popularityScore * 0.10;
+            $score += $popularityScore * $wPopularity;
 
-            // Freshness boost (10% weight) — Newer products get a slight boost
+            // Freshness boost — Newer products get a slight boost
             $freshnessScore = $this->calculateFreshnessScore($product);
-            $score += $freshnessScore * 0.10;
+            $score += $freshnessScore * $wFreshness;
 
-            // Stock penalty (5% weight) — Low stock items are penalized
+            // Stock penalty — Low stock items are penalized
             $stockScore = $this->calculateStockScore($product);
-            $score += $stockScore * 0.05;
+            $score += $stockScore * $wStock;
 
             // Extract categories from array field
             $categories = $product['categories'] ?? [];
@@ -51,9 +63,9 @@ class RelevanceService
             }
             $category = is_array($categories) ? ($categories[0] ?? null) : $categories;
 
-            // Build product URL from url_key
+            // Build product URL from url_key (configurable pattern)
             $urlKey = $product['url_key'] ?? '';
-            $productUrl = $urlKey ? ('/default/' . $urlKey . '.html') : null;
+            $productUrl = $urlKey ? str_replace('{url_key}', $urlKey, $urlPattern) : null;
 
             return [
                 'id'              => $product['external_id'] ?? (string) ($product['_id'] ?? ''),
@@ -61,7 +73,7 @@ class RelevanceService
                 'sku'             => $product['sku'] ?? '',
                 'price'           => $product['price'] ?? 0,
                 'special_price'   => $product['special_price'] ?? null,
-                'currency'        => 'INR',
+                'currency'        => $currency,
                 'image'           => $product['image_url'] ?? $product['image'] ?? null,
                 'category'        => $category,
                 'brand'           => $product['brand'] ?? null,
@@ -161,30 +173,78 @@ class RelevanceService
 
         // Word-level matching in name (most important metric)
         if (count($queryWords) > 0) {
-            $nameWords = explode(' ', $name);
-            $matchedWords = 0;
+            $nameWords = array_values(array_filter(explode(' ', $name), fn($w) => strlen($w) > 0));
+            $exactMatchedWords = 0;
+            $fuzzyMatchedWords = 0;
+            $totalFuzzyQuality = 0.0;
+
             foreach ($queryWords as $qw) {
+                $exactMatch = false;
+                $fuzzyMatch = false;
+                $bestFuzzyQuality = 0.0;
+
                 foreach ($nameWords as $nw) {
-                    if ($nw === $qw || str_contains($nw, $qw) || str_contains($qw, $nw)) {
-                        $matchedWords++;
+                    if (strlen($nw) === 0) continue;
+
+                    // Exact/substring match — require name word to be comparable length
+                    // "glenlevit" contains "glen" (4/9=44%) → NOT exact, fall through to fuzzy
+                    // "walker" contains "walk" (4/6=67%) → NOT exact, fall through to fuzzy
+                    // "glenlivet" contains "glenliv" (7/9=78%) → exact
+                    if ($nw === $qw || str_contains($nw, $qw) ||
+                        (strlen($qw) > 2 && str_contains($qw, $nw) && strlen($nw) >= strlen($qw) * 0.7)) {
+                        $exactMatch = true;
                         break;
                     }
+
+                    // Fuzzy match (Levenshtein + phonetic) for words 3+ chars
+                    if (strlen($qw) >= 3 && strlen($nw) >= 3) {
+                        $maxDist = max(2, (int) ceil(strlen($qw) * 0.35));
+                        $dist = levenshtein($qw, $nw);
+                        if ($dist <= $maxDist) {
+                            $quality = 1.0 - ($dist / max(strlen($qw), strlen($nw)));
+                            if ($quality > $bestFuzzyQuality) {
+                                $bestFuzzyQuality = $quality;
+                                $fuzzyMatch = true;
+                            }
+                        }
+                        // Phonetic comparison (metaphone / soundex)
+                        if ($bestFuzzyQuality < 0.7) {
+                            if (metaphone($qw) === metaphone($nw) || soundex($qw) === soundex($nw)) {
+                                $quality = 0.7;
+                                if ($quality > $bestFuzzyQuality) {
+                                    $bestFuzzyQuality = $quality;
+                                    $fuzzyMatch = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ($exactMatch) {
+                    $exactMatchedWords++;
+                } elseif ($fuzzyMatch) {
+                    $fuzzyMatchedWords++;
+                    $totalFuzzyQuality += $bestFuzzyQuality;
                 }
             }
 
-            $wordMatchRatio = $matchedWords / count($queryWords);
+            $totalMatched = $exactMatchedWords + $fuzzyMatchedWords;
+            $totalRatio = count($queryWords) > 0 ? $totalMatched / count($queryWords) : 0;
 
-            // Strong bonus for matching ALL or most query words in name
-            if ($wordMatchRatio >= 1.0) {
-                $score += 50;
-            } elseif ($wordMatchRatio >= 0.8) {
-                $score += 35;
-            } elseif ($wordMatchRatio >= 0.6) {
-                $score += 25;
-            } elseif ($wordMatchRatio >= 0.4) {
-                $score += 15;
+            // Unified scoring: reward products where ALL query words match
+            if ($totalRatio >= 1.0) {
+                // All query words matched (exact or fuzzy) — best outcome
+                $avgFuzzyQuality = $fuzzyMatchedWords > 0 ? $totalFuzzyQuality / $fuzzyMatchedWords : 1.0;
+                $baseScore = ($exactMatchedWords * 50 + $fuzzyMatchedWords * $avgFuzzyQuality * 45) / count($queryWords);
+                $score += $baseScore;
+            } elseif ($totalRatio >= 0.5) {
+                // Partial match — lower score
+                $avgFuzzyQuality = $fuzzyMatchedWords > 0 ? $totalFuzzyQuality / $fuzzyMatchedWords : 1.0;
+                $baseScore = ($exactMatchedWords * 30 + $fuzzyMatchedWords * $avgFuzzyQuality * 20) / count($queryWords);
+                $score += $baseScore;
             } else {
-                $score += $wordMatchRatio * 10;
+                // Poor match — minimal score
+                $score += $totalMatched * 5;
             }
 
             // Consecutive word matching bonus (phrase-aware)

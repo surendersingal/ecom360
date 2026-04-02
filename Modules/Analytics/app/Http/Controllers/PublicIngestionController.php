@@ -6,6 +6,7 @@ namespace Modules\Analytics\Http\Controllers;
 
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Modules\Analytics\Http\Requests\PublicBatchTrackingRequest;
@@ -134,10 +135,33 @@ final class PublicIngestionController extends Controller
     }
 
     /**
+     * GET /api/v1/interventions/poll
+     *
+     * Returns pending behavioral interventions for the given session.
+     * The tracker JS polls this every 15 seconds as a fallback when WebSockets are unavailable.
+     */
+    public function interventionPoll(Request $request): JsonResponse
+    {
+        // Stub: return empty interventions array. Future: query rules engine.
+        return response()->json([
+            'success' => true,
+            'data'    => [],
+        ]);
+    }
+
+    /**
      * OPTIONS /api/v1/collect (CORS preflight).
      */
     public function preflight(): JsonResponse
     {
-        return response()->json(null, 204);
+        $origin = request()->header('Origin', '*');
+
+        return response()->json(null, 204, [
+            'Access-Control-Allow-Origin'      => $origin,
+            'Access-Control-Allow-Methods'     => 'POST, OPTIONS',
+            'Access-Control-Allow-Headers'     => 'Content-Type, X-Ecom360-Key, X-Requested-With',
+            'Access-Control-Allow-Credentials' => 'true',
+            'Access-Control-Max-Age'           => '86400',
+        ]);
     }
 }

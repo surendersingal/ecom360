@@ -181,7 +181,7 @@ final class NaturalLanguageQueryService
 
     // ── Query execution ──────────────────────────────────────────────
 
-    private function queryScalar(int $tid, string $metric, string $start, string $end): array
+    private function queryScalar(int|string $tid, string $metric, string $start, string $end): array
     {
         $value = match ($metric) {
             'revenue' => round((float) DB::connection('mongodb')->table('tracking_events')
@@ -222,7 +222,7 @@ final class NaturalLanguageQueryService
         ];
     }
 
-    private function queryByDimension(int $tid, string $metric, string $dimension, string $start, string $end, int $limit): array
+    private function queryByDimension(int|string $tid, string $metric, string $dimension, string $start, string $end, int $limit): array
     {
         $eventType = in_array($metric, ['revenue', 'orders', 'aov', 'customers']) ? 'purchase' : 'page_view';
         $dimField = $dimension === 'category' ? 'metadata.category' : ($dimension === 'brand' ? 'metadata.brand' : $dimension);
@@ -257,7 +257,7 @@ final class NaturalLanguageQueryService
         return ['answer' => $answer, 'data' => $data];
     }
 
-    private function queryWithComparison(int $tid, string $metric, string $start, string $end): array
+    private function queryWithComparison(int|string $tid, string $metric, string $start, string $end): array
     {
         $periodDays = max(1, (int) now()->parse($start)->diffInDays(now()->parse($end)));
         $prevStart = now()->parse($start)->subDays($periodDays)->toIso8601String();
@@ -290,7 +290,7 @@ final class NaturalLanguageQueryService
         ];
     }
 
-    private function queryTopProducts(int $tid, string $start, string $end, int $limit): array
+    private function queryTopProducts(int|string $tid, string $start, string $end, int $limit): array
     {
         $results = DB::connection('mongodb')->table('tracking_events')
             ->raw(function ($col) use ($tid, $start, $end, $limit) {
@@ -323,7 +323,7 @@ final class NaturalLanguageQueryService
         return ['answer' => $answer, 'data' => $data];
     }
 
-    private function computeAov(int $tid, string $start, string $end): float
+    private function computeAov(int|string $tid, string $start, string $end): float
     {
         $q = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)->where('event_type', 'purchase')
@@ -332,7 +332,7 @@ final class NaturalLanguageQueryService
         return $orders > 0 ? round((float) $q->sum('metadata.revenue') / $orders, 2) : 0;
     }
 
-    private function computeConversionRate(int $tid, string $start, string $end): float
+    private function computeConversionRate(int|string $tid, string $start, string $end): float
     {
         $sessions = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)->where('event_type', 'page_view')

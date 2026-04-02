@@ -28,6 +28,12 @@ final class User extends Authenticatable
     use HasRoles;
     use Notifiable;
 
+    /**
+     * Tell Spatie to use 'sanctum' guard for roles/permissions,
+     * matching the guard under which roles were provisioned.
+     */
+    protected string $guard_name = 'sanctum';
+
     protected $fillable = [
         'tenant_id',
         'name',

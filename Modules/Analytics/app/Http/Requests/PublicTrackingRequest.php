@@ -55,6 +55,9 @@ final class PublicTrackingRequest extends FormRequest
             'utm.campaign'                    => ['nullable', 'string', 'max:255'],
             'utm.term'                        => ['nullable', 'string', 'max:255'],
             'utm.content'                     => ['nullable', 'string', 'max:255'],
+
+            // Optional client-supplied timestamp for event ordering.
+            'timestamp'                       => ['nullable', 'date'],
         ];
     }
 

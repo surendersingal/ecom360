@@ -1,0 +1,1113 @@
+{
+  "results": [
+    {
+      "test_id": "US-AN-001",
+      "title": "Guest Home 10s \u2192 Bounce",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Event accepted (201)",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Returns event ID",
+          "pass": true,
+          "details": "{\"id\": \"69a95d43e28618051100f035\", \"event_type\": \"page_view\", \"session_id\": \"g_001_b88164968086\", \"ts\": \"2026-03-05T10:38:59+00:00\"}"
+        },
+        {
+          "label": "Session ID preserved",
+          "pass": true,
+          "details": "sid=g_001_b88164968086"
+        },
+        {
+          "label": "Bounce event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 145,
+      "timestamp": "2026-03-05T10:38:59.579056"
+    },
+    {
+      "test_id": "US-AN-002",
+      "title": "Guest 45s \u2192 BI Metric Update",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI overview accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Overview has metrics",
+          "pass": true,
+          "details": "['traffic', 'revenue', 'sessions']"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:38:59.696754"
+    },
+    {
+      "test_id": "US-AN-003",
+      "title": "Guest Multi-page \u2192 Category Abandon",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Batch accepted (201)",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Category abandon event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 114,
+      "timestamp": "2026-03-05T10:38:59.875282"
+    },
+    {
+      "test_id": "US-AN-004",
+      "title": "Guest Product 60s \u2192 Abandon \u2192 EventBus",
+      "modules": "Analytics, EventBus",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Home page_view accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Product view accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Product abandon accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Behavioral triggers evaluate",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:39:00.108227"
+    },
+    {
+      "test_id": "US-AN-005",
+      "title": "Guest Search 'Boots' \u2192 Product \u2192 Abandon",
+      "modules": "Search, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Search event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Product view after search accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "AiSearch endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Search analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 53,
+      "timestamp": "2026-03-05T10:39:00.331965"
+    },
+    {
+      "test_id": "US-AN-006",
+      "title": "Guest Product \u2192 Cart \u2192 Cart Abandon",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Product view accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Add-to-cart accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Cart abandon event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Funnel endpoint returns stages",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:39:00.549714"
+    },
+    {
+      "test_id": "US-AN-007",
+      "title": "Guest Checkout \u2192 Abandon $50",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Checkout batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Checkout abandon event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Revenue endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 117,
+      "timestamp": "2026-03-05T10:39:00.781007"
+    },
+    {
+      "test_id": "US-AN-008",
+      "title": "Guest Full Funnel \u2192 Drop at Step 3",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "3-step funnel batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "All 3 events ingested",
+          "pass": true,
+          "details": "ingested=3"
+        },
+        {
+          "label": "Funnel has stages",
+          "pass": true,
+          "details": "stages=4"
+        },
+        {
+          "label": "Drop-off endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 157,
+      "timestamp": "2026-03-05T10:39:01.057818"
+    },
+    {
+      "test_id": "US-AN-009",
+      "title": "Facebook Ad \u2192 5s Bounce \u2192 Attribution",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "UTM event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Bounce event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaign analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Traffic analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 52,
+      "timestamp": "2026-03-05T10:39:01.273591"
+    },
+    {
+      "test_id": "US-AN-010",
+      "title": "Google Ad \u2192 Cart Abandon \u2192 Marketing",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Google ad batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Cart abandon accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing flows API responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 111,
+      "timestamp": "2026-03-05T10:39:01.493170"
+    },
+    {
+      "test_id": "US-AN-011",
+      "title": "Logged User \u2192 Home \u2192 Session Linked",
+      "modules": "DataSync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Authenticated page_view accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Customer analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:39:01.601877"
+    },
+    {
+      "test_id": "US-AN-012",
+      "title": "Logged User \u2192 Cart \u2192 Known-user Recovery",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Known-user batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 112,
+      "timestamp": "2026-03-05T10:39:01.716399"
+    },
+    {
+      "test_id": "US-AN-013",
+      "title": "Logged User \u2192 Full Purchase \u2192 BI Revenue",
+      "modules": "Analytics, Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Full funnel batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "All 4 events ingested",
+          "pass": true,
+          "details": "ingested=4"
+        },
+        {
+          "label": "Revenue endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI KPI refresh works",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 222,
+      "timestamp": "2026-03-05T10:39:02.102096"
+    },
+    {
+      "test_id": "US-AN-014",
+      "title": "Logged User \u2192 Category \u2192 Purchase \u2192 CLV",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Category\u2192Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "CLV prediction accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 112,
+      "timestamp": "2026-03-05T10:39:02.273615"
+    },
+    {
+      "test_id": "US-AN-015",
+      "title": "Email Link \u2192 Purchase \u2192 Campaign Attribution",
+      "modules": "Mktg, Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Email attribution batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaign analytics has data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 120,
+      "timestamp": "2026-03-05T10:39:02.452893"
+    },
+    {
+      "test_id": "US-AN-016",
+      "title": "SMS \u2192 Purchase \u2192 Stop Retargeting",
+      "modules": "Mktg, Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "SMS attribution batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing contacts accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 113,
+      "timestamp": "2026-03-05T10:39:02.626313"
+    },
+    {
+      "test_id": "US-AN-017",
+      "title": "Guest \u2192 Login \u2192 Identity Merge",
+      "modules": "Analytics (Identity)",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Guest browse accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Guest cart accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Login identity merge accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T10:39:02.823602"
+    },
+    {
+      "test_id": "US-AN-018",
+      "title": "3-Day Guest \u2192 Login \u2192 Profile Merge",
+      "modules": "Analytics (Identity)",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "3-day guest history accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Login merge accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 218,
+      "timestamp": "2026-03-05T10:39:03.150463"
+    },
+    {
+      "test_id": "US-AN-019",
+      "title": "Guest Cart Abandon \u2192 Login \u2192 Re-evaluate",
+      "modules": "Identity, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Guest cart abandon batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Next-day login merge accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 181,
+      "timestamp": "2026-03-05T10:39:03.430777"
+    },
+    {
+      "test_id": "US-AN-020",
+      "title": "Guest Purchase \u2192 Account \u2192 Retroactive Attribution",
+      "modules": "Sync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Guest purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Account creation merge accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 94,
+      "timestamp": "2026-03-05T10:39:03.621039"
+    },
+    {
+      "test_id": "US-AN-021",
+      "title": "Rapid 5x Refresh \u2192 Debounce",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "5 rapid events batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "All 5 ingested (dedup at query layer)",
+          "pass": true,
+          "details": "ingested=5"
+        },
+        {
+          "label": "Sessions endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 524,
+      "timestamp": "2026-03-05T10:39:04.257966"
+    },
+    {
+      "test_id": "US-AN-022",
+      "title": "45-Min Idle \u2192 Session Timeout",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Long-idle page_view accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "New session after timeout accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T10:39:04.435471"
+    },
+    {
+      "test_id": "US-AN-023",
+      "title": "Rage Click \u2192 Chatbot 'Need Help?'",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Rage click event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot rage-click API responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 124,
+      "timestamp": "2026-03-05T10:39:31.994863"
+    },
+    {
+      "test_id": "US-AN-024",
+      "title": "Text Copy Micro-Interaction",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Text copy event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Export endpoint filters events",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:39:32.112748"
+    },
+    {
+      "test_id": "US-AN-025",
+      "title": "Tab Switch \u2192 Pause/Resume Timer",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Visibility change batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 121,
+      "timestamp": "2026-03-05T10:39:32.235648"
+    },
+    {
+      "test_id": "US-AN-026",
+      "title": "GDPR Opt-out \u2192 Anonymous Ping Only",
+      "modules": "Analytics (Privacy)",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "GDPR opt-out event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Anonymous ping accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 64,
+      "timestamp": "2026-03-05T10:39:32.355787"
+    },
+    {
+      "test_id": "US-AN-027",
+      "title": "GDPR Opt-out Purchase \u2192 Sync Only",
+      "modules": "Sync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "GDPR purchase event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync status accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T10:39:32.491659"
+    },
+    {
+      "test_id": "US-AN-028",
+      "title": "GDPR Partial Consent \u2192 Analytics Only",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Partial consent event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Cart event with partial consent accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 65,
+      "timestamp": "2026-03-05T10:39:32.615702"
+    },
+    {
+      "test_id": "US-AN-029",
+      "title": "Multi-Qty Purchase \u2192 Inventory/BI Update",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Multi-qty purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Product analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:39:32.732215"
+    },
+    {
+      "test_id": "US-AN-030",
+      "title": "Bundle Purchase \u2192 Child SKU Deconstruct",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Bundle purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync accessible for inventory",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:39:32.858998"
+    },
+    {
+      "test_id": "US-AN-031",
+      "title": "Guest Wishlist \u2192 Price Drop Trigger Queued",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Wishlist add event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Behavioral triggers responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:39:32.972115"
+    },
+    {
+      "test_id": "US-AN-032",
+      "title": "Wishlist \u2192 Purchase \u2192 Clear Trigger",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Wishlist\u2192Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 128,
+      "timestamp": "2026-03-05T10:39:33.102478"
+    },
+    {
+      "test_id": "US-AN-033",
+      "title": "Invalid Promo \u2192 Chatbot Help",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Promo error event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot responds to promo query",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 139,
+      "timestamp": "2026-03-05T10:39:41.312257"
+    },
+    {
+      "test_id": "US-AN-034",
+      "title": "Valid Promo \u2192 Discounted Revenue in BI",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Promo+Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Revenue analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 114,
+      "timestamp": "2026-03-05T10:39:41.492013"
+    },
+    {
+      "test_id": "US-AN-035",
+      "title": "100% Scroll Depth \u2192 Engagement Score",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Scroll depth event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:39:41.547905"
+    },
+    {
+      "test_id": "US-AN-036",
+      "title": "10% Scroll \u2192 Bounce \u2192 Poor Engagement",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Scroll+Bounce batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 109,
+      "timestamp": "2026-03-05T10:39:41.660195"
+    },
+    {
+      "test_id": "US-AN-037",
+      "title": "Video Play \u2192 Engagement Score",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Video play event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:39:41.717536"
+    },
+    {
+      "test_id": "US-AN-038",
+      "title": "5-Star Review \u2192 Promoter Tag",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "5-star review event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Audience segments accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:39:41.829334"
+    },
+    {
+      "test_id": "US-AN-039",
+      "title": "1-Star Review \u2192 BI Alert \u2192 Detractor",
+      "modules": "Sync, BI, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "1-star review event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI alerts accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Real-time alerts accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:39:41.995693"
+    },
+    {
+      "test_id": "US-AN-040",
+      "title": "Outbound Social Click \u2192 Channel Tracking",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Outbound click event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:39:42.051824"
+    },
+    {
+      "test_id": "US-AN-041",
+      "title": "Cross-Device Cart Transfer via Identity",
+      "modules": "Sync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "PC cart event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Mobile session linked",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Journey endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T10:39:42.229777"
+    },
+    {
+      "test_id": "US-AN-042",
+      "title": "Mobile Browse \u2192 PC Purchase \u2192 Attribution",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Mobile browse accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "PC purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:39:42.351195"
+    },
+    {
+      "test_id": "US-AN-043",
+      "title": "Currency Change \u2192 BI Normalization",
+      "modules": "Analytics, DataSync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Currency change event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Overview (normalized currency) accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 53,
+      "timestamp": "2026-03-05T10:39:42.468111"
+    },
+    {
+      "test_id": "US-AN-044",
+      "title": "Language Change \u2192 Chatbot FR",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Language change event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot responds (FR)",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 64,
+      "timestamp": "2026-03-05T10:39:44.596061"
+    },
+    {
+      "test_id": "US-AN-045",
+      "title": "Organic Google \u2192 SEO Attribution",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Organic search event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Traffic analytics shows sources",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:39:44.718758"
+    },
+    {
+      "test_id": "US-AN-046",
+      "title": "Affiliate Link \u2192 Revenue Attribution",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Affiliate batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 119,
+      "timestamp": "2026-03-05T10:39:46.846507"
+    },
+    {
+      "test_id": "US-AN-047",
+      "title": "Exit Intent \u2192 Chatbot Intervention",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Exit intent event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot intervention responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:39:48.969146"
+    },
+    {
+      "test_id": "US-AN-048",
+      "title": "$0 Order \u2192 Sync Without AOV Impact",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "$0 order event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Revenue analytics accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T10:39:49.164627"
+    },
+    {
+      "test_id": "US-AN-049",
+      "title": "Invalid Email \u2192 Block Marketing Sync",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Newsletter attempt event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing contacts query works",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:39:49.275673"
+    },
+    {
+      "test_id": "US-AN-050",
+      "title": "Account Deletion \u2192 Cascade Delete",
+      "modules": "Sync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Pre-deletion activity accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Account deletion event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:39:49.393213"
+    }
+  ],
+  "summary": {
+    "total": 50,
+    "pass": 50,
+    "warn": 0,
+    "fail": 0,
+    "pass_rate": 100.0,
+    "execution_time_s": 50.02,
+    "timestamp": "2026-03-05T10:39:49.393784"
+  }
+}

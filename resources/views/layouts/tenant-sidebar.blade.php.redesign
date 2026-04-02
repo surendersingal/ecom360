@@ -1,0 +1,192 @@
+@php
+    $slug = $tenant->slug;
+    $user = auth()->user();
+    $isSuperAdmin = $user?->is_super_admin ?? false;
+
+    // Permission checks (super admin bypasses all)
+    $canAnalytics       = $isSuperAdmin || $user?->can('analytics.view');
+    $canAnalyticsManage = $isSuperAdmin || $user?->can('analytics.manage');
+    $canSearch          = $isSuperAdmin || $user?->can('ai_search.query');
+    $canSearchManage    = $isSuperAdmin || $user?->can('ai_search.manage');
+    $canMarketing       = $isSuperAdmin || $user?->can('marketing.view');
+    $canMarketingManage = $isSuperAdmin || $user?->can('marketing.manage');
+    $canBI              = $isSuperAdmin || $user?->can('business_intelligence.view');
+    $canBIManage        = $isSuperAdmin || $user?->can('business_intelligence.manage');
+    $canChatbot         = $isSuperAdmin || $user?->can('chatbot.view');
+    $canChatbotManage   = $isSuperAdmin || $user?->can('chatbot.configure');
+    $canManage          = $isSuperAdmin || $user?->can('analytics.manage');
+
+    $initials = collect(explode(' ', $user->name ?? 'U'))->map(fn($w) => strtoupper(substr($w,0,1)))->take(2)->implode('');
+@endphp
+<!-- ========== Redesigned Sidebar ========== -->
+<div class="vertical-menu">
+
+    {{-- Sidebar collapse toggle --}}
+    <button class="sidebar-toggle-btn" onclick="window.ecom360ToggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+
+    <div data-simplebar class="h-100" style="display:flex;flex-direction:column;">
+
+        {{-- Store selector --}}
+        <div class="e360-store-selector" title="{{ $tenant->name }}">
+            <span class="store-dot"></span>
+            <span class="store-name">{{ $tenant->name }}</span>
+            <span class="store-chevron"><i class="bx bx-chevron-down" style="font-size:14px;color:var(--neutral-500)"></i></span>
+        </div>
+
+        <div id="sidebar-menu">
+            <ul class="metismenu list-unstyled" id="side-menu">
+
+                {{-- ──── MAIN ──── --}}
+                <li class="menu-title">Main</li>
+
+                <li>
+                    <a href="{{ route('tenant.dashboard', $slug) }}" class="{{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}">
+                        <i class="bx bxs-dashboard"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.realtime', $slug) }}" class="{{ request()->routeIs('tenant.realtime') ? 'active' : '' }}">
+                        <i class="bx bx-pulse"></i>
+                        <span>Real-Time Pulse</span>
+                    </a>
+                </li>
+
+                @if($canManage)
+                {{-- ──── DATA ──── --}}
+                <li class="menu-title">Data</li>
+
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.datasync.*') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-datasync"><i class="bx bx-transfer"></i></span>
+                        <span>DataSync</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.datasync.connections', $slug) }}" class="{{ request()->routeIs('tenant.datasync.connections') ? 'active' : '' }}">Connections</a></li>
+                        <li><a href="{{ route('tenant.datasync.logs', $slug) }}" class="{{ request()->routeIs('tenant.datasync.logs') ? 'active' : '' }}">Sync Logs</a></li>
+                        <li><a href="{{ route('tenant.datasync.products', $slug) }}" class="{{ request()->routeIs('tenant.datasync.products') ? 'active' : '' }}">Products</a></li>
+                        <li><a href="{{ route('tenant.datasync.orders', $slug) }}" class="{{ request()->routeIs('tenant.datasync.orders') ? 'active' : '' }}">Orders</a></li>
+                        <li><a href="{{ route('tenant.datasync.customers', $slug) }}" class="{{ request()->routeIs('tenant.datasync.customers') ? 'active' : '' }}">Customers</a></li>
+                        <li><a href="{{ route('tenant.datasync.inventory', $slug) }}" class="{{ request()->routeIs('tenant.datasync.inventory') ? 'active' : '' }}">Inventory</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canAnalytics)
+                {{-- ──── INTELLIGENCE ──── --}}
+                <li class="menu-title">Intelligence</li>
+
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.page-visits', 'tenant.sessions', 'tenant.funnels', 'tenant.products', 'tenant.categories', 'tenant.campaigns', 'tenant.revenue-waterfall', 'tenant.customer-journey', 'tenant.cohorts', 'tenant.segments', 'tenant.geographic', 'tenant.clv', 'tenant.ai-insights', 'tenant.why-analysis', 'tenant.nlq', 'tenant.recommendations', 'tenant.benchmarks') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-analytics"><i class="bx bx-line-chart"></i></span>
+                        <span>Analytics</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.page-visits', $slug) }}" class="{{ request()->routeIs('tenant.page-visits') ? 'active' : '' }}">Traffic</a></li>
+                        <li><a href="{{ route('tenant.products', $slug) }}" class="{{ request()->routeIs('tenant.products') ? 'active' : '' }}">Revenue</a></li>
+                        <li><a href="{{ route('tenant.customer-journey', $slug) }}" class="{{ request()->routeIs('tenant.customer-journey') ? 'active' : '' }}">Customers / RFM</a></li>
+                        <li><a href="{{ route('tenant.funnels', $slug) }}" class="{{ request()->routeIs('tenant.funnels') ? 'active' : '' }}">Conversion Funnel</a></li>
+                        <li><a href="{{ route('tenant.campaigns', $slug) }}" class="{{ request()->routeIs('tenant.campaigns') ? 'active' : '' }}">Campaigns / UTM</a></li>
+                        <li><a href="{{ route('tenant.ai-insights', $slug) }}" class="{{ request()->routeIs('tenant.ai-insights', 'tenant.why-analysis', 'tenant.nlq') ? 'active' : '' }}">Advanced AI</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canMarketing)
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.marketing.*') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-marketing"><i class="bx bx-send"></i></span>
+                        <span>Marketing</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.marketing.campaigns', $slug) }}" class="{{ request()->routeIs('tenant.marketing.campaigns') ? 'active' : '' }}">Campaigns</a></li>
+                        <li><a href="{{ route('tenant.marketing.flows', $slug) }}" class="{{ request()->routeIs('tenant.marketing.flows', 'tenant.marketing.flow-builder') ? 'active' : '' }}">Automation Flows</a></li>
+                        <li><a href="{{ route('tenant.marketing.contacts', $slug) }}" class="{{ request()->routeIs('tenant.marketing.contacts') ? 'active' : '' }}">Contacts</a></li>
+                        <li><a href="{{ route('tenant.marketing.templates', $slug) }}" class="{{ request()->routeIs('tenant.marketing.templates') ? 'active' : '' }}">Templates</a></li>
+                        <li><a href="{{ route('tenant.marketing.channels', $slug) }}" class="{{ request()->routeIs('tenant.marketing.channels') ? 'active' : '' }}">Channels</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canChatbot)
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.chatbot.*', 'tenant.support.*') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-chatbot"><i class="bx bx-bot"></i></span>
+                        <span>Chatbot</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.chatbot.conversations', $slug) }}" class="{{ request()->routeIs('tenant.chatbot.conversations') ? 'active' : '' }}">Conversations</a></li>
+                        <li><a href="{{ route('tenant.chatbot.analytics', $slug) }}" class="{{ request()->routeIs('tenant.chatbot.analytics') ? 'active' : '' }}">Analytics</a></li>
+                        <li><a href="{{ route('tenant.chatbot.settings', $slug) }}" class="{{ request()->routeIs('tenant.chatbot.settings') ? 'active' : '' }}">Configuration</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canSearch)
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.search.*') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-search"><i class="bx bx-search-alt-2"></i></span>
+                        <span>AI Search</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.search.analytics', $slug) }}" class="{{ request()->routeIs('tenant.search.analytics') ? 'active' : '' }}">Search Analytics</a></li>
+                        <li><a href="{{ route('tenant.search.trend-ranking', $slug) }}" class="{{ request()->routeIs('tenant.search.trend-ranking') ? 'active' : '' }}">Trending</a></li>
+                        <li><a href="{{ route('tenant.search.settings', $slug) }}" class="{{ request()->routeIs('tenant.search.settings') ? 'active' : '' }}">Configuration</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canBI)
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.bi.*') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-bi"><i class="bx bx-bar-chart-alt-2"></i></span>
+                        <span>Business Intel</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.bi.dashboards', $slug) }}" class="{{ request()->routeIs('tenant.bi.dashboards') ? 'active' : '' }}">Dashboards</a></li>
+                        <li><a href="{{ route('tenant.bi.reports', $slug) }}" class="{{ request()->routeIs('tenant.bi.reports') ? 'active' : '' }}">Reports</a></li>
+                        <li><a href="{{ route('tenant.bi.kpis', $slug) }}" class="{{ request()->routeIs('tenant.bi.kpis') ? 'active' : '' }}">KPIs</a></li>
+                        <li><a href="{{ route('tenant.bi.alerts', $slug) }}" class="{{ request()->routeIs('tenant.bi.alerts') ? 'active' : '' }}">Alerts</a></li>
+                        <li><a href="{{ route('tenant.bi.exports', $slug) }}" class="{{ request()->routeIs('tenant.bi.exports') ? 'active' : '' }}">Exports</a></li>
+                        <li><a href="{{ route('tenant.bi.predictions', $slug) }}" class="{{ request()->routeIs('tenant.bi.predictions') ? 'active' : '' }}">Predictions</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                @if($canManage)
+                {{-- ──── SETTINGS ──── --}}
+                <li class="menu-title">Settings</li>
+
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow {{ request()->routeIs('tenant.settings', 'tenant.integration', 'tenant.webhooks', 'tenant.custom-events') ? 'mm-active' : '' }}">
+                        <span class="nav-module-icon icon-settings"><i class="bx bx-cog"></i></span>
+                        <span>Settings</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.settings', $slug) }}" class="{{ request()->routeIs('tenant.settings') ? 'active' : '' }}">Store Configuration</a></li>
+                        <li><a href="{{ route('tenant.integration', $slug) }}" class="{{ request()->routeIs('tenant.integration') ? 'active' : '' }}">Integrations</a></li>
+                        <li><a href="{{ route('tenant.webhooks', $slug) }}" class="{{ request()->routeIs('tenant.webhooks') ? 'active' : '' }}">Webhooks</a></li>
+                    </ul>
+                </li>
+                @endif
+
+            </ul>
+        </div>
+
+        {{-- Sidebar footer — user info --}}
+        <div style="margin-top:auto;">
+            <div class="e360-sidebar-user">
+                <div class="user-avatar">{{ $initials }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ $user->name ?? 'User' }}</div>
+                    <div class="user-role">{{ $isSuperAdmin ? 'Super Admin' : ($user?->roles?->first()?->name ?? 'Store Owner') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========== Sidebar End ========== -->

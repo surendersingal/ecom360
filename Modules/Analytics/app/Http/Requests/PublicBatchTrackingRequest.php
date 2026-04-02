@@ -46,7 +46,7 @@ final class PublicBatchTrackingRequest extends FormRequest
             'events.*.utm.source'                   => ['nullable', 'string', 'max:255'],
             'events.*.utm.medium'                   => ['nullable', 'string', 'max:255'],
             'events.*.utm.campaign'                 => ['nullable', 'string', 'max:255'],
-            'events.*.timestamp'                    => ['nullable', 'string', 'max:30'],
+            'events.*.timestamp'                    => ['nullable', 'date'],
         ];
     }
 

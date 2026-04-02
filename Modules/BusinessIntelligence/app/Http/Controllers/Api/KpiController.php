@@ -40,10 +40,15 @@ final class KpiController extends Controller
             unset($data['target']);
         }
 
-        $service = app(KpiService::class);
-        $kpi = $service->create($this->tenantId(), $data);
-
-        return $this->successResponse($kpi, 201);
+        try {
+            $service = app(KpiService::class);
+            $kpi = $service->create($this->tenantId(), $data);
+            return $this->successResponse($kpi, 201);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return $this->errorResponse('A KPI with this metric already exists.', 409);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('KPI creation failed: ' . $e->getMessage(), 500);
+        }
     }
 
     public function show(int $id): JsonResponse

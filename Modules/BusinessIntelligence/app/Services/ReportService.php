@@ -95,12 +95,15 @@ final class ReportService
      */
     public function create(int $tenantId, array $data): Report
     {
+        $validTypes = ['standard', 'custom', 'sql', 'scheduled'];
+        $type = in_array($data['type'] ?? '', $validTypes) ? $data['type'] : 'custom';
+
         return Report::create([
             'tenant_id' => $tenantId,
             'created_by' => $data['created_by'] ?? null,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'type' => $data['type'] ?? 'standard',
+            'type' => $type,
             'config' => $data['config'] ?? [],
             'visualizations' => $data['visualizations'] ?? [],
             'filters' => $data['filters'] ?? [],

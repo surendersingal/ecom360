@@ -1,0 +1,815 @@
+{
+  "timestamp": "2026-03-08T15:44:33.354389",
+  "store_url": "https://stagingddf.gmraerodutyfree.in",
+  "events_sent": 1798,
+  "events_ingested": 1798,
+  "sessions": 150,
+  "orders": 100,
+  "revenue": 1159250.0,
+  "aov": 11592.5,
+  "event_counts": {
+    "page_view": 250,
+    "search": 39,
+    "category_view": 100,
+    "product_view": 267,
+    "scroll_depth": 267,
+    "add_to_cart": 235,
+    "begin_checkout": 100,
+    "checkout_step": 200,
+    "purchase": 100,
+    "engagement_time": 150,
+    "customer_login": 45,
+    "add_to_wishlist": 5,
+    "customer_register": 10,
+    "exit_intent": 30
+  },
+  "product_views": {
+    "P009": 9,
+    "P008": 15,
+    "P019": 13,
+    "P007": 13,
+    "P018": 17,
+    "P015": 14,
+    "P003": 17,
+    "P012": 17,
+    "P013": 10,
+    "P005": 12,
+    "P002": 13,
+    "P020": 12,
+    "P014": 17,
+    "P010": 17,
+    "P017": 11,
+    "P016": 17,
+    "P004": 10,
+    "P006": 10,
+    "P011": 12,
+    "P001": 11
+  },
+  "product_purchases": {
+    "P009": {
+      "qty": 11,
+      "revenue": 93500.0
+    },
+    "P008": {
+      "qty": 14,
+      "revenue": 137200.0
+    },
+    "P019": {
+      "qty": 11,
+      "revenue": 41800.0
+    },
+    "P007": {
+      "qty": 11,
+      "revenue": 137500.0
+    },
+    "P018": {
+      "qty": 18,
+      "revenue": 64800.0
+    },
+    "P015": {
+      "qty": 14,
+      "revenue": 16800.0
+    },
+    "P003": {
+      "qty": 19,
+      "revenue": 98800.0
+    },
+    "P012": {
+      "qty": 12,
+      "revenue": 57600.0
+    },
+    "P013": {
+      "qty": 8,
+      "revenue": 14800.0
+    },
+    "P005": {
+      "qty": 5,
+      "revenue": 37500.0
+    },
+    "P002": {
+      "qty": 12,
+      "revenue": 54000.0
+    },
+    "P020": {
+      "qty": 10,
+      "revenue": 34000.0
+    },
+    "P014": {
+      "qty": 14,
+      "revenue": 44800.0
+    },
+    "P010": {
+      "qty": 12,
+      "revenue": 62400.0
+    },
+    "P017": {
+      "qty": 9,
+      "revenue": 40500.0
+    },
+    "P016": {
+      "qty": 20,
+      "revenue": 38000.0
+    },
+    "P004": {
+      "qty": 8,
+      "revenue": 71200.0
+    },
+    "P006": {
+      "qty": 8,
+      "revenue": 22400.0
+    },
+    "P011": {
+      "qty": 8,
+      "revenue": 62400.0
+    },
+    "P001": {
+      "qty": 9,
+      "revenue": 29250.0
+    }
+  },
+  "category_views": {
+    "Perfumes": 26,
+    "Confectionery": 21,
+    "Whisky": 31,
+    "Beauty": 22
+  },
+  "search_queries": {
+    "glenfiddich": 4,
+    "duty free combos": 4,
+    "chanel perfume": 4,
+    "jura whisky": 3,
+    "chocolate gift box": 2,
+    "macallan 12": 4,
+    "johnnie walker": 5,
+    "mac cosmetics": 3,
+    "dior sauvage": 1,
+    "gucci bloom": 3,
+    "lipstick": 1,
+    "hugo boss": 2,
+    "birthday gift": 1,
+    "whisky under 5000": 1,
+    "toblerone": 1
+  },
+  "order_ids": [
+    "DDF-100000",
+    "DDF-100001",
+    "DDF-100002",
+    "DDF-100003",
+    "DDF-100004",
+    "DDF-100005",
+    "DDF-100006",
+    "DDF-100007",
+    "DDF-100008",
+    "DDF-100009",
+    "DDF-100010",
+    "DDF-100011",
+    "DDF-100012",
+    "DDF-100013",
+    "DDF-100014",
+    "DDF-100015",
+    "DDF-100016",
+    "DDF-100017",
+    "DDF-100018",
+    "DDF-100019",
+    "DDF-100020",
+    "DDF-100021",
+    "DDF-100022",
+    "DDF-100023",
+    "DDF-100024",
+    "DDF-100025",
+    "DDF-100026",
+    "DDF-100027",
+    "DDF-100028",
+    "DDF-100029",
+    "DDF-100030",
+    "DDF-100031",
+    "DDF-100032",
+    "DDF-100033",
+    "DDF-100034",
+    "DDF-100035",
+    "DDF-100036",
+    "DDF-100037",
+    "DDF-100038",
+    "DDF-100039",
+    "DDF-100040",
+    "DDF-100041",
+    "DDF-100042",
+    "DDF-100043",
+    "DDF-100044",
+    "DDF-100045",
+    "DDF-100046",
+    "DDF-100047",
+    "DDF-100048",
+    "DDF-100049",
+    "DDF-100050",
+    "DDF-100051",
+    "DDF-100052",
+    "DDF-100053",
+    "DDF-100054",
+    "DDF-100055",
+    "DDF-100056",
+    "DDF-100057",
+    "DDF-100058",
+    "DDF-100059",
+    "DDF-100060",
+    "DDF-100061",
+    "DDF-100062",
+    "DDF-100063",
+    "DDF-100064",
+    "DDF-100065",
+    "DDF-100066",
+    "DDF-100067",
+    "DDF-100068",
+    "DDF-100069",
+    "DDF-100070",
+    "DDF-100071",
+    "DDF-100072",
+    "DDF-100073",
+    "DDF-100074",
+    "DDF-100075",
+    "DDF-100076",
+    "DDF-100077",
+    "DDF-100078",
+    "DDF-100079",
+    "DDF-100080",
+    "DDF-100081",
+    "DDF-100082",
+    "DDF-100083",
+    "DDF-100084",
+    "DDF-100085",
+    "DDF-100086",
+    "DDF-100087",
+    "DDF-100088",
+    "DDF-100089",
+    "DDF-100090",
+    "DDF-100091",
+    "DDF-100092",
+    "DDF-100093",
+    "DDF-100094",
+    "DDF-100095",
+    "DDF-100096",
+    "DDF-100097",
+    "DDF-100098",
+    "DDF-100099"
+  ],
+  "passed": 111,
+  "failed": 0,
+  "pass_rate": "100.0%",
+  "results": [
+    {
+      "test": "All events ingested",
+      "status": "PASS",
+      "detail": "1798/1798"
+    },
+    {
+      "test": "Overview: total events",
+      "status": "PASS",
+      "detail": "API=1798, expected=1798"
+    },
+    {
+      "test": "Overview: unique sessions",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Overview: orders",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Overview: revenue",
+      "status": "PASS",
+      "detail": "API=INR 1,159,250, expected=INR 1,159,250"
+    },
+    {
+      "test": "Traffic: total events",
+      "status": "PASS",
+      "detail": "API=1798, expected=1798"
+    },
+    {
+      "test": "Traffic: unique sessions",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Traffic: event_type page_view",
+      "status": "PASS",
+      "detail": "API=250, expected=250"
+    },
+    {
+      "test": "Traffic: event_type search",
+      "status": "PASS",
+      "detail": "API=39, expected=39"
+    },
+    {
+      "test": "Traffic: event_type category_view",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Traffic: event_type product_view",
+      "status": "PASS",
+      "detail": "API=267, expected=267"
+    },
+    {
+      "test": "Traffic: event_type scroll_depth",
+      "status": "PASS",
+      "detail": "API=267, expected=267"
+    },
+    {
+      "test": "Traffic: event_type add_to_cart",
+      "status": "PASS",
+      "detail": "API=235, expected=235"
+    },
+    {
+      "test": "Traffic: event_type begin_checkout",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Traffic: event_type checkout_step",
+      "status": "PASS",
+      "detail": "API=200, expected=200"
+    },
+    {
+      "test": "Traffic: event_type purchase",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Traffic: event_type engagement_time",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Traffic: event_type customer_login",
+      "status": "PASS",
+      "detail": "API=45, expected=45"
+    },
+    {
+      "test": "Traffic: event_type add_to_wishlist",
+      "status": "PASS",
+      "detail": "API=5, expected=5"
+    },
+    {
+      "test": "Traffic: event_type customer_register",
+      "status": "PASS",
+      "detail": "API=10, expected=10"
+    },
+    {
+      "test": "Traffic: event_type exit_intent",
+      "status": "PASS",
+      "detail": "API=30, expected=30"
+    },
+    {
+      "test": "Revenue: total revenue",
+      "status": "PASS",
+      "detail": "API=INR 1,159,250, expected=INR 1,159,250"
+    },
+    {
+      "test": "Revenue: total orders",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Revenue: AOV",
+      "status": "PASS",
+      "detail": "API=INR 11,592, expected=INR 11,592"
+    },
+    {
+      "test": "Products: top_by_purchases populated",
+      "status": "PASS",
+      "detail": "20 products"
+    },
+    {
+      "test": "Products: total purchase revenue",
+      "status": "PASS",
+      "detail": "API=INR 1,159,250, expected=INR 1,159,250"
+    },
+    {
+      "test": "Products: Chanel No 5 Eau de Parfum qty",
+      "status": "PASS",
+      "detail": "API=11, expected=11"
+    },
+    {
+      "test": "Products: Chanel No 5 Eau de Parfum rev",
+      "status": "PASS",
+      "detail": "API=INR 137,500, expected=INR 137,500"
+    },
+    {
+      "test": "Products: Dior Sauvage EDT 200ml qty",
+      "status": "PASS",
+      "detail": "API=14, expected=14"
+    },
+    {
+      "test": "Products: Dior Sauvage EDT 200ml rev",
+      "status": "PASS",
+      "detail": "API=INR 137,200, expected=INR 137,200"
+    },
+    {
+      "test": "Products: Chivas Regal 18 Year Old  qty",
+      "status": "PASS",
+      "detail": "API=19, expected=19"
+    },
+    {
+      "test": "Products: Chivas Regal 18 Year Old  rev",
+      "status": "PASS",
+      "detail": "API=INR 98,800, expected=INR 98,800"
+    },
+    {
+      "test": "Products: Gucci Bloom EDP 100ml qty",
+      "status": "PASS",
+      "detail": "API=11, expected=11"
+    },
+    {
+      "test": "Products: Gucci Bloom EDP 100ml rev",
+      "status": "PASS",
+      "detail": "API=INR 93,500, expected=INR 93,500"
+    },
+    {
+      "test": "Products: Glenfiddich 18 Year Old 7 qty",
+      "status": "PASS",
+      "detail": "API=8, expected=8"
+    },
+    {
+      "test": "Products: Glenfiddich 18 Year Old 7 rev",
+      "status": "PASS",
+      "detail": "API=INR 71,200, expected=INR 71,200"
+    },
+    {
+      "test": "Products: top_by_views populated",
+      "status": "PASS",
+      "detail": "20 products"
+    },
+    {
+      "test": "Products: Clinique Moisture Surge 1 views",
+      "status": "PASS",
+      "detail": "API=17, expected=17"
+    },
+    {
+      "test": "Products: Chivas Regal 18 Year Old  views",
+      "status": "PASS",
+      "detail": "API=17, expected=17"
+    },
+    {
+      "test": "Products: Godiva Gold Collection 36 views",
+      "status": "PASS",
+      "detail": "API=17, expected=17"
+    },
+    {
+      "test": "Products: Anthon Berg Chocolate Liq views",
+      "status": "PASS",
+      "detail": "API=17, expected=17"
+    },
+    {
+      "test": "Products: Hugo Boss Bottled EDT 200 views",
+      "status": "PASS",
+      "detail": "API=17, expected=17"
+    },
+    {
+      "test": "Products: performance populated",
+      "status": "PASS",
+      "detail": "20 products"
+    },
+    {
+      "test": "Products: performance total revenue",
+      "status": "PASS",
+      "detail": "API=INR 1,159,250, expected=INR 1,159,250"
+    },
+    {
+      "test": "Products: cart_abandonment populated",
+      "status": "PASS",
+      "detail": "9 products with abandonment"
+    },
+    {
+      "test": "Sessions: total count",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Search: total searches",
+      "status": "PASS",
+      "detail": "API=39, expected=39"
+    },
+    {
+      "test": "Search: unique keywords",
+      "status": "PASS",
+      "detail": "API=15, expected=15"
+    },
+    {
+      "test": "Search: 'johnnie walker' count",
+      "status": "PASS",
+      "detail": "API=5, expected=5"
+    },
+    {
+      "test": "Search: 'glenfiddich' count",
+      "status": "PASS",
+      "detail": "API=4, expected=4"
+    },
+    {
+      "test": "Search: 'duty free combos' count",
+      "status": "PASS",
+      "detail": "API=4, expected=4"
+    },
+    {
+      "test": "Search: 'chanel perfume' count",
+      "status": "PASS",
+      "detail": "API=4, expected=4"
+    },
+    {
+      "test": "Search: 'macallan 12' count",
+      "status": "PASS",
+      "detail": "API=4, expected=4"
+    },
+    {
+      "test": "Search: 'jura whisky' count",
+      "status": "PASS",
+      "detail": "API=3, expected=3"
+    },
+    {
+      "test": "Search: 'mac cosmetics' count",
+      "status": "PASS",
+      "detail": "API=3, expected=3"
+    },
+    {
+      "test": "Search: 'gucci bloom' count",
+      "status": "PASS",
+      "detail": "API=3, expected=3"
+    },
+    {
+      "test": "Search: 'chocolate gift box' count",
+      "status": "PASS",
+      "detail": "API=2, expected=2"
+    },
+    {
+      "test": "Search: 'hugo boss' count",
+      "status": "PASS",
+      "detail": "API=2, expected=2"
+    },
+    {
+      "test": "Search: 'dior sauvage' count",
+      "status": "PASS",
+      "detail": "API=1, expected=1"
+    },
+    {
+      "test": "Search: 'lipstick' count",
+      "status": "PASS",
+      "detail": "API=1, expected=1"
+    },
+    {
+      "test": "Search: 'birthday gift' count",
+      "status": "PASS",
+      "detail": "API=1, expected=1"
+    },
+    {
+      "test": "Search: 'whisky under 5000' count",
+      "status": "PASS",
+      "detail": "API=1, expected=1"
+    },
+    {
+      "test": "Search: 'toblerone' count",
+      "status": "PASS",
+      "detail": "API=1, expected=1"
+    },
+    {
+      "test": "Funnel: product_view sessions",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Funnel: add_to_cart sessions",
+      "status": "PASS",
+      "detail": "API=130, expected=130"
+    },
+    {
+      "test": "Funnel: begin_checkout sessions",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Funnel: purchase sessions",
+      "status": "PASS",
+      "detail": "API=100, expected=100"
+    },
+    {
+      "test": "Categories: populated",
+      "status": "PASS",
+      "detail": "4 categories"
+    },
+    {
+      "test": "Categories: Perfumes views",
+      "status": "PASS",
+      "detail": "API=92, expected=92"
+    },
+    {
+      "test": "Categories: Whisky views",
+      "status": "PASS",
+      "detail": "API=129, expected=129"
+    },
+    {
+      "test": "Categories: Beauty views",
+      "status": "PASS",
+      "detail": "API=67, expected=67"
+    },
+    {
+      "test": "Categories: Confectionery views",
+      "status": "PASS",
+      "detail": "API=79, expected=79"
+    },
+    {
+      "test": "Devices: Desktop",
+      "status": "PASS",
+      "detail": "API=98, expected>0 (expected_sessions=98)"
+    },
+    {
+      "test": "Devices: Mobile",
+      "status": "PASS",
+      "detail": "API=41, expected>0 (expected_sessions=41)"
+    },
+    {
+      "test": "Devices: Tablet",
+      "status": "PASS",
+      "detail": "API=11, expected>0 (expected_sessions=11)"
+    },
+    {
+      "test": "Browsers: Chrome present",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "test": "Browsers: Firefox present",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "test": "Browsers: Edge present",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "test": "Browsers: Safari present",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "test": "Campaigns: UTM data present",
+      "status": "PASS",
+      "detail": "3 UTM entries"
+    },
+    {
+      "test": "Campaigns: referrer sources",
+      "status": "PASS",
+      "detail": "6 referrer sources"
+    },
+    {
+      "test": "Realtime: active sessions > 0",
+      "status": "PASS",
+      "detail": "active_5min=150"
+    },
+    {
+      "test": "Recent events: populated",
+      "status": "PASS",
+      "detail": "50 events"
+    },
+    {
+      "test": "Recent events: our sessions present",
+      "status": "PASS",
+      "detail": "50/50 match our sessions"
+    },
+    {
+      "test": "Recent events: multiple types present",
+      "status": "PASS",
+      "detail": "types={'search', 'engagement_time', 'scroll_depth', 'page_view', 'product_view'}"
+    },
+    {
+      "test": "All Pages: populated",
+      "status": "PASS",
+      "detail": "5 pages"
+    },
+    {
+      "test": "All Pages: homepage tracked",
+      "status": "PASS",
+      "detail": "API=150, expected=150"
+    },
+    {
+      "test": "Events Breakdown: all core types",
+      "status": "PASS",
+      "detail": "found 8/8: ['page_view', 'product_view', 'add_to_cart', 'purchase', 'search', 'begin_checkout', 'scroll_depth', 'engagement_time']"
+    },
+    {
+      "test": "Cross: exact 100 order IDs generated",
+      "status": "PASS",
+      "detail": "generated=100"
+    },
+    {
+      "test": "Cross: all 20 products viewed",
+      "status": "PASS",
+      "detail": "unique products viewed=20"
+    },
+    {
+      "test": "Cross: registered user emails",
+      "status": "PASS",
+      "detail": "unique=35, expected=35"
+    },
+    {
+      "test": "Cross: login events count",
+      "status": "PASS",
+      "detail": "tracked=45, events=45"
+    },
+    {
+      "test": "Cross: register events count",
+      "status": "PASS",
+      "detail": "tracked=10, events=10"
+    },
+    {
+      "test": "Cross: search events total",
+      "status": "PASS",
+      "detail": "queries=39, events=39"
+    },
+    {
+      "test": "Cross: scroll events count",
+      "status": "PASS",
+      "detail": "tracked=267, events=267"
+    },
+    {
+      "test": "Cross: wishlist events count",
+      "status": "PASS",
+      "detail": "tracked=5, events=5"
+    },
+    {
+      "test": "Cross: exit_intent events",
+      "status": "PASS",
+      "detail": "tracked=30, events=30"
+    },
+    {
+      "test": "Cross: engagement events",
+      "status": "PASS",
+      "detail": "tracked=150, events=150"
+    },
+    {
+      "test": "Cross: session math 100+30+20=150",
+      "status": "PASS",
+      "detail": "100+30+20=150"
+    },
+    {
+      "test": "Staging accessible",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "test": "Tracker JS present",
+      "status": "PASS",
+      "detail": "ecom360-config found"
+    },
+    {
+      "test": "Chatbot widget present",
+      "status": "PASS",
+      "detail": "chatbot FAB found"
+    },
+    {
+      "test": "AI Search present",
+      "status": "PASS",
+      "detail": "search overlay found"
+    },
+    {
+      "test": "Tracker: API key matches",
+      "status": "PASS",
+      "detail": "key matches"
+    },
+    {
+      "test": "Tracker: server URL",
+      "status": "PASS",
+      "detail": "https://ecom.buildnetic.com"
+    },
+    {
+      "test": "Tracker: page_views enabled",
+      "status": "PASS",
+      "detail": "page_views=true"
+    },
+    {
+      "test": "Tracker: product_views enabled",
+      "status": "PASS",
+      "detail": "product_views=true"
+    },
+    {
+      "test": "Tracker: cart enabled",
+      "status": "PASS",
+      "detail": "cart=true"
+    },
+    {
+      "test": "Tracker: checkout enabled",
+      "status": "PASS",
+      "detail": "checkout=true"
+    },
+    {
+      "test": "Tracker: purchases enabled",
+      "status": "PASS",
+      "detail": "purchases=true"
+    },
+    {
+      "test": "Tracker: search enabled",
+      "status": "PASS",
+      "detail": "search=true"
+    }
+  ]
+}

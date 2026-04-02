@@ -57,11 +57,17 @@ Route::prefix('v1')->middleware([ValidateTrackingApiKey::class])->group(function
     Route::post('collect/batch', [PublicIngestionController::class, 'batch'])
         ->middleware('throttle:60,1')
         ->name('analytics.public.collect.batch');
+
+    // Behavioral intervention polling (used by tracker JS)
+    Route::get('interventions/poll', [PublicIngestionController::class, 'interventionPoll'])
+        ->middleware('throttle:120,1')
+        ->name('analytics.public.interventions.poll');
 });
 
 // CORS preflight (no auth needed).
 Route::options('v1/collect', [PublicIngestionController::class, 'preflight']);
 Route::options('v1/collect/batch', [PublicIngestionController::class, 'preflight']);
+Route::options('v1/interventions/poll', [PublicIngestionController::class, 'preflight']);
 
 // ─── Authenticated Routes (Sanctum) ──────────────────────────────────
 
@@ -104,6 +110,14 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
         // Campaign & attribution
         Route::get('campaigns', [AnalyticsApiController::class, 'campaigns'])->name('analytics.api.campaigns');
         Route::get('geographic', [AnalyticsApiController::class, 'geographic'])->name('analytics.api.geographic');
+
+        // Matomo-parity: All Pages, Search Analytics, Events Breakdown, Visitor Frequency, Day-of-Week, Recent Events
+        Route::get('all-pages', [AnalyticsApiController::class, 'allPages'])->name('analytics.api.all-pages');
+        Route::get('search-analytics', [AnalyticsApiController::class, 'searchAnalytics'])->name('analytics.api.search-analytics');
+        Route::get('events-breakdown', [AnalyticsApiController::class, 'eventsBreakdown'])->name('analytics.api.events-breakdown');
+        Route::get('visitor-frequency', [AnalyticsApiController::class, 'visitorFrequency'])->name('analytics.api.visitor-frequency');
+        Route::get('day-of-week', [AnalyticsApiController::class, 'dayOfWeek'])->name('analytics.api.day-of-week');
+        Route::get('recent-events', [AnalyticsApiController::class, 'recentEvents'])->name('analytics.api.recent-events');
 
         // Export
         Route::get('export', [AnalyticsApiController::class, 'export'])->name('analytics.api.export');
@@ -149,12 +163,38 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
             Route::get('alerts', [AdvancedAnalyticsController::class, 'realtimeAlerts'])->name('analytics.advanced.alerts');
             Route::post('alerts/{alert}/acknowledge', [AdvancedAnalyticsController::class, 'acknowledgeAlert'])->name('analytics.advanced.alerts.acknowledge');
 
-            // Natural Language Query
-            Route::get('ask', [AdvancedAnalyticsController::class, 'nlQuery'])->name('analytics.advanced.ask');
+            // Natural Language Query (GET for suggestions, match for NLQ)
+            Route::match(['get', 'post'], 'ask', [AdvancedAnalyticsController::class, 'nlQuery'])->name('analytics.advanced.ask');
             Route::get('ask/suggest', [AdvancedAnalyticsController::class, 'nlSuggest'])->name('analytics.advanced.ask.suggest');
+
+            // Alert Rules CRUD
+            Route::post('alerts/rules', [AdvancedAnalyticsController::class, 'createAlertRule'])->name('analytics.advanced.alerts.rules.create');
+            Route::get('alerts/rules', [AdvancedAnalyticsController::class, 'listAlertRules'])->name('analytics.advanced.alerts.rules');
 
             // Competitive Benchmarks
             Route::get('benchmarks', [AdvancedAnalyticsController::class, 'competitiveBenchmarks'])->name('analytics.advanced.benchmarks');
         });
+    });
+
+    // ─── CDP (Customer Data Platform) API ─────────────────────────────
+    Route::prefix('cdp')->group(function () {
+        Route::get('dashboard',                [\App\Http\Controllers\Tenant\CdpController::class, 'apiDashboard'])->name('cdp.api.dashboard');
+        Route::get('profiles',                 [\App\Http\Controllers\Tenant\CdpController::class, 'apiProfiles'])->name('cdp.api.profiles');
+        Route::post('profiles/build',          [\App\Http\Controllers\Tenant\CdpController::class, 'apiBuildProfiles'])->name('cdp.api.profiles.build');
+        Route::get('profiles/{profileId}',     [\App\Http\Controllers\Tenant\CdpController::class, 'apiProfileDetail'])->name('cdp.api.profiles.detail');
+        Route::get('profiles/{profileId}/timeline', [\App\Http\Controllers\Tenant\CdpController::class, 'apiProfileTimeline'])->name('cdp.api.profiles.timeline');
+        Route::get('segments',                 [\App\Http\Controllers\Tenant\CdpController::class, 'apiSegments'])->name('cdp.api.segments');
+        Route::post('segments',                [\App\Http\Controllers\Tenant\CdpController::class, 'apiCreateSegment'])->name('cdp.api.segments.create');
+        Route::post('segments/preview',        [\App\Http\Controllers\Tenant\CdpController::class, 'apiPreviewSegment'])->name('cdp.api.segments.preview');
+        Route::post('segments/overlap',        [\App\Http\Controllers\Tenant\CdpController::class, 'apiSegmentOverlap'])->name('cdp.api.segments.overlap');
+        Route::get('segments/{segmentId}',     [\App\Http\Controllers\Tenant\CdpController::class, 'apiSegmentDetail'])->name('cdp.api.segments.detail');
+        Route::put('segments/{segmentId}',     [\App\Http\Controllers\Tenant\CdpController::class, 'apiUpdateSegment'])->name('cdp.api.segments.update');
+        Route::delete('segments/{segmentId}',  [\App\Http\Controllers\Tenant\CdpController::class, 'apiDeleteSegment'])->name('cdp.api.segments.delete');
+        Route::post('segments/{segmentId}/evaluate', [\App\Http\Controllers\Tenant\CdpController::class, 'apiEvaluateSegment'])->name('cdp.api.segments.evaluate');
+        Route::get('rfm',                      [\App\Http\Controllers\Tenant\CdpController::class, 'apiRfm'])->name('cdp.api.rfm');
+        Route::post('rfm/recalculate',         [\App\Http\Controllers\Tenant\CdpController::class, 'apiRfmRecalculate'])->name('cdp.api.rfm.recalculate');
+        Route::get('predictions',              [\App\Http\Controllers\Tenant\CdpController::class, 'apiPredictions'])->name('cdp.api.predictions');
+        Route::get('data-health',              [\App\Http\Controllers\Tenant\CdpController::class, 'apiDataHealth'])->name('cdp.api.data-health');
+        Route::get('dimensions',               [\App\Http\Controllers\Tenant\CdpController::class, 'apiDimensions'])->name('cdp.api.dimensions');
     });
 });

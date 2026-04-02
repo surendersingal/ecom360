@@ -57,7 +57,7 @@ final class WhyExplanationService
         ];
     }
 
-    private function getMetricValue(int $tid, string $metric, string $start, string $end): float
+    private function getMetricValue(int|string $tid, string $metric, string $start, string $end): float
     {
         return match ($metric) {
             'revenue' => (float) DB::connection('mongodb')->table('tracking_events')
@@ -78,7 +78,7 @@ final class WhyExplanationService
         };
     }
 
-    private function computeAov(int $tid, string $start, string $end): float
+    private function computeAov(int|string $tid, string $start, string $end): float
     {
         $q = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)->where('event_type', 'purchase')
@@ -87,7 +87,7 @@ final class WhyExplanationService
         return $orders > 0 ? round((float) $q->sum('metadata.revenue') / $orders, 2) : 0;
     }
 
-    private function computeConversionRate(int $tid, string $start, string $end): float
+    private function computeConversionRate(int|string $tid, string $start, string $end): float
     {
         $sessions = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)->where('event_type', 'page_view')
@@ -100,7 +100,7 @@ final class WhyExplanationService
         return $sessions > 0 ? round(($orders / $sessions) * 100, 2) : 0;
     }
 
-    private function analyzeDimension(int $tid, string $metric, string $dimension, string $curStart, string $curEnd, string $prevStart, string $prevEnd): array
+    private function analyzeDimension(int|string $tid, string $metric, string $dimension, string $curStart, string $curEnd, string $prevStart, string $prevEnd): array
     {
         $aggregateField = match ($metric) {
             'revenue' => '$metadata.revenue',
@@ -133,7 +133,7 @@ final class WhyExplanationService
         return $factors;
     }
 
-    private function groupByDimension(int $tid, string $metric, string $dim, string $start, string $end, ?string $aggField): array
+    private function groupByDimension(int|string $tid, string $metric, string $dim, string $start, string $end, ?string $aggField): array
     {
         $eventType = in_array($metric, ['revenue', 'orders', 'aov']) ? 'purchase' : 'page_view';
 

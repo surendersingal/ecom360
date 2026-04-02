@@ -54,6 +54,7 @@ final class SyncedProduct extends Model
         'category_ids',
         'variants',
         'attributes',
+        'brand',
         'store_id',
         'synced_at',
     ];

@@ -1,0 +1,1252 @@
+{
+  "run_date": "2026-03-04T20:55:32.066865",
+  "total": 80,
+  "passed": 62,
+  "warnings": 18,
+  "failed": 0,
+  "group_stats": {
+    "G01: Order Tracking": {
+      "pass": 5,
+      "warn": 0,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G02: Returns & Refunds": {
+      "pass": 1,
+      "warn": 4,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G03: Product Discovery": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G04: Cart & Checkout": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G05: Account & Login": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G06: Shipping & Delivery": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G07: Payment & Billing": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G08: Product Info": {
+      "pass": 3,
+      "warn": 2,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G09: Stock & Availability": {
+      "pass": 3,
+      "warn": 2,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G10: Complaints & Escalation": {
+      "pass": 5,
+      "warn": 0,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G11: Promotions & Loyalty": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G12: Complex Multi-Intent": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G13: Edge Cases": {
+      "pass": 10,
+      "warn": 0,
+      "fail": 0,
+      "skip": 0,
+      "total": 10
+    },
+    "G14: Handoff & Escalation": {
+      "pass": 3,
+      "warn": 2,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    },
+    "G15: Proactive Scenarios": {
+      "pass": 4,
+      "warn": 1,
+      "fail": 0,
+      "skip": 0,
+      "total": 5
+    }
+  },
+  "intent_distribution": {
+    "order_tracking": 17,
+    "return_request": 3,
+    "add_to_cart": 6,
+    "payment_info": 4,
+    "product_inquiry": 11,
+    "greeting": 6,
+    "checkout_help": 4,
+    "coupon_inquiry": 2,
+    "account_help": 3,
+    "shipping_inquiry": 2,
+    "stock_check": 4,
+    "escalation": 4,
+    "complaint": 4,
+    "loyalty": 3,
+    "general": 6,
+    "rage_click": 1
+  },
+  "results": [
+    {
+      "story_id": 1,
+      "group": "G01: Order Tracking",
+      "message": "I placed an order yesterday. My order number is #10045. Can you tell me where my order is right now?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #yesterday. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 119 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 160
+    },
+    {
+      "story_id": 2,
+      "group": "G01: Order Tracking",
+      "message": "I ordered 3 items last week but only received 2. Order #10087. What happened to the third item?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #ed. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 112 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 152
+    },
+    {
+      "story_id": 3,
+      "group": "G01: Order Tracking",
+      "message": "My order says delivered but I never received it. Order #10023. Can you help?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #says. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 114 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 138
+    },
+    {
+      "story_id": 4,
+      "group": "G01: Order Tracking",
+      "message": "I placed two orders this week \u2014 #10091 and #10094. Can you give me the status of both?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #s. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 111 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 133
+    },
+    {
+      "story_id": 5,
+      "group": "G01: Order Tracking",
+      "message": "How long will my order take to arrive? I ordered standard shipping 4 days ago. Order #10056.",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #take. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 114 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 6,
+      "group": "G02: Returns & Refunds",
+      "message": "I received the wrong product. I ordered a blue shirt size L but got a red one size M. I want to return it. Order #10033.",
+      "status": "PASS",
+      "intent": "return_request",
+      "response": "I'm sorry you need to make a return. I can help with that!\n\nOur return policy allows returns within 30 days of delivery for most items. Would you like to start a return?",
+      "checks": [
+        "\u2713 Intent: return_request",
+        "\u2713 Response: 169 chars",
+        "\u2713 Contains: 'return'"
+      ],
+      "response_time_ms": 126
+    },
+    {
+      "story_id": 7,
+      "group": "G02: Returns & Refunds",
+      "message": "I want to return my headphones. I bought them 5 days ago and they stopped working. What's the return process?",
+      "status": "WARN",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "~ Intent: add_to_cart (expected: return_request/returns/return_policy/product_issue)",
+        "\u2713 Response: 80 chars",
+        "~ Missing: 'return'"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 8,
+      "group": "G02: Returns & Refunds",
+      "message": "I already shipped back my return 3 days ago. When will I get my refund? Return ID RT-4421.",
+      "status": "WARN",
+      "intent": "payment_info",
+      "response": "Refund timelines depend on the payment method:\n\n\ud83d\udcb3 **Credit/Debit Card** \u2014 5-10 business days\n\ud83c\udfe6 **Bank Transfer** \u2014 3-5 business days\n\ud83d\udcb0 **Store Credit** \u2014 Instant\n\ud83d\udcf1 **Digital Wallet** \u2014 1-3 business days\n\nWould you like to check a specific refund?",
+      "checks": [
+        "~ Intent: payment_info (expected: return_request/refund_status/returns/refund)",
+        "\u2713 Response: 246 chars",
+        "\u2713 Contains: 'refund'"
+      ],
+      "response_time_ms": 147
+    },
+    {
+      "story_id": 9,
+      "group": "G02: Returns & Refunds",
+      "message": "The product I received is damaged. The box was crushed. Can I get a replacement or refund? Order #10078.",
+      "status": "WARN",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #10078. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "~ Intent: order_tracking (expected: return_request/returns/damaged_product/replacement)",
+        "\u2713 Response: 115 chars",
+        "~ Missing: 'return'",
+        "~ Missing: 'refund'"
+      ],
+      "response_time_ms": 136
+    },
+    {
+      "story_id": 10,
+      "group": "G02: Returns & Refunds",
+      "message": "I changed my mind about my purchase. Can I return it even though I opened the packaging? Order #10065.",
+      "status": "WARN",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #10065. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "~ Intent: order_tracking (expected: return_request/returns/return_policy)",
+        "\u2713 Response: 115 chars",
+        "~ Missing: 'return'"
+      ],
+      "response_time_ms": 146
+    },
+    {
+      "story_id": 11,
+      "group": "G03: Product Discovery",
+      "message": "I'm looking for a gift for my wife who loves skincare. Budget is around $80. What do you recommend?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "Looking for the perfect gift?\n\nI found 5 products for \"I'm a gift for my wife who loves skincare. Budget is around $80. What do you recommend?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 144 chars",
+        "\u2713 Product-related response"
+      ],
+      "response_time_ms": 246
+    },
+    {
+      "story_id": 12,
+      "group": "G03: Product Discovery",
+      "message": "I bought wireless earbuds from you 3 months ago. What accessories would work with them?",
+      "status": "WARN",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "~ Intent: greeting (expected: product_inquiry/product_search/accessories/recommendation)",
+        "\u2713 Response: 34 chars"
+      ],
+      "response_time_ms": 142
+    },
+    {
+      "story_id": 13,
+      "group": "G03: Product Discovery",
+      "message": "I need running shoes for a half marathon. I pronate slightly. What do you have under $120?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"running shoes for a half marathon. I pronate slightly. What under $120?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 97 chars",
+        "\u2713 Products returned: 5"
+      ],
+      "response_time_ms": 234
+    },
+    {
+      "story_id": 14,
+      "group": "G03: Product Discovery",
+      "message": "Show me your best selling products in the electronics category right now.",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"your best selling products in the electronics category right now.\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 91 chars",
+        "\u2713 Products returned: 5"
+      ],
+      "response_time_ms": 190
+    },
+    {
+      "story_id": 15,
+      "group": "G03: Product Discovery",
+      "message": "I'm looking for something similar to the Sony WH-1000XM5 headphones but cheaper. What do you have?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"I'm something similar to the Sony WH-1000XM5 headphones but cheaper. What ?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 101 chars",
+        "\u2713 Products returned: 5"
+      ],
+      "response_time_ms": 193
+    },
+    {
+      "story_id": 16,
+      "group": "G04: Cart & Checkout",
+      "message": "I added 5 items to my cart but when I go to checkout the cart shows only 3 items. What happened?",
+      "status": "WARN",
+      "intent": "checkout_help",
+      "response": "I can help you complete your purchase! What issue are you having?",
+      "checks": [
+        "~ Intent: checkout_help (expected: cart_issue/add_to_cart/cart_help/general/product_inquiry)",
+        "\u2713 Response: 65 chars"
+      ],
+      "response_time_ms": 140
+    },
+    {
+      "story_id": 17,
+      "group": "G04: Cart & Checkout",
+      "message": "I'm trying to apply a discount code SAVE20 but it's not working. Can you help?",
+      "status": "PASS",
+      "intent": "coupon_inquiry",
+      "response": "Welcome! 15% off with code WELCOME15",
+      "checks": [
+        "\u2713 Intent: coupon_inquiry",
+        "\u2713 Response: 36 chars",
+        "~ Missing: 'coupon'",
+        "\u2713 Contains: 'code'",
+        "~ Missing: 'discount'"
+      ],
+      "response_time_ms": 140
+    },
+    {
+      "story_id": 18,
+      "group": "G04: Cart & Checkout",
+      "message": "I started checkout but got confused at the payment step. Can you walk me through how to complete my order?",
+      "status": "PASS",
+      "intent": "checkout_help",
+      "response": "I can help you complete your purchase! What issue are you having?",
+      "checks": [
+        "\u2713 Intent: checkout_help",
+        "\u2713 Response: 65 chars",
+        "~ Missing: 'checkout'",
+        "~ Missing: 'payment'"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 19,
+      "group": "G04: Cart & Checkout",
+      "message": "I want to change the quantity of one item in my cart from 1 to 3 before I checkout. Can you help me do that?",
+      "status": "PASS",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "\u2713 Intent: add_to_cart",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 149
+    },
+    {
+      "story_id": 20,
+      "group": "G04: Cart & Checkout",
+      "message": "I accidentally added the wrong size to my cart. How do I change it to size XL before placing the order?",
+      "status": "PASS",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "\u2713 Intent: add_to_cart",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 21,
+      "group": "G05: Account & Login",
+      "message": "I forgot my password and can't log in. My email is test@gmail.com. Can you help me reset it?",
+      "status": "PASS",
+      "intent": "account_help",
+      "response": "I can help you reset your password! Here's what to do:\n\n1. Go to the **Login** page\n2. Click **\"Forgot Password\"**\n3. Enter your email address\n4. Check your inbox for a reset link\n\nThe link expires in 24 hours.",
+      "checks": [
+        "\u2713 Intent: account_help",
+        "\u2713 Response: 210 chars",
+        "\u2713 Contains: 'password'"
+      ],
+      "response_time_ms": 147
+    },
+    {
+      "story_id": 22,
+      "group": "G05: Account & Login",
+      "message": "I want to create a new account. What information do I need and how do I do it?",
+      "status": "PASS",
+      "intent": "account_help",
+      "response": "Creating an account is easy! You'll get benefits like:\n\n\u2705 Faster checkout\n\u2705 Order tracking\n\u2705 Exclusive offers\n\u2705 Wishlist\n\nClick below to get started!",
+      "checks": [
+        "\u2713 Intent: account_help",
+        "\u2713 Response: 149 chars",
+        "\u2713 Contains: 'account'"
+      ],
+      "response_time_ms": 137
+    },
+    {
+      "story_id": 23,
+      "group": "G05: Account & Login",
+      "message": "I have two accounts with the same email. Can you merge them into one?",
+      "status": "WARN",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "~ Intent: greeting (expected: account_help/account_merge/general/escalation)",
+        "\u2713 Response: 34 chars",
+        "~ Missing: 'account'"
+      ],
+      "response_time_ms": 160
+    },
+    {
+      "story_id": 24,
+      "group": "G05: Account & Login",
+      "message": "I updated my shipping address in my account but my current order still shows the old address. Can you update it?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #still. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 115 chars",
+        "\u2713 Contains: 'address'"
+      ],
+      "response_time_ms": 210
+    },
+    {
+      "story_id": 25,
+      "group": "G05: Account & Login",
+      "message": "I want to delete my account and all my data. How do I do that?",
+      "status": "PASS",
+      "intent": "account_help",
+      "response": "I understand you'd like to manage your account. For account deletion, we need to verify your identity.",
+      "checks": [
+        "\u2713 Intent: account_help",
+        "\u2713 Response: 102 chars",
+        "\u2713 Contains: 'account'"
+      ],
+      "response_time_ms": 153
+    },
+    {
+      "story_id": 26,
+      "group": "G06: Shipping & Delivery",
+      "message": "What shipping options do you offer and how much does each one cost?",
+      "status": "PASS",
+      "intent": "shipping_inquiry",
+      "response": "Welcome! 15% off with code WELCOME15",
+      "checks": [
+        "\u2713 Intent: shipping_inquiry",
+        "\u2713 Response: 36 chars",
+        "~ Missing: 'shipping'"
+      ],
+      "response_time_ms": 134
+    },
+    {
+      "story_id": 27,
+      "group": "G06: Shipping & Delivery",
+      "message": "Do you ship internationally? I'm in Dubai and want to order.",
+      "status": "PASS",
+      "intent": "shipping_inquiry",
+      "response": "Here are our shipping options:\n\n\u2022 **Standard** \u2014 5-7 business days (Free over $50)\n\u2022 **Express** \u2014 2-3 business days ($9.99)\n\u2022 **Next Day** \u2014 1 business day ($19.99)\n\nAll orders include tracking!",
+      "checks": [
+        "\u2713 Intent: shipping_inquiry",
+        "\u2713 Response: 195 chars",
+        "\u2713 Contains: 'shipping'"
+      ],
+      "response_time_ms": 138
+    },
+    {
+      "story_id": 28,
+      "group": "G06: Shipping & Delivery",
+      "message": "I need my order by Friday for a birthday. Today is Tuesday. Which shipping option should I choose?",
+      "status": "WARN",
+      "intent": "order_tracking",
+      "response": "Looking for the perfect gift?\n\nI found 5 products for \"my order by Friday for a birthday. Today is Tuesday. Which shipping option should I choose?\":",
+      "checks": [
+        "~ Intent: order_tracking (expected: shipping_inquiry/shipping/delivery_estimate)",
+        "\u2713 Response: 148 chars",
+        "\u2713 Contains: 'shipping'"
+      ],
+      "response_time_ms": 282
+    },
+    {
+      "story_id": 29,
+      "group": "G06: Shipping & Delivery",
+      "message": "My tracking number says my package is stuck in transit for 5 days. Can you investigate? Tracking: TRK998821.",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I'd be happy to help track your order! Could you please provide your order number? It usually starts with # or looks like ORD-XXXX.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 131 chars",
+        "~ Missing: 'tracking'"
+      ],
+      "response_time_ms": 148
+    },
+    {
+      "story_id": 30,
+      "group": "G06: Shipping & Delivery",
+      "message": "Can I change my delivery address after placing the order? Order #10102 was placed 2 hours ago.",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #10102. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 115 chars",
+        "\u2713 Contains: 'address'",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 31,
+      "group": "G07: Payment & Billing",
+      "message": "My payment failed but money was deducted from my account. Order #10055. What happened?",
+      "status": "WARN",
+      "intent": "payment_info",
+      "response": "I'm sorry you're having payment issues. Here are some common solutions:\n\n1. **Check card details** \u2014 Ensure number, expiry, and CVV are correct\n2. **Sufficient funds** \u2014 Verify your account balance\n3. **Bank restrictions** \u2014 Some banks block online transactions by default\n4. **Try another method** \u2014",
+      "checks": [
+        "~ Intent: payment_info (expected: payment_issue/order_tracking/billing/general)",
+        "\u2713 Response: 390 chars",
+        "\u2713 Contains: 'payment'"
+      ],
+      "response_time_ms": 140
+    },
+    {
+      "story_id": 32,
+      "group": "G07: Payment & Billing",
+      "message": "What payment methods do you accept? Do you have buy now pay later?",
+      "status": "PASS",
+      "intent": "payment_info",
+      "response": "We accept the following payment methods:\n\n\ud83d\udcb3 Visa, Mastercard, American Express\n\ud83d\udcf1 Apple Pay, Google Pay\n\ud83c\udfe6 Bank Transfer\n\ud83d\udcb0 Gift Cards & Store Credit\n\ud83d\udd04 Buy Now Pay Later (Afterpay/Klarna)\n\nAll transactions are secured with 256-bit SSL encryption.",
+      "checks": [
+        "\u2713 Intent: payment_info",
+        "\u2713 Response: 243 chars",
+        "\u2713 Contains: 'payment'"
+      ],
+      "response_time_ms": 137
+    },
+    {
+      "story_id": 33,
+      "group": "G07: Payment & Billing",
+      "message": "I was charged twice for the same order. My order number is #10039. Can you fix this?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #number. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 116 chars",
+        "~ Missing: 'charge'"
+      ],
+      "response_time_ms": 134
+    },
+    {
+      "story_id": 34,
+      "group": "G07: Payment & Billing",
+      "message": "I want to pay using a different card than the one saved on my account. How do I do that at checkout?",
+      "status": "PASS",
+      "intent": "checkout_help",
+      "response": "I can help you complete your purchase! What issue are you having?",
+      "checks": [
+        "\u2713 Intent: checkout_help",
+        "\u2713 Response: 65 chars",
+        "~ Missing: 'payment'",
+        "~ Missing: 'card'"
+      ],
+      "response_time_ms": 149
+    },
+    {
+      "story_id": 35,
+      "group": "G07: Payment & Billing",
+      "message": "Do you offer EMI or installment payment options for orders above $500?",
+      "status": "PASS",
+      "intent": "payment_info",
+      "response": "Welcome! 15% off with code WELCOME15",
+      "checks": [
+        "\u2713 Intent: payment_info",
+        "\u2713 Response: 36 chars",
+        "~ Missing: 'payment'"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 36,
+      "group": "G08: Product Info",
+      "message": "What is the warranty period on your electronics products? Does it cover accidental damage?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"What is the warranty period on your electronics products? Does it cover accidental damage?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 116 chars",
+        "\u2713 Contains: 'warranty'"
+      ],
+      "response_time_ms": 437
+    },
+    {
+      "story_id": 37,
+      "group": "G08: Product Info",
+      "message": "I want to buy the running shoes but I'm between size 9 and 9.5. How does your sizing run \u2014 should I size up or down?",
+      "status": "WARN",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "~ Intent: add_to_cart (expected: product_inquiry/sizing/general)",
+        "\u2713 Response: 80 chars",
+        "~ Missing: 'size'"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 38,
+      "group": "G08: Product Info",
+      "message": "Is this product compatible with iPhone 15? I want to make sure before I buy.",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"Is this product compatible with iPhone 15? to make sure before I buy.\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 95 chars"
+      ],
+      "response_time_ms": 228
+    },
+    {
+      "story_id": 39,
+      "group": "G08: Product Info",
+      "message": "What's the difference between the Pro version and the Standard version of your headphones? Is it worth the extra $50?",
+      "status": "WARN",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "~ Intent: greeting (expected: product_inquiry/comparison/product_search)",
+        "\u2713 Response: 34 chars",
+        "~ No products in response"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 40,
+      "group": "G08: Product Info",
+      "message": "I'm allergic to latex. Does this product contain any latex or rubber materials?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"I'm allergic to latex. Does this product contain latex or rubber materials?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 101 chars",
+        "\u2713 Contains: 'product'"
+      ],
+      "response_time_ms": 236
+    },
+    {
+      "story_id": 41,
+      "group": "G09: Stock & Availability",
+      "message": "The blue color of this jacket is showing out of stock. When will it be back in stock?",
+      "status": "PASS",
+      "intent": "stock_check",
+      "response": "I found 5 product(s) for \"blue color of this jacket showing . When will be back ?\".\n\n\u26a0\ufe0f Unfortunately, these items are currently out of stock.",
+      "checks": [
+        "\u2713 Intent: stock_check",
+        "\u2713 Response: 142 chars",
+        "\u2713 Contains: 'stock'"
+      ],
+      "response_time_ms": 224
+    },
+    {
+      "story_id": 42,
+      "group": "G09: Stock & Availability",
+      "message": "Can you notify me when size M of the running shirt is available again?",
+      "status": "WARN",
+      "intent": "stock_check",
+      "response": "I found 5 product(s) for \"Can you notify me when size M of running shirt again?\".\n\n\u26a0\ufe0f Unfortunately, these items are currently out of stock.",
+      "checks": [
+        "~ Intent: stock_check (expected: product_inquiry/stock_notification/availability/general)",
+        "\u2713 Response: 140 chars",
+        "\u2713 Contains: 'stock'",
+        "\u2713 Contains: 'notify'",
+        "~ Missing: 'available'"
+      ],
+      "response_time_ms": 180
+    },
+    {
+      "story_id": 43,
+      "group": "G09: Stock & Availability",
+      "message": "I need 10 units of the same product for a corporate order. Do you have that quantity available?",
+      "status": "WARN",
+      "intent": "stock_check",
+      "response": "I found 5 product(s) for \"I need 10 units of same product for a corporate order. that quantity ?\".\n\n\u26a0\ufe0f Unfortunately, these items are currently out of stock.",
+      "checks": [
+        "~ Intent: stock_check (expected: product_inquiry/bulk_order/availability/general)",
+        "\u2713 Response: 157 chars"
+      ],
+      "response_time_ms": 208
+    },
+    {
+      "story_id": 44,
+      "group": "G09: Stock & Availability",
+      "message": "I saw a product on your site yesterday but now I can't find it. Was it removed? It was called ProFit Yoga Mat.",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"I saw a product on your site yesterday but now I can't it. Was it removed? It was called ProFit Yoga Mat.\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 131 chars"
+      ],
+      "response_time_ms": 258
+    },
+    {
+      "story_id": 45,
+      "group": "G09: Stock & Availability",
+      "message": "Do you have any products similar to what I bought before that are currently in stock and on sale?",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"products similar to what I bought before that are currently in stock and on sale?\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 107 chars",
+        "\u2713 Products returned: 5"
+      ],
+      "response_time_ms": 234
+    },
+    {
+      "story_id": 46,
+      "group": "G10: Complaints & Escalation",
+      "message": "This is absolutely ridiculous. I've been waiting 2 weeks for my order and nobody is helping me. I want to speak to a real person NOW. Order #10011.",
+      "status": "PASS",
+      "intent": "escalation",
+      "response": "I understand you'd like to speak with a human agent. Let me collect your details so our team can reach out to you right away.",
+      "checks": [
+        "\u2713 Intent: escalation",
+        "\u2713 Response: 125 chars",
+        "\u2713 Escalation intent detected"
+      ],
+      "response_time_ms": 138
+    },
+    {
+      "story_id": 47,
+      "group": "G10: Complaints & Escalation",
+      "message": "I have complained 3 times already about the same issue and nothing has been resolved. This is my last attempt before I post a review. Order #10044.",
+      "status": "PASS",
+      "intent": "complaint",
+      "response": "I'm really sorry to hear about your experience. Your satisfaction is very important to us, and I want to make sure this gets resolved properly.",
+      "checks": [
+        "\u2713 Intent: complaint",
+        "\u2713 Response: 143 chars",
+        "~ No escalation signal found"
+      ],
+      "response_time_ms": 134
+    },
+    {
+      "story_id": 48,
+      "group": "G10: Complaints & Escalation",
+      "message": "Your website crashed during checkout and I was charged but never received an order confirmation. I have a screenshot. What do I do?",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #confirmation. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 122 chars",
+        "\u2713 Contains: 'order'"
+      ],
+      "response_time_ms": 140
+    },
+    {
+      "story_id": 49,
+      "group": "G10: Complaints & Escalation",
+      "message": "I received a product that looks like it was used and repackaged. This is not acceptable. I need an immediate resolution. Order #10088.",
+      "status": "PASS",
+      "intent": "complaint",
+      "response": "I'm really sorry to hear about your experience. Your satisfaction is very important to us, and I want to make sure this gets resolved properly.",
+      "checks": [
+        "\u2713 Intent: complaint",
+        "\u2713 Response: 143 chars",
+        "~ No escalation signal found"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 50,
+      "group": "G10: Complaints & Escalation",
+      "message": "I'm very frustrated. The chatbot keeps giving me wrong answers and I can't get a human to respond. Who do I escalate to?",
+      "status": "PASS",
+      "intent": "complaint",
+      "response": "I'm really sorry to hear about your experience. Your satisfaction is very important to us, and I want to make sure this gets resolved properly.",
+      "checks": [
+        "\u2713 Intent: complaint",
+        "\u2713 Response: 143 chars",
+        "~ No escalation signal found"
+      ],
+      "response_time_ms": 138
+    },
+    {
+      "story_id": 51,
+      "group": "G11: Promotions & Loyalty",
+      "message": "I heard you have a loyalty program. How many points do I have and what can I use them for?",
+      "status": "PASS",
+      "intent": "loyalty",
+      "response": "Welcome to our Loyalty Program! \ud83c\udf1f\n\n**How it works:**\n\u2022 Earn 1 point for every $1 spent\n\u2022 100 points = $5 reward\n\u2022 Exclusive member-only deals\n\u2022 Early access to sales\n\u2022 Birthday bonus points\n\n**Tiers:**\n\ud83e\udd49 Bronze \u2014 0-499 points\n\ud83e\udd48 Silver \u2014 500-999 points\n\ud83e\udd47 Gold \u2014 1,000-1,999 points\n\ud83d\udc8e Platinum \u2014 2,000+ ",
+      "checks": [
+        "\u2713 Intent: loyalty",
+        "\u2713 Response: 306 chars",
+        "\u2713 Contains: 'loyalty'",
+        "\u2713 Contains: 'points'"
+      ],
+      "response_time_ms": 150
+    },
+    {
+      "story_id": 52,
+      "group": "G11: Promotions & Loyalty",
+      "message": "Is there a discount for first-time buyers? I've never ordered from you before.",
+      "status": "PASS",
+      "intent": "coupon_inquiry",
+      "response": "Welcome! 15% off with code WELCOME15",
+      "checks": [
+        "\u2713 Intent: coupon_inquiry",
+        "\u2713 Response: 36 chars",
+        "~ Missing: 'discount'"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 53,
+      "group": "G11: Promotions & Loyalty",
+      "message": "I referred my friend and he placed an order. When will my referral bonus be credited?",
+      "status": "PASS",
+      "intent": "loyalty",
+      "response": "Welcome to our Loyalty Program! \ud83c\udf1f\n\n**How it works:**\n\u2022 Earn 1 point for every $1 spent\n\u2022 100 points = $5 reward\n\u2022 Exclusive member-only deals\n\u2022 Early access to sales\n\u2022 Birthday bonus points\n\n**Tiers:**\n\ud83e\udd49 Bronze \u2014 0-499 points\n\ud83e\udd48 Silver \u2014 500-999 points\n\ud83e\udd47 Gold \u2014 1,000-1,999 points\n\ud83d\udc8e Platinum \u2014 2,000+ ",
+      "checks": [
+        "\u2713 Intent: loyalty",
+        "\u2713 Response: 306 chars",
+        "~ Missing: 'referral'"
+      ],
+      "response_time_ms": 139
+    },
+    {
+      "story_id": 54,
+      "group": "G11: Promotions & Loyalty",
+      "message": "Are there any active promo codes right now? I'm about to place a $200 order.",
+      "status": "WARN",
+      "intent": "checkout_help",
+      "response": "I can help you complete your purchase! What issue are you having?",
+      "checks": [
+        "~ Intent: checkout_help (expected: coupon_inquiry/promotion/discount/general)",
+        "\u2713 Response: 65 chars",
+        "~ Missing: 'promo'",
+        "~ Missing: 'code'",
+        "~ Missing: 'discount'"
+      ],
+      "response_time_ms": 145
+    },
+    {
+      "story_id": 55,
+      "group": "G11: Promotions & Loyalty",
+      "message": "I'm a VIP member. Am I eligible for early access to your upcoming sale?",
+      "status": "PASS",
+      "intent": "loyalty",
+      "response": "Welcome to our Loyalty Program! \ud83c\udf1f\n\n**How it works:**\n\u2022 Earn 1 point for every $1 spent\n\u2022 100 points = $5 reward\n\u2022 Exclusive member-only deals\n\u2022 Early access to sales\n\u2022 Birthday bonus points\n\n**Tiers:**\n\ud83e\udd49 Bronze \u2014 0-499 points\n\ud83e\udd48 Silver \u2014 500-999 points\n\ud83e\udd47 Gold \u2014 1,000-1,999 points\n\ud83d\udc8e Platinum \u2014 2,000+ ",
+      "checks": [
+        "\u2713 Intent: loyalty",
+        "\u2713 Response: 306 chars"
+      ],
+      "response_time_ms": 137
+    },
+    {
+      "story_id": 56,
+      "group": "G12: Complex Multi-Intent",
+      "message": "I want to return my order #10031 AND place a new order for the same product in a different color AND also check if I have any loyalty points I can use for the new order.",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #10031. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 115 chars",
+        "~ Missing: 'return'"
+      ],
+      "response_time_ms": 145
+    },
+    {
+      "story_id": 57,
+      "group": "G12: Complex Multi-Intent",
+      "message": "My last three orders have all had issues \u2014 wrong item, late delivery, and damaged product. I want a compensation and a guarantee this won't happen again.",
+      "status": "PASS",
+      "intent": "complaint",
+      "response": "I sincerely apologize for your experience. I completely understand your frustration. Let me connect you with a senior support specialist right away.",
+      "checks": [
+        "\u2713 Intent: complaint",
+        "\u2713 Response: 148 chars",
+        "\u2713 Escalation mentioned in response"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 58,
+      "group": "G12: Complex Multi-Intent",
+      "message": "I'm looking for a birthday gift under $100 for a 10-year-old boy who loves technology. It needs to be delivered by this Saturday and I want to use my store credit.",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "Looking for the perfect gift?\n\nI found 5 products for \"I'm a birthday gift under $100 for a 10-year-old boy who loves technology. It needs to be delivered by this Saturday and to use my store credit.\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 201 chars",
+        "\u2713 Product-related response"
+      ],
+      "response_time_ms": 416
+    },
+    {
+      "story_id": 59,
+      "group": "G12: Complex Multi-Intent",
+      "message": "Can you compare the top 3 noise-cancelling headphones you sell, tell me which one has the best reviews, and check if any of them are currently on sale?",
+      "status": "WARN",
+      "intent": "general",
+      "response": "I understand you need help with that. Let me see what I can do!\n\nHere are some things I can help with:",
+      "checks": [
+        "~ Intent: general (expected: product_inquiry/comparison/product_search)",
+        "\u2713 Response: 102 chars",
+        "\u2713 Product-related response"
+      ],
+      "response_time_ms": 144
+    },
+    {
+      "story_id": 60,
+      "group": "G12: Complex Multi-Intent",
+      "message": "I placed an order 30 minutes ago. I want to cancel it, get a refund, and then reorder the same items but with a different shipping address and faster shipping.",
+      "status": "PASS",
+      "intent": "return_request",
+      "response": "I'm sorry you need to make a return. I can help with that!\n\nOur return policy allows returns within 30 days of delivery for most items. Would you like to start a return?",
+      "checks": [
+        "\u2713 Intent: return_request",
+        "\u2713 Response: 169 chars",
+        "~ Missing: 'order'",
+        "~ Missing: 'cancel'"
+      ],
+      "response_time_ms": 138
+    },
+    {
+      "story_id": 61,
+      "group": "G13: Edge Cases",
+      "message": "asdfghjkl qwerty random gibberish 12345",
+      "status": "PASS",
+      "intent": "general",
+      "response": "I'm not sure I understood that. Could you rephrase, or try one of these options?",
+      "checks": [
+        "\u2713 Intent: general",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 154
+    },
+    {
+      "story_id": 62,
+      "group": "G13: Edge Cases",
+      "message": ".",
+      "status": "PASS",
+      "intent": "general",
+      "response": "I'm not sure I understood that. Could you rephrase, or try one of these options?",
+      "checks": [
+        "\u2713 Intent: general",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 155
+    },
+    {
+      "story_id": 63,
+      "group": "G13: Edge Cases",
+      "message": "I want to buy everything in your store",
+      "status": "PASS",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "\u2713 Intent: add_to_cart",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 137
+    },
+    {
+      "story_id": 64,
+      "group": "G13: Edge Cases",
+      "message": "What is the meaning of life?",
+      "status": "PASS",
+      "intent": "general",
+      "response": "I'm not sure I understood that. Could you rephrase, or try one of these options?",
+      "checks": [
+        "\u2713 Intent: general",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 161
+    },
+    {
+      "story_id": 65,
+      "group": "G13: Edge Cases",
+      "message": "Can you speak to me in Hindi / Arabic / French?",
+      "status": "PASS",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "\u2713 Intent: greeting",
+        "\u2713 Response: 34 chars"
+      ],
+      "response_time_ms": 141
+    },
+    {
+      "story_id": 66,
+      "group": "G13: Edge Cases",
+      "message": "I want to order 10,000 units of your most expensive product for immediate delivery today",
+      "status": "PASS",
+      "intent": "add_to_cart",
+      "response": "Sure! Which product would you like to add? You can share a product name or link.",
+      "checks": [
+        "\u2713 Intent: add_to_cart",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 140
+    },
+    {
+      "story_id": 67,
+      "group": "G13: Edge Cases",
+      "message": "My order number is AAAA-BBBB-CCCC-DDDD",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #number. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "\u2713 Intent: order_tracking",
+        "\u2713 Response: 116 chars"
+      ],
+      "response_time_ms": 141
+    },
+    {
+      "story_id": 68,
+      "group": "G13: Edge Cases",
+      "message": "I need help",
+      "status": "PASS",
+      "intent": "general",
+      "response": "I'm not sure I understood that. Could you rephrase, or try one of these options?",
+      "checks": [
+        "\u2713 Intent: general",
+        "\u2713 Response: 80 chars"
+      ],
+      "response_time_ms": 146
+    },
+    {
+      "story_id": 69,
+      "group": "G13: Edge Cases",
+      "message": "Where is my order #10045 (x5 repeated)",
+      "status": "PASS",
+      "intent": "order_tracking",
+      "response": "Repeated message handling tested",
+      "checks": [
+        "\u2713 All 5 messages handled"
+      ],
+      "response_time_ms": 153
+    },
+    {
+      "story_id": 70,
+      "group": "G13: Edge Cases",
+      "message": "I want a refund for an order I placed 2 years ago",
+      "status": "PASS",
+      "intent": "return_request",
+      "response": "Our return policy allows returns within 30 days of delivery for most items. Would you like to start a return?",
+      "checks": [
+        "\u2713 Intent: return_request",
+        "\u2713 Response: 109 chars",
+        "\u2713 Contains: 'return'",
+        "~ Missing: 'refund'",
+        "\u2713 Contains: 'policy'"
+      ],
+      "response_time_ms": 135
+    },
+    {
+      "story_id": 71,
+      "group": "G14: Handoff & Escalation",
+      "message": "I don't want to talk to a bot. Connect me to a human agent right now.",
+      "status": "PASS",
+      "intent": "escalation",
+      "response": "I understand you'd like to speak with a human agent. Let me collect your details so our team can reach out to you right away.",
+      "checks": [
+        "\u2713 Intent: escalation",
+        "\u2713 Response: 125 chars",
+        "\u2713 Escalation intent detected"
+      ],
+      "response_time_ms": 160
+    },
+    {
+      "story_id": 72,
+      "group": "G14: Handoff & Escalation",
+      "message": "The chatbot already answered my question wrong twice. I want a supervisor.",
+      "status": "PASS",
+      "intent": "escalation",
+      "response": "I understand you'd like to speak with a human agent. Let me collect your details so our team can reach out to you right away.",
+      "checks": [
+        "\u2713 Intent: escalation",
+        "\u2713 Response: 125 chars",
+        "\u2713 Escalation intent detected"
+      ],
+      "response_time_ms": 128
+    },
+    {
+      "story_id": 73,
+      "group": "G14: Handoff & Escalation",
+      "message": "This is a legal matter. I need to speak with your customer service manager.",
+      "status": "PASS",
+      "intent": "escalation",
+      "response": "I understand you'd like to speak with a human agent. Let me collect your details so our team can reach out to you right away.",
+      "checks": [
+        "\u2713 Intent: escalation",
+        "\u2713 Response: 125 chars",
+        "\u2713 Escalation intent detected"
+      ],
+      "response_time_ms": 146
+    },
+    {
+      "story_id": 74,
+      "group": "G14: Handoff & Escalation",
+      "message": "I'm a business customer with a bulk order issue. I need to speak to your B2B team.",
+      "status": "WARN",
+      "intent": "order_tracking",
+      "response": "I couldn't find order #issue. Please double-check the order number or provide the email address used for the order.",
+      "checks": [
+        "~ Intent: order_tracking (expected: escalation/human_agent/bulk_order/general)",
+        "\u2713 Response: 115 chars",
+        "~ No escalation signal found"
+      ],
+      "response_time_ms": 130
+    },
+    {
+      "story_id": 75,
+      "group": "G14: Handoff & Escalation",
+      "message": "Can I schedule a callback from your support team instead of chatting?",
+      "status": "WARN",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "~ Intent: greeting (expected: escalation/human_agent/callback/general)",
+        "\u2713 Response: 34 chars",
+        "~ No escalation signal found"
+      ],
+      "response_time_ms": 146
+    },
+    {
+      "story_id": 76,
+      "group": "G15: Proactive Scenarios",
+      "message": "I've been looking at this product for a while but I'm not sure if I should buy it.",
+      "status": "PASS",
+      "intent": "product_inquiry",
+      "response": "I found 5 products for \"I've been looking at this product for a while but I'm not sure if I should buy it.\":",
+      "checks": [
+        "\u2713 Intent: product_inquiry",
+        "\u2713 Response: 108 chars",
+        "~ Missing: 'help'",
+        "\u2713 Contains: 'product'"
+      ],
+      "response_time_ms": 269
+    },
+    {
+      "story_id": 77,
+      "group": "G15: Proactive Scenarios",
+      "message": "I have items in my cart but I'm hesitating to check out. Not sure about the total.",
+      "status": "PASS",
+      "intent": "general",
+      "response": "I'm not sure I understood that. Could you rephrase, or try one of these options?",
+      "checks": [
+        "\u2713 Intent: general",
+        "\u2713 Response: 80 chars",
+        "~ Missing: 'checkout'",
+        "~ Missing: 'cart'",
+        "~ Missing: 'help'"
+      ],
+      "response_time_ms": 166
+    },
+    {
+      "story_id": 78,
+      "group": "G15: Proactive Scenarios",
+      "message": "Rage-click detection (8 rapid clicks)",
+      "status": "PASS",
+      "intent": "rage_click",
+      "response": "Having trouble adding to cart? Let me help! Sometimes items may be out of stock or require a size/color selection first.",
+      "checks": [
+        "\u2713 Rage-click endpoint responded",
+        "\u2713 Intervention message: Having trouble adding to cart? Let me help! Sometimes items "
+      ],
+      "response_time_ms": 182
+    },
+    {
+      "story_id": 79,
+      "group": "G15: Proactive Scenarios",
+      "message": "Hi, I was shopping yesterday but didn't complete my order. I left some items in my cart.",
+      "status": "PASS",
+      "intent": "greeting",
+      "response": "Hello! Welcome to Delhi Duty Free!",
+      "checks": [
+        "\u2713 Intent: greeting",
+        "\u2713 Response: 34 chars",
+        "~ Missing: 'cart'"
+      ],
+      "response_time_ms": 143
+    },
+    {
+      "story_id": 80,
+      "group": "G15: Proactive Scenarios",
+      "message": "I searched for 'quantum flux capacitor' but nothing came up. Do you have anything similar?",
+      "status": "WARN",
+      "intent": "stock_check",
+      "response": "I found 5 product(s) for \"I searched for 'quantum flux capacitor' but nothing came up. anything similar?\".\n\n\u26a0\ufe0f Unfortunately, these items are currently out of stock.",
+      "checks": [
+        "~ Intent: stock_check (expected: product_inquiry/product_search/general)",
+        "\u2713 Response: 165 chars",
+        "\u2713 Products returned: 5"
+      ],
+      "response_time_ms": 358
+    }
+  ]
+}

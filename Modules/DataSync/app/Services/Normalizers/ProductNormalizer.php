@@ -58,6 +58,7 @@ final class ProductNormalizer
             'category_ids'      => array_map('strval', $p['category_ids'] ?? []),
             'variants'          => $p['variants'] ?? [],
             'attributes'        => $p['attributes'] ?? [],
+            'brand'             => $p['brand'] ?? null,
         ];
     }
 
@@ -81,6 +82,7 @@ final class ProductNormalizer
             'category_ids'      => array_map('strval', array_column($p['categories'] ?? [], 'id')),
             'variants'          => $this->normalizeWooVariations($p['variations'] ?? []),
             'attributes'        => $p['attributes'] ?? [],
+            'brand'             => $p['brand'] ?? null,
         ];
     }
 
@@ -104,6 +106,7 @@ final class ProductNormalizer
             'category_ids'      => $p['category_ids'] ?? [],
             'variants'          => $p['variants'] ?? [],
             'attributes'        => $p['attributes'] ?? [],
+            'brand'             => $p['brand'] ?? null,
         ];
     }
 

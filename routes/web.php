@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\Tenant\DashboardController as TenantDashboard;
 use App\Http\Controllers\Tenant\PageController as TenantPage;
+use App\Http\Controllers\Tenant\CdpController as TenantCdp;
+use App\Http\Controllers\Tenant\BiController as TenantBi;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public ───
@@ -67,26 +69,57 @@ Route::middleware(['auth', 'super_admin'])->prefix('admin')->name('admin.')->gro
 Route::middleware(['auth', 'resolve_tenant'])->prefix('app/{tenant}')->name('tenant.')->group(function () {
     Route::get('/', TenantDashboard::class)->name('dashboard');
 
-    // ── Analytics: Traffic ──
+    // ── Analytics: Dashboard (Matomo-style) ──
+    Route::get('analytics', [TenantPage::class, 'analyticsOverview'])->name('analytics.overview');
+    Route::get('analytics/visitors', [TenantPage::class, 'analyticsVisitors'])->name('analytics.visitors');
+    Route::get('analytics/visitor-log', [TenantPage::class, 'analyticsVisitorLog'])->name('analytics.visitor-log');
+    Route::get('analytics/devices', [TenantPage::class, 'analyticsDevices'])->name('analytics.devices');
+    Route::get('analytics/locations', [TenantPage::class, 'analyticsLocations'])->name('analytics.locations');
+    Route::get('analytics/times', [TenantPage::class, 'analyticsTimes'])->name('analytics.times');
+
+    // ── Analytics: Behaviour ──
+    Route::get('analytics/pages', [TenantPage::class, 'analyticsPages'])->name('analytics.pages');
+    Route::get('analytics/entry-pages', [TenantPage::class, 'analyticsEntryPages'])->name('analytics.entry-pages');
+    Route::get('analytics/exit-pages', [TenantPage::class, 'analyticsExitPages'])->name('analytics.exit-pages');
+    Route::get('analytics/events', [TenantPage::class, 'analyticsEvents'])->name('analytics.events');
+    Route::get('analytics/site-search', [TenantPage::class, 'analyticsSiteSearch'])->name('analytics.site-search');
+
+    // ── Analytics: Acquisition ──
+    Route::get('analytics/channels', [TenantPage::class, 'analyticsChannels'])->name('analytics.channels');
+    Route::get('analytics/campaigns', [TenantPage::class, 'analyticsCampaigns'])->name('analytics.campaigns');
+    Route::get('analytics/referrers', [TenantPage::class, 'analyticsReferrers'])->name('analytics.referrers');
+
+    // ── Analytics: Ecommerce ──
+    Route::get('analytics/ecommerce', [TenantPage::class, 'analyticsEcommerce'])->name('analytics.ecommerce');
+    Route::get('analytics/products', [TenantPage::class, 'analyticsProducts'])->name('analytics.products');
+    Route::get('analytics/categories', [TenantPage::class, 'analyticsCategories'])->name('analytics.categories');
+    Route::get('analytics/funnel', [TenantPage::class, 'analyticsFunnel'])->name('analytics.funnel');
+    Route::get('analytics/abandoned-carts', [TenantPage::class, 'analyticsAbandonedCarts'])->name('analytics.abandoned-carts');
+
+    // ── Analytics: AI & Insights (unique to Ecom360) ──
+    Route::get('analytics/ai-insights', [TenantPage::class, 'analyticsAiInsights'])->name('analytics.ai-insights');
+    Route::get('analytics/ask', [TenantPage::class, 'analyticsAsk'])->name('analytics.ask');
+    Route::get('analytics/predictions', [TenantPage::class, 'analyticsPredictions'])->name('analytics.predictions');
+    Route::get('analytics/benchmarks', [TenantPage::class, 'analyticsBenchmarks'])->name('analytics.benchmarks');
+
+    // ── Analytics: Real-time ──
+    Route::get('analytics/realtime', [TenantPage::class, 'analyticsRealtime'])->name('analytics.realtime');
+    Route::get('analytics/alerts', [TenantPage::class, 'analyticsAlerts'])->name('analytics.alerts');
+
+    // ── Legacy routes (backwards compatible) ──
     Route::get('realtime', [TenantPage::class, 'realtime'])->name('realtime');
     Route::get('page-visits', [TenantPage::class, 'pageVisits'])->name('page-visits');
     Route::get('sessions', [TenantPage::class, 'sessions'])->name('sessions');
     Route::get('funnels', [TenantPage::class, 'funnels'])->name('funnels');
-
-    // ── Analytics: Revenue ──
     Route::get('products', [TenantPage::class, 'products'])->name('products');
     Route::get('categories', [TenantPage::class, 'categories'])->name('categories');
     Route::get('campaigns', [TenantPage::class, 'campaigns'])->name('campaigns');
     Route::get('revenue-waterfall', [TenantPage::class, 'revenueWaterfall'])->name('revenue-waterfall');
-
-    // ── Analytics: Audience ──
     Route::get('customer-journey', [TenantPage::class, 'customerJourney'])->name('customer-journey');
     Route::get('cohorts', [TenantPage::class, 'cohorts'])->name('cohorts');
     Route::get('segments', [TenantPage::class, 'segments'])->name('segments');
     Route::get('geographic', [TenantPage::class, 'geographic'])->name('geographic');
     Route::get('clv', [TenantPage::class, 'clv'])->name('clv');
-
-    // ── Analytics: AI & Insights ──
     Route::get('ai-insights', [TenantPage::class, 'aiInsights'])->name('ai-insights');
     Route::get('why-analysis', [TenantPage::class, 'whyAnalysis'])->name('why-analysis');
     Route::get('nlq', [TenantPage::class, 'nlq'])->name('nlq');
@@ -109,6 +142,18 @@ Route::middleware(['auth', 'resolve_tenant'])->prefix('app/{tenant}')->name('ten
     Route::get('bi/alerts', [TenantPage::class, 'biAlerts'])->name('bi.alerts');
     Route::get('bi/predictions', [TenantPage::class, 'biPredictions'])->name('bi.predictions');
     Route::get('bi/exports', [TenantPage::class, 'biExports'])->name('bi.exports');
+
+    // ── BI Intelligence Dashboards ──
+    Route::get('bi/revenue',         [TenantBi::class, 'revenue'])->name('bi.revenue');
+    Route::get('bi/products',        [TenantBi::class, 'products'])->name('bi.products');
+    Route::get('bi/customers',       [TenantBi::class, 'customers'])->name('bi.customers');
+    Route::get('bi/cohorts',         [TenantBi::class, 'cohorts'])->name('bi.cohorts');
+    Route::get('bi/operations',      [TenantBi::class, 'operations'])->name('bi.operations');
+    Route::get('bi/coupons',         [TenantBi::class, 'coupons'])->name('bi.coupons');
+    Route::get('bi/attribution',     [TenantBi::class, 'attribution'])->name('bi.attribution');
+    Route::get('bi/search-revenue',  [TenantBi::class, 'searchRevenue'])->name('bi.search-revenue');
+    Route::get('bi/chatbot-impact',  [TenantBi::class, 'chatbotImpact'])->name('bi.chatbot-impact');
+    Route::get('bi/copilot',         [TenantBi::class, 'copilot'])->name('bi.copilot');
 
     // ── Monitoring ──
     Route::get('behavioral-triggers', [TenantPage::class, 'behavioralTriggers'])->name('behavioral-triggers');
@@ -162,17 +207,27 @@ Route::middleware(['auth', 'resolve_tenant'])->prefix('app/{tenant}')->name('ten
     Route::get('support/gift-cards', [TenantPage::class, 'giftCardBuilder'])->name('support.gift-cards');
     Route::get('support/video-reviews', [TenantPage::class, 'videoReviews'])->name('support.video-reviews');
 
-    // ── Next-Gen Analytics & CDP (UC41-50) ──
-    Route::get('cdp/offline-stitching', [TenantPage::class, 'offlineStitching'])->name('cdp.offline-stitching');
-    Route::get('cdp/zombie-accounts', [TenantPage::class, 'zombieAccounts'])->name('cdp.zombie-accounts');
-    Route::get('cdp/product-affinity', [TenantPage::class, 'productAffinity'])->name('cdp.product-affinity');
-    Route::get('cdp/zero-party-data', [TenantPage::class, 'zeroPartyData'])->name('cdp.zero-party-data');
-    Route::get('cdp/refund-impact', [TenantPage::class, 'refundImpact'])->name('cdp.refund-impact');
-    Route::get('cdp/attribution', [TenantPage::class, 'multiTouchAttribution'])->name('cdp.attribution');
-    Route::get('cdp/journey-replay', [TenantPage::class, 'journeyReplay'])->name('cdp.journey-replay');
-    Route::get('cdp/gdpr-purge', [TenantPage::class, 'gdprPurge'])->name('cdp.gdpr-purge');
-    Route::get('cdp/form-abandonment', [TenantPage::class, 'formAbandonment'])->name('cdp.form-abandonment');
-    Route::get('cdp/cross-benchmarking', [TenantPage::class, 'crossBenchmarking'])->name('cdp.cross-benchmarking');
+    // ── CDP — Customer Data Platform ──
+    Route::get('cdp/dashboard',              [TenantCdp::class, 'dashboard'])->name('cdp.dashboard');
+    Route::get('cdp/profiles',               [TenantCdp::class, 'profiles'])->name('cdp.profiles');
+    Route::get('cdp/profiles/{profileId}',   [TenantCdp::class, 'profileDetail'])->name('cdp.profile-detail');
+    Route::get('cdp/segments',               [TenantCdp::class, 'segments'])->name('cdp.segments');
+    Route::get('cdp/segments/{segmentId}',   [TenantCdp::class, 'segmentDetail'])->name('cdp.segment-detail');
+    Route::get('cdp/rfm',                    [TenantCdp::class, 'rfm'])->name('cdp.rfm');
+    Route::get('cdp/predictions',            [TenantCdp::class, 'predictions'])->name('cdp.predictions');
+    Route::get('cdp/data-health',            [TenantCdp::class, 'dataHealth'])->name('cdp.data-health');
+
+    // ── AI Search Settings & Analytics ──
+    Route::get('search/settings', [TenantPage::class, 'searchSettings'])->name('search.settings');
+    Route::post('search/settings', [TenantPage::class, 'searchSettingsSave'])->name('search.settings.save');
+    Route::get('search/analytics-dashboard', [TenantPage::class, 'searchAnalyticsDashboard'])->name('search.analytics');
+
+    // ── AI Chatbot Settings, Conversations & Analytics ──
+    Route::get('chatbot/settings', [TenantPage::class, 'chatbotSettings'])->name('chatbot.settings');
+    Route::post('chatbot/settings', [TenantPage::class, 'chatbotSettingsSave'])->name('chatbot.settings.save');
+    Route::get('chatbot/flows', [TenantPage::class, 'chatbotFlows'])->name('chatbot.flows');
+    Route::get('chatbot/conversations', [TenantPage::class, 'chatbotConversations'])->name('chatbot.conversations');
+    Route::get('chatbot/analytics-dashboard', [TenantPage::class, 'chatbotAnalyticsDashboard'])->name('chatbot.analytics');
 
     // ── Data Sync ──
     Route::get('datasync/connections', [TenantPage::class, 'datasyncConnections'])->name('datasync.connections');
@@ -183,6 +238,8 @@ Route::middleware(['auth', 'resolve_tenant'])->prefix('app/{tenant}')->name('ten
     Route::get('datasync/customers', [TenantPage::class, 'datasyncCustomers'])->name('datasync.customers');
     Route::get('datasync/inventory', [TenantPage::class, 'datasyncInventory'])->name('datasync.inventory');
     Route::get('datasync/logs', [TenantPage::class, 'datasyncLogs'])->name('datasync.logs');
+    Route::get('datasync/settings', [TenantPage::class, 'datasyncSettings'])->name('datasync.settings');
+    Route::post('datasync/settings', [TenantPage::class, 'datasyncSettingsSave'])->name('datasync.settings.save');
 
     // ── Developer ──
     Route::get('custom-events', [TenantPage::class, 'customEvents'])->name('custom-events');

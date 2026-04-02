@@ -125,6 +125,34 @@ class Config extends AbstractHelper
         return (int) ($this->getValue('sync/batch_size', $storeId) ?: 50);
     }
 
+    /**
+     * The product attribute code used as the brand (e.g. "manufacturer").
+     * Returns empty string if brand sync is disabled.
+     */
+    public function getBrandAttribute(?int $storeId = null): string
+    {
+        return (string) ($this->getValue('sync/brand_attribute', $storeId) ?: 'manufacturer');
+    }
+
+    /**
+     * Build the sync configuration array for reporting to the Ecom360 platform.
+     * Sent during product sync and heartbeat so the admin dashboard knows
+     * what the Magento store is configured to do.
+     */
+    public function getSyncConfig(?int $storeId = null): array
+    {
+        return [
+            'brand_attribute'  => $this->getBrandAttribute($storeId),
+            'sync_products'    => $this->isSyncProducts($storeId),
+            'sync_categories'  => $this->isSyncCategories($storeId),
+            'sync_orders'      => $this->isSyncOrders($storeId),
+            'sync_customers'   => $this->isSyncCustomers($storeId),
+            'sync_sales_data'  => $this->isSyncSalesData($storeId),
+            'sync_interval'    => $this->getSyncInterval($storeId),
+            'batch_size'       => $this->getSyncBatchSize($storeId),
+        ];
+    }
+
     /* ──────────────────── Tracking toggles ──────────────────── */
 
     public function isTrackPageViews(?int $storeId = null): bool
@@ -426,6 +454,11 @@ class Config extends AbstractHelper
         return $this->isFlag('features/ai_search_visual_enabled', $storeId);
     }
 
+    public function isAiSearchVoiceEnabled(?int $storeId = null): bool
+    {
+        return $this->isFlag('features/ai_search_voice_enabled', $storeId);
+    }
+
     public function isSyncInventory(?int $storeId = null): bool
     {
         return $this->isFlag('features/sync_inventory', $storeId);
@@ -497,6 +530,7 @@ class Config extends AbstractHelper
                 'chatbotGreeting'      => $this->getChatbotGreeting($storeId),
                 'aiSearch'             => $this->isAiSearchEnabled($storeId),
                 'aiSearchVisual'       => $this->isAiSearchVisualEnabled($storeId),
+                'aiSearchVoice'        => $this->isAiSearchVoiceEnabled($storeId),
             ],
         ];
     }

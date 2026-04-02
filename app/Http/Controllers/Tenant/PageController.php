@@ -35,6 +35,170 @@ final class PageController extends Controller
         return $request->query('date_range', '30d');
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  ANALYTICS — Matomo-style Dashboard Pages
+    // ════════════════════════════════════════════════════════════════════════
+
+    /** Analytics overview dashboard — the main Matomo-style "Dashboard" */
+    public function analyticsOverview(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.overview');
+    }
+
+    /** Visitors → Overview */
+    public function analyticsVisitors(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.visitors');
+    }
+
+    /** Visitors → Visitor Log (individual sessions) */
+    public function analyticsVisitorLog(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.visitor-log');
+    }
+
+    /** Visitors → Devices */
+    public function analyticsDevices(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.devices');
+    }
+
+    /** Visitors → Locations */
+    public function analyticsLocations(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.locations');
+    }
+
+    /** Visitors → Times */
+    public function analyticsTimes(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.times');
+    }
+
+    /** Behaviour → Pages */
+    public function analyticsPages(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.pages');
+    }
+
+    /** Behaviour → Entry Pages */
+    public function analyticsEntryPages(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.entry-pages');
+    }
+
+    /** Behaviour → Exit Pages */
+    public function analyticsExitPages(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.exit-pages');
+    }
+
+    /** Behaviour → Events (custom events) */
+    public function analyticsEvents(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.events');
+    }
+
+    /** Behaviour → Site Search */
+    public function analyticsSiteSearch(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.site-search');
+    }
+
+    /** Acquisition → Channels */
+    public function analyticsChannels(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.channels');
+    }
+
+    /** Acquisition → Campaigns (UTM breakdown) */
+    public function analyticsCampaigns(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.campaigns');
+    }
+
+    /** Acquisition → Referrers */
+    public function analyticsReferrers(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.referrers');
+    }
+
+    /** Ecommerce → Overview (revenue, orders, AOV) */
+    public function analyticsEcommerce(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.ecommerce');
+    }
+
+    /** Ecommerce → Products */
+    public function analyticsProducts(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.products');
+    }
+
+    /** Ecommerce → Categories */
+    public function analyticsCategories(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.categories');
+    }
+
+    /** Ecommerce → Conversion Funnel */
+    public function analyticsFunnel(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.funnel');
+    }
+
+    /** Ecommerce → Abandoned Carts */
+    public function analyticsAbandonedCarts(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.abandoned-carts');
+    }
+
+    /** AI & Insights → AI Insights */
+    public function analyticsAiInsights(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.ai-insights');
+    }
+
+    /** AI & Insights → Ask a Question (NLQ) */
+    public function analyticsAsk(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.ask');
+    }
+
+    /** AI & Insights → CLV Predictions & Revenue Forecast */
+    public function analyticsPredictions(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.predictions');
+    }
+
+    /** AI & Insights → Competitive Benchmarks */
+    public function analyticsBenchmarks(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.benchmarks');
+    }
+
+    /** Real-time → Live Dashboard */
+    public function analyticsRealtime(Request $request, string $tenant): View
+    {
+        $tid = $this->tid($request);
+        try {
+            $data = app(AiAnalyticsService::class)->getRealTimeOverview($tid);
+        } catch (\Throwable) {
+            $data = ['active_sessions' => 0, 'events_per_minute' => 0, 'top_pages' => [], 'geo_breakdown' => []];
+        }
+        return view('tenant.pages.analytics.realtime', ['rt' => $data]);
+    }
+
+    /** Real-time → Alerts */
+    public function analyticsAlerts(Request $request, string $tenant): View
+    {
+        return view('tenant.pages.analytics.alerts');
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  LEGACY ANALYTICS PAGES (kept for backwards compatibility)
+    // ════════════════════════════════════════════════════════════════════════
+
     // ── Real-Time Traffic ────────────────────
     public function realtime(Request $request, string $tenant): View
     {
@@ -440,7 +604,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\AiSearch\Services\PersonalizedSearchService::class)->outOfStockReroute($tid, '');
         } catch (\Throwable) {
-            $data = ['original_product' => '', 'alternatives' => [], 'restock_estimate' => null];
+            $data = ['original_product' => [], 'alternatives' => [], 'restock_estimate' => null];
         }
         return view('tenant.pages.search.oos-reroute', ['results' => $data]);
     }
@@ -517,7 +681,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\AiSearch\Services\SemanticSearchService::class)->voiceToCart($tid, '');
         } catch (\Throwable) {
-            $data = ['transcript' => '', 'parsed_items' => [], 'cart' => []];
+            $data = ['transcript' => [], 'parsed_items' => [], 'cart' => []];
         }
         return view('tenant.pages.search.voice-to-cart', ['results' => $data]);
     }
@@ -560,7 +724,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\Marketing\Services\HyperPersonalizationService::class)->cartAbandonmentDownSell($tid, $range);
         } catch (\Throwable) {
-            $data = ['abandoned_carts' => [], 'downsell_offers' => [], 'recovery_rate' => 0];
+            $data = ['abandoned_carts' => [], 'downsell_offers' => 0, 'recovery_rate' => 0];
         }
         return view('tenant.pages.marketing.cart-downsell', ['data' => $data]);
     }
@@ -612,7 +776,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\Marketing\Services\AdvancedMarketingService::class)->vipEarlyAccess($tid, $range);
         } catch (\Throwable) {
-            $data = ['vip_customers' => [], 'upcoming_launches' => [], 'engagement_rate' => 0];
+            $data = ['vip_customers' => 0, 'upcoming_launches' => [], 'engagement_rate' => 0];
         }
         return view('tenant.pages.marketing.vip-early-access', ['data' => $data]);
     }
@@ -625,7 +789,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\Marketing\Services\AdvancedMarketingService::class)->churnRiskWinback($tid, $range);
         } catch (\Throwable) {
-            $data = ['at_risk_customers' => [], 'winback_campaigns' => [], 'recovery_rate' => 0];
+            $data = ['at_risk_customers' => [], 'winback_campaigns' => 0, 'recovery_rate' => 0];
         }
         return view('tenant.pages.marketing.churn-winback', ['data' => $data]);
     }
@@ -815,7 +979,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\Chatbot\Services\ProactiveSupportService::class)->sentimentEscalation($tid, $range);
         } catch (\Throwable) {
-            $data = ['tickets' => [], 'sentiment_distribution' => [], 'escalation_rate' => 0];
+            $data = ['tickets' => [], 'sentiment_distribution' => 'N/A', 'escalation_rate' => 0];
         }
         return view('tenant.pages.support.sentiment-router', ['data' => $data]);
     }
@@ -906,7 +1070,7 @@ final class PageController extends Controller
         try {
             $data = app(\Modules\Chatbot\Services\AdvancedChatService::class)->giftCardBuilder($tid, $range);
         } catch (\Throwable) {
-            $data = ['cards_created' => 0, 'revenue' => 0, 'popular_designs' => []];
+            $data = ['cards_created' => 0, 'revenue' => 0, 'popular_designs' => 'N/A'];
         }
         return view('tenant.pages.support.gift-cards', ['data' => $data]);
     }
@@ -1050,9 +1214,22 @@ final class PageController extends Controller
         $tid = $this->tid($request);
         $range = $this->dateRange($request);
         try {
-            $data = app(\Modules\Analytics\Services\AdvancedAnalyticsOpsService::class)->crossTenantBenchmarking($tid, $range);
+            $raw = app(\Modules\Analytics\Services\AdvancedAnalyticsOpsService::class)->crossTenantBenchmarking($tid, $range);
+            // Normalize: service returns different keys than blade expects
+            $industryAvg = $raw['industry_avg'] ?? [];
+            $data = [
+                'percentile'  => $raw['current_percentile'] ?? 0,
+                'industry_avg' => is_array($industryAvg) ? ($industryAvg['avg_revenue'] ?? 'N/A') : $industryAvg,
+                'benchmarks'  => collect($raw['benchmarks'] ?? [])->map(fn($b) => [
+                    'name'         => $b['tenant_id'] ?? '-',
+                    'your_value'   => $b['revenue_30d'] ?? 0,
+                    'industry_avg' => $b['aov'] ?? 0,
+                    'percentile'   => $b['conversion_rate'] ?? 0,
+                    'trend'        => ($b['revenue_30d'] ?? 0) > 0 ? 'up' : 'flat',
+                ])->toArray(),
+            ];
         } catch (\Throwable) {
-            $data = ['benchmarks' => [], 'percentile' => 0, 'industry_avg' => []];
+            $data = ['benchmarks' => [], 'percentile' => 0, 'industry_avg' => 'N/A'];
         }
         return view('tenant.pages.cdp.cross-benchmarking', ['data' => $data]);
     }
@@ -1119,5 +1296,299 @@ final class PageController extends Controller
         $logs = \Modules\DataSync\Models\SyncLog::where('tenant_id', $tenantModel->id)
             ->orderByDesc('created_at')->paginate(25);
         return view('tenant.pages.datasync.logs', ['logs' => $logs]);
+    }
+
+    // ── AI Search Settings ───────────────────
+    public function searchSettings(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $settings = \App\Models\TenantSetting::where('tenant_id', $tenantModel->id)
+            ->where('module', 'aisearch')
+            ->pluck('value', 'key')
+            ->toArray();
+
+        return view('tenant.pages.search.settings', ['settings' => $settings]);
+    }
+
+    public function searchSettingsSave(Request $request, string $tenant): \Illuminate\Http\JsonResponse
+    {
+        $tenantModel = $request->attributes->get('tenant');
+
+        $keys = [
+            // Engine config
+            'search_results_per_page', 'search_max_raw_results', 'search_min_query_length',
+            'search_debounce_ms', 'search_throttle_rate',
+            // Relevance weights
+            'weight_text_relevance', 'weight_margin_boost', 'weight_popularity',
+            'weight_freshness', 'weight_stock',
+            // Facets
+            'facet_brands_enabled', 'facet_categories_enabled', 'facet_price_enabled',
+            'facet_color_enabled', 'facet_size_enabled', 'facet_rating_enabled',
+            'facet_brands_limit', 'facet_categories_limit',
+            // Autocomplete & Suggestions
+            'autocomplete_enabled', 'autocomplete_max_suggestions', 'suggest_cache_ttl',
+            'trending_enabled', 'trending_window_days', 'trending_max_results',
+            'typo_correction_enabled', 'smart_price_fallback',
+            // Synonyms & Aliases
+            'custom_synonyms', 'category_aliases',
+            // Currency & Display
+            'search_currency_code', 'search_currency_symbol', 'search_price_format',
+            'search_store_base_url', 'search_product_url_pattern', 'search_no_image_url',
+            // Advanced features
+            'nlq_enabled', 'fuzzy_matching_enabled', 'phonetic_matching_enabled',
+            'synonym_expansion_enabled', 'gift_concierge_enabled', 'visual_search_enabled',
+            'voice_search_enabled', 'oos_reroute_enabled', 'comparison_enabled',
+            'personalized_size_enabled',
+            // Widget appearance
+            'search_widget_color', 'search_placeholder_text', 'suggest_show_images',
+            'suggest_show_prices', 'show_brand_in_results', 'search_keyboard_shortcut',
+            // SRP config
+            'srp_default_view', 'srp_default_sort', 'srp_per_page_options',
+            'srp_show_discount_badge', 'srp_show_stock_status', 'srp_show_rating',
+        ];
+
+        foreach ($keys as $key) {
+            $value = $request->input($key);
+            if ($value !== null) {
+                \App\Models\TenantSetting::updateOrCreate(
+                    ['tenant_id' => $tenantModel->id, 'module' => 'aisearch', 'key' => $key],
+                    ['value' => $value],
+                );
+            }
+        }
+
+        \Illuminate\Support\Facades\Cache::forget("tenant_settings:{$tenantModel->id}:aisearch");
+
+        return response()->json(['success' => true, 'message' => 'Search settings saved.']);
+    }
+
+    public function searchAnalyticsDashboard(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $tid = (string) $tenantModel->id;
+        $days = (int) $request->query('days', 30);
+
+        try {
+            $searchService = app(\Modules\AiSearch\Services\SearchService::class);
+            $analytics = $searchService->getAnalytics($tid, $days);
+            $trending  = $searchService->getTrending($tid, 15);
+        } catch (\Throwable) {
+            $analytics = [
+                'total_searches' => 0, 'click_through_rate' => 0, 'conversion_rate' => 0,
+                'zero_result_rate' => 0, 'avg_response_time' => 0,
+                'top_queries' => [], 'zero_result_queries' => [],
+            ];
+            $trending = ['trending' => []];
+        }
+
+        return view('tenant.pages.search.analytics', [
+            'analytics' => $analytics,
+            'trending'  => $trending['trending'] ?? [],
+            'days'      => $days,
+        ]);
+    }
+
+    // ── AI Chatbot Settings ──────────────────
+    public function chatbotSettings(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $settings = \App\Models\TenantSetting::where('tenant_id', $tenantModel->id)
+            ->where('module', 'chatbot')
+            ->pluck('value', 'key')
+            ->toArray();
+
+        return view('tenant.pages.chatbot.settings', ['settings' => $settings]);
+    }
+
+    public function chatbotFlows(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $settings = \App\Models\TenantSetting::where('tenant_id', $tenantModel->id)
+            ->where('module', 'chatbot')
+            ->pluck('value', 'key')
+            ->toArray();
+
+        $flows = json_decode($settings['custom_flows'] ?? '[]', true) ?: [];
+
+        return view('tenant.pages.chatbot.flows', ['settings' => $settings, 'flows' => $flows]);
+    }
+
+    public function chatbotSettingsSave(Request $request, string $tenant): \Illuminate\Http\JsonResponse
+    {
+        $tenantModel = $request->attributes->get('tenant');
+
+        $keys = [
+            // Widget appearance
+            'chatbot_name', 'chatbot_greeting', 'chatbot_avatar', 'chatbot_color',
+            'chatbot_position', 'chatbot_width', 'chatbot_height', 'chatbot_offline_message',
+            // Behavior
+            'chatbot_enabled', 'chatbot_auto_open_seconds', 'chatbot_language',
+            'chatbot_product_cards', 'chatbot_max_products', 'chatbot_quick_replies',
+            'chatbot_typing_indicator', 'chatbot_sound_enabled',
+            // Intent toggles
+            'intent_greeting', 'intent_farewell', 'intent_product_inquiry', 'intent_order_tracking',
+            'intent_checkout_help', 'intent_return_request', 'intent_coupon_inquiry',
+            'intent_size_help', 'intent_shipping_inquiry', 'intent_add_to_cart',
+            // Advanced features
+            'chatbot_rage_click', 'chatbot_sentiment_escalation', 'chatbot_vip_greeting',
+            'chatbot_objection_handler', 'chatbot_visual_tracking', 'chatbot_order_modification',
+            'chatbot_warranty_claims', 'chatbot_multi_sizing',
+            'chatbot_subscription_mgmt', 'chatbot_gift_card', 'chatbot_video_review',
+            // Greeting & fallback buttons
+            'chatbot_greeting_buttons', 'chatbot_fallback_buttons', 'tpl_general_fallback',
+            // Response templates
+            'tpl_shipping', 'tpl_returns', 'tpl_no_products', 'tpl_farewell',
+            // Proactive triggers
+            'trigger_cart_abandonment', 'trigger_cart_delay', 'trigger_exit_intent',
+            'trigger_inactivity', 'trigger_inactivity_delay', 'trigger_scroll_depth',
+            'trigger_scroll_percent', 'trigger_cart_message',
+            // Escalation
+            'escalation_enabled', 'escalation_email', 'sentiment_threshold',
+            'vip_ltv_threshold', 'max_bot_turns',
+            // Business hours
+            'business_hours_enabled', 'business_timezone', 'business_hours_start',
+            'business_hours_end', 'business_days',
+            // Custom keywords
+            'custom_product_keywords',
+            // Store integration
+            'chatbot_store_url', 'chatbot_product_url_pattern', 'chatbot_currency_symbol',
+            'chatbot_free_shipping', 'chatbot_return_days', 'chatbot_warranty_days',
+            // Emergency
+            'chatbot_maintenance', 'chatbot_maintenance_message',
+            'chatbot_max_messages', 'chatbot_rate_limit',
+            // Custom flows (JSON)
+            'custom_flows',
+        ];
+
+        foreach ($keys as $key) {
+            $value = $request->input($key);
+            if ($value !== null) {
+                \App\Models\TenantSetting::updateOrCreate(
+                    ['tenant_id' => $tenantModel->id, 'module' => 'chatbot', 'key' => $key],
+                    ['value' => $value],
+                );
+            }
+        }
+
+        \Illuminate\Support\Facades\Cache::forget("tenant_settings:{$tenantModel->id}:chatbot");
+
+        return response()->json(['success' => true, 'message' => 'Chatbot settings saved.']);
+    }
+
+    public function chatbotConversations(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+
+        try {
+            $chatService = app(\Modules\Chatbot\Services\ChatService::class);
+            $filters = array_filter([
+                'status' => $request->query('status'),
+                'intent' => $request->query('intent'),
+                'email'  => $request->query('email'),
+                'limit'  => 100,
+            ]);
+            $data = $chatService->listConversations($tenantModel->id, $filters);
+            $conversations = $data['conversations'] ?? [];
+        } catch (\Throwable) {
+            $conversations = [];
+        }
+
+        // Compute stats from conversations
+        $convCollection = collect($conversations);
+        $stats = [
+            'total'     => $convCollection->count(),
+            'active'    => $convCollection->where('status', 'active')->count(),
+            'resolved'  => $convCollection->where('status', 'resolved')->count(),
+            'escalated' => $convCollection->where('status', 'escalated')->count(),
+        ];
+
+        return view('tenant.pages.chatbot.conversations', [
+            'conversations' => $conversations,
+            'stats'         => $stats,
+        ]);
+    }
+
+    public function chatbotAnalyticsDashboard(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $days = (int) $request->query('days', 30);
+
+        try {
+            $chatService = app(\Modules\Chatbot\Services\ChatService::class);
+            $analytics = $chatService->getAnalytics($tenantModel->id, $days);
+        } catch (\Throwable) {
+            $analytics = [
+                'total_conversations' => 0, 'resolution_rate' => 0, 'escalation_rate' => 0,
+                'avg_satisfaction' => null, 'intent_breakdown' => [],
+            ];
+        }
+
+        return view('tenant.pages.chatbot.analytics', [
+            'analytics' => $analytics,
+            'days'      => $days,
+        ]);
+    }
+
+    // ── Data Sync Settings ───────────────────
+    public function datasyncSettings(Request $request, string $tenant): View
+    {
+        $tenantModel = $request->attributes->get('tenant');
+        $registry    = app(\App\Services\SettingsRegistry::class);
+
+        // Load all datasync settings for this tenant
+        $settings = \App\Models\TenantSetting::where('tenant_id', $tenantModel->id)
+            ->where('module', 'datasync')
+            ->pluck('value', 'key')
+            ->toArray();
+
+        // Remote settings reported by Magento (stored during register/heartbeat)
+        $remoteSettings = \App\Models\TenantSetting::where('tenant_id', $tenantModel->id)
+            ->where('module', 'datasync_remote')
+            ->pluck('value', 'key')
+            ->toArray();
+
+        // Get the first active connection for defaults
+        $connection = \Modules\DataSync\Models\SyncConnection::where('tenant_id', $tenantModel->id)
+            ->where('is_active', true)
+            ->first();
+
+        return view('tenant.pages.datasync.settings', [
+            'settings'       => $settings,
+            'remoteSettings' => $remoteSettings,
+            'connection'     => $connection ?? (object) ['currency' => 'INR', 'locale' => 'en_US', 'store_url' => ''],
+        ]);
+    }
+
+    public function datasyncSettingsSave(Request $request, string $tenant): \Illuminate\Http\JsonResponse
+    {
+        $tenantModel = $request->attributes->get('tenant');
+
+        // All saveable setting keys
+        $keys = [
+            'brand_attribute', 'name_attribute', 'color_attribute', 'size_attribute',
+            'custom_attributes', 'image_attribute',
+            'currency_code', 'currency_symbol', 'locale',
+            'sync_products', 'sync_categories', 'sync_orders', 'sync_customers',
+            'sync_inventory', 'sync_brands',
+            'search_brand_facet', 'search_category_facet', 'search_price_facet',
+            'chatbot_enabled', 'chatbot_product_cards', 'search_autocomplete',
+            'products_per_page', 'chatbot_max_products', 'price_display',
+            'store_base_url', 'product_url_suffix', 'no_image_placeholder',
+        ];
+
+        foreach ($keys as $key) {
+            $value = $request->input($key);
+            if ($value !== null) {
+                \App\Models\TenantSetting::updateOrCreate(
+                    ['tenant_id' => $tenantModel->id, 'module' => 'datasync', 'key' => $key],
+                    ['value' => $value],
+                );
+            }
+        }
+
+        // Clear cached settings
+        \Illuminate\Support\Facades\Cache::forget("tenant_settings:{$tenantModel->id}:datasync");
+
+        return response()->json(['success' => true, 'message' => 'Settings saved.']);
     }
 }

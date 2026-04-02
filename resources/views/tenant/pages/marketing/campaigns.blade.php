@@ -3,60 +3,77 @@
 @section('title', 'Campaigns')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0 font-size-18">Campaigns</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
-                        <li class="breadcrumb-item">Marketing</li>
-                        <li class="breadcrumb-item active">Campaigns</li>
-                    </ol>
+    <div class="e360-page-header">
+        <div>
+            <h4>Campaigns</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('tenant.dashboard', $tenant->slug) }}">Dashboard</a></li>
+                    <li class="breadcrumb-item">Marketing</li>
+                    <li class="breadcrumb-item active">Campaigns</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-new-campaign"><i class="bx bx-plus me-1"></i> New Campaign</button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4" id="campaign-stats">
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Total Campaigns</span>
+                    <span class="kpi-icon" style="background:rgba(5,150,105,0.1);color:var(--marketing);"><i class="bx bx-send"></i></span>
                 </div>
+                <div class="kpi-value" id="stat-total">0</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Sent</span>
+                    <span class="kpi-icon revenue"><i class="bx bx-check-circle"></i></span>
+                </div>
+                <div class="kpi-value" id="stat-sent">0</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Avg Open Rate</span>
+                    <span class="kpi-icon conversion"><i class="bx bx-envelope-open"></i></span>
+                </div>
+                <div class="kpi-value" id="stat-open">0%</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Avg Click Rate</span>
+                    <span class="kpi-icon orders"><i class="bx bx-pointer"></i></span>
+                </div>
+                <div class="kpi-value" id="stat-click">0%</div>
             </div>
         </div>
     </div>
 
-    <div class="row" id="campaign-stats">
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid"><div class="card-body"><div class="d-flex"><div class="flex-grow-1"><p class="text-muted fw-medium">Total Campaigns</p><h4 class="mb-0" id="stat-total">0</h4></div><div class="mini-stat-icon avatar-sm rounded-circle bg-primary align-self-center"><span class="avatar-title"><i class="bx bx-send font-size-24"></i></span></div></div></div></div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid"><div class="card-body"><div class="d-flex"><div class="flex-grow-1"><p class="text-muted fw-medium">Sent</p><h4 class="mb-0" id="stat-sent">0</h4></div><div class="mini-stat-icon avatar-sm rounded-circle bg-success align-self-center"><span class="avatar-title"><i class="bx bx-check-circle font-size-24"></i></span></div></div></div></div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid"><div class="card-body"><div class="d-flex"><div class="flex-grow-1"><p class="text-muted fw-medium">Avg Open Rate</p><h4 class="mb-0" id="stat-open">0%</h4></div><div class="mini-stat-icon avatar-sm rounded-circle bg-warning align-self-center"><span class="avatar-title"><i class="bx bx-envelope-open font-size-24"></i></span></div></div></div></div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card mini-stats-wid"><div class="card-body"><div class="d-flex"><div class="flex-grow-1"><p class="text-muted fw-medium">Avg Click Rate</p><h4 class="mb-0" id="stat-click">0%</h4></div><div class="mini-stat-icon avatar-sm rounded-circle bg-info align-self-center"><span class="avatar-title"><i class="bx bx-pointer font-size-24"></i></span></div></div></div></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">All Campaigns</h4>
-                        <button type="button" class="btn btn-primary btn-sm" id="btn-new-campaign"><i class="bx bx-plus me-1"></i> New Campaign</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="campaigns-table" class="table table-centered table-nowrap mb-0 w-100">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Channel</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Sent At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
+    <div class="card" data-module="marketing">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="campaigns-table" class="table table-nowrap mb-0 w-100">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Channel</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Sent At</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>

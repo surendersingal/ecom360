@@ -1,0 +1,1043 @@
+{
+  "results": [
+    {
+      "test_id": "US-CB-051",
+      "title": "Exit Intent \u2192 Chatbot 10% Discount Offer",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Exit intent event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot responds to exit intent",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 160,
+      "timestamp": "2026-03-05T10:52:12.037573"
+    },
+    {
+      "test_id": "US-CB-052",
+      "title": "Idle on Checkout 45s \u2192 Payment Help",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Checkout idle event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot offers payment help",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 65,
+      "timestamp": "2026-03-05T10:52:12.164046"
+    },
+    {
+      "test_id": "US-CB-053",
+      "title": "Rage Click Variant \u2192 Out-of-Stock Help",
+      "modules": "Analytics, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Rage click variant event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot suggests similar items",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 63,
+      "timestamp": "2026-03-05T10:52:12.289391"
+    },
+    {
+      "test_id": "US-CB-054",
+      "title": "Logged WISMO \u2192 DataSync Order Tracking",
+      "modules": "Chatbot, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "WISMO chatbot query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync status accessible for order lookup",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:52:12.429181"
+    },
+    {
+      "test_id": "US-CB-055",
+      "title": "Guest WISMO Order #1002 \u2192 Email Verify",
+      "modules": "Chatbot, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Guest WISMO query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync accessible for order query",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 62,
+      "timestamp": "2026-03-05T10:52:12.565992"
+    },
+    {
+      "test_id": "US-CB-056",
+      "title": "FAQ Shipping \u2192 AI Search Vector Lookup",
+      "modules": "Chatbot, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "FAQ shipping query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "AI Search accessible for FAQ",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T10:52:12.719782"
+    },
+    {
+      "test_id": "US-CB-057",
+      "title": "Return Request \u2192 DataSync Order Lookup",
+      "modules": "Chatbot, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Return intent query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync accessible for order lookup",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:12.851714"
+    },
+    {
+      "test_id": "US-CB-058",
+      "title": "Photo Upload \u2192 AI Search Visual Match",
+      "modules": "Chatbot, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Visual search chatbot query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "AI Search returns results",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 91,
+      "timestamp": "2026-03-05T10:52:13.034777"
+    },
+    {
+      "test_id": "US-CB-059",
+      "title": "Semantic Search \u2192 AI Search Carousel",
+      "modules": "Chatbot, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Semantic search query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "AI Search filters by price",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 94,
+      "timestamp": "2026-03-05T10:52:13.231351"
+    },
+    {
+      "test_id": "US-CB-060",
+      "title": "Gibberish Input \u2192 Graceful Fallback",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Gibberish input handled gracefully",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:52:13.294079"
+    },
+    {
+      "test_id": "US-CB-061",
+      "title": "Profanity \u2192 Policy Warning + Admin Log",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Profanity input handled",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Chatbot analytics accessible for moderation logs",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:13.416790"
+    },
+    {
+      "test_id": "US-CB-062",
+      "title": "Agent Handoff \u2192 Live Agent Queue",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Agent handoff request accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Conversations list accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:52:13.579046"
+    },
+    {
+      "test_id": "US-CB-063",
+      "title": "Lead Form \u2192 Marketing Audience",
+      "modules": "Chatbot, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Lead form submission accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contacts API accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:52:13.701780"
+    },
+    {
+      "test_id": "US-CB-064",
+      "title": "Language Change (ES) \u2192 Auto-Translate",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Spanish chatbot query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:52:13.757395"
+    },
+    {
+      "test_id": "US-CB-065",
+      "title": "Chat 10-Min Idle \u2192 Session Timeout",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Initial chat session opened",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Session timeout event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:52:13.871448"
+    },
+    {
+      "test_id": "US-CB-066",
+      "title": "Competitor Mention \u2192 Store Value Pivot",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Competitor mention handled",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 84,
+      "timestamp": "2026-03-05T10:52:13.957356"
+    },
+    {
+      "test_id": "US-CB-067",
+      "title": "Cancel Pending Order \u2192 Initiate Cancellation",
+      "modules": "Chatbot, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Cancel pending order query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync status for order cancel check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:52:14.092944"
+    },
+    {
+      "test_id": "US-CB-068",
+      "title": "Cancel Shipped Order \u2192 Deny + Return Policy",
+      "modules": "Chatbot, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Cancel shipped order query accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "DataSync accessible for shipped order",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 1267,
+      "timestamp": "2026-03-05T10:52:15.435533"
+    },
+    {
+      "test_id": "US-CB-069",
+      "title": "Discount Request \u2192 Promo Check + Email",
+      "modules": "Chatbot, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Discount request handled",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing campaigns accessible for promo check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:15.561017"
+    },
+    {
+      "test_id": "US-CB-070",
+      "title": "VIP User \u2192 Priority Support Queue",
+      "modules": "Chatbot, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "VIP greeting endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI accessible for VIP tier verification",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 53,
+      "timestamp": "2026-03-05T10:52:15.677709"
+    },
+    {
+      "test_id": "US-MK-071",
+      "title": "Newsletter Signup \u2192 Welcome Series",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Contact created in Marketing",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing flows accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 66,
+      "timestamp": "2026-03-05T10:52:15.803826"
+    },
+    {
+      "test_id": "US-MK-072",
+      "title": "Account Register \u2192 Welcome Email",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Account created event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing contacts accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 66,
+      "timestamp": "2026-03-05T10:52:15.937124"
+    },
+    {
+      "test_id": "US-MK-073",
+      "title": "Abandon $150 Cart \u2192 High-Value Recovery",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "High-value cart abandon batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Marketing flows for cart recovery",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 126,
+      "timestamp": "2026-03-05T10:52:16.130361"
+    },
+    {
+      "test_id": "US-MK-074",
+      "title": "Abandon $15 Cart \u2192 Low-Value Recovery",
+      "modules": "Chatbot, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Low-value cart abandon batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 117,
+      "timestamp": "2026-03-05T10:52:16.251056"
+    },
+    {
+      "test_id": "US-MK-075",
+      "title": "Abandon Cart \u2192 Purchase \u2192 Cancel Flow",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Abandon\u2192Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "All 3 events ingested",
+          "pass": true,
+          "details": "ingested=3"
+        }
+      ],
+      "elapsed_ms": 186,
+      "timestamp": "2026-03-05T10:52:16.442566"
+    },
+    {
+      "test_id": "US-MK-076",
+      "title": "Browse Abandon (3 Shoes) \u2192 Reco Email",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Browse abandon batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "All 3 views ingested",
+          "pass": true,
+          "details": "ingested=3"
+        },
+        {
+          "label": "Flows accessible for browse abandon",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 181,
+      "timestamp": "2026-03-05T10:52:16.689522"
+    },
+    {
+      "test_id": "US-MK-077",
+      "title": "Email Click \u2192 Campaign Attribution",
+      "modules": "Mktg, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Email click event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaign stats accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Analytics campaign tracking accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 63,
+      "timestamp": "2026-03-05T10:52:16.869262"
+    },
+    {
+      "test_id": "US-MK-078",
+      "title": "Unsubscribe \u2192 Opt-out Email",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Contact created for unsubscribe test",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Unsubscribe processed",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:16.995791"
+    },
+    {
+      "test_id": "US-MK-079",
+      "title": "Order Complete \u2192 Thank You + Review",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Order complete event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Post-purchase flows accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 65,
+      "timestamp": "2026-03-05T10:52:17.125324"
+    },
+    {
+      "test_id": "US-MK-080",
+      "title": "5-Star Review \u2192 Loyalty 15% Off",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "5-star review event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Loyalty flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:17.245037"
+    },
+    {
+      "test_id": "US-MK-081",
+      "title": "60-Day Churn \u2192 Winback SMS + Email",
+      "modules": "BI, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Churn-risk user event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI KPIs for churn detection",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Winback flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T10:52:17.419719"
+    },
+    {
+      "test_id": "US-MK-082",
+      "title": "Invalid SMS Number \u2192 Bounce Flag",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Contact with invalid SMS created",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing channels accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:52:17.538335"
+    },
+    {
+      "test_id": "US-MK-083",
+      "title": "Winback SMS Click \u2192 Purchase \u2192 Flow ROI",
+      "modules": "Mktg, Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Winback SMS\u2192Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Campaign analytics for SMS ROI",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Revenue analytics for flow ROI",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 117,
+      "timestamp": "2026-03-05T10:52:17.771837"
+    },
+    {
+      "test_id": "US-MK-084",
+      "title": "$500 LTV \u2192 BI Update \u2192 VIP Segment",
+      "modules": "BI, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "LTV purchase event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "CLV prediction accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contacts for VIP move",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:52:17.946126"
+    },
+    {
+      "test_id": "US-MK-085",
+      "title": "VIP Broadcast \u2192 Exclusive Early Access",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Marketing campaigns API accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing lists (VIP segment) accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T10:52:18.062672"
+    },
+    {
+      "test_id": "US-MK-086",
+      "title": "Soft Bounce \u2192 Disable After 3 Bounces",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Bounce contact created",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "SendGrid webhook endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:18.171259"
+    },
+    {
+      "test_id": "US-MK-087",
+      "title": "Birthday Flow \u2192 Scheduled Dispatch",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Birthday contact created",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Birthday flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:52:18.290932"
+    },
+    {
+      "test_id": "US-MK-088",
+      "title": "Cross-sell \u2192 PS5 \u2192 Controller Reco",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "PS5 purchase event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Cross-sell flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T10:52:18.407278"
+    },
+    {
+      "test_id": "US-MK-089",
+      "title": "Restock Notify \u2192 DataSync \u2192 Email",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Restock notification event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync accessible for inventory check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:52:18.534139"
+    },
+    {
+      "test_id": "US-MK-090",
+      "title": "Restock Email \u2192 Purchase \u2192 Attribution",
+      "modules": "Mktg, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Restock click\u2192Purchase batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Campaign attribution accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 116,
+      "timestamp": "2026-03-05T10:52:18.712780"
+    },
+    {
+      "test_id": "US-MK-091",
+      "title": "A/B Test Subject A \u2192 Track Open Rate",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "A/B variant A open tracked",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaigns accessible for A/B stats",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 62,
+      "timestamp": "2026-03-05T10:52:18.833546"
+    },
+    {
+      "test_id": "US-MK-092",
+      "title": "A/B Test Subject B \u2192 Auto-Scale Winner",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "A/B variant B open tracked",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaigns accessible for auto-scale",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T10:52:18.952545"
+    },
+    {
+      "test_id": "US-MK-093",
+      "title": "Facebook Lead Ad \u2192 Marketing Contact",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Meta webhook endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 43,
+      "timestamp": "2026-03-05T10:52:18.998652"
+    },
+    {
+      "test_id": "US-MK-094",
+      "title": "Replenishment \u2192 Dog Food Reorder Reminder",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Consumable purchase event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Replenishment flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T10:52:19.123706"
+    },
+    {
+      "test_id": "US-MK-095",
+      "title": "Flash Sale Countdown \u2192 Dynamic Timer",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Timer view event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Templates accessible for timer widget",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T10:52:19.240650"
+    },
+    {
+      "test_id": "US-MK-096",
+      "title": "Spam Complaint \u2192 Immediate Suppression",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Spam complaint webhook responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 43,
+      "timestamp": "2026-03-05T10:52:19.286200"
+    },
+    {
+      "test_id": "US-MK-097",
+      "title": "Order Shipped \u2192 Transactional Email",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Order shipped event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync for shipment tracking",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Transactional flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 1132,
+      "timestamp": "2026-03-05T10:52:20.553050"
+    },
+    {
+      "test_id": "US-MK-098",
+      "title": "Order Refunded \u2192 Remove Cross-sell",
+      "modules": "Sync, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Order refunded event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "DataSync for refund processing",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing flows for cross-sell removal",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T10:52:20.741528"
+    },
+    {
+      "test_id": "US-MK-099",
+      "title": "Push Notification Opt-in \u2192 Welcome Push",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Push opt-in event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing channels for push delivery",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T10:52:20.857636"
+    },
+    {
+      "test_id": "US-MK-100",
+      "title": "Abandoned Cart \u2192 Web Push Notification",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Cart abandon batch accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Both events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Marketing channels for push routing",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 114,
+      "timestamp": "2026-03-05T10:52:21.040176"
+    }
+  ],
+  "summary": {
+    "total": 50,
+    "pass": 50,
+    "warn": 0,
+    "fail": 0,
+    "pass_rate": 100.0,
+    "execution_time_s": 9.23,
+    "timestamp": "2026-03-05T10:52:21.042830"
+  }
+}

@@ -53,6 +53,7 @@ final class ValidateTrackingApiKey
         $response->headers->set('Access-Control-Allow-Origin', $request->header('Origin', '*'));
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-Ecom360-Key, X-Requested-With');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Max-Age', '86400');
 
         return $response;

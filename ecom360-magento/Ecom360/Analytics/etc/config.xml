@@ -24,6 +24,7 @@
                 <sync_sales_data>1</sync_sales_data>
                 <sync_interval>every_hour</sync_interval>
                 <batch_size>50</batch_size>
+                <brand_attribute>manufacturer</brand_attribute>
             </sync>
             <tracking>
                 <track_page_views>1</track_page_views>

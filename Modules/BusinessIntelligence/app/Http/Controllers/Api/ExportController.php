@@ -26,15 +26,20 @@ final class ExportController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'report_id' => 'required|integer|exists:bi_reports,id',
-            'format' => 'required|in:csv,xlsx,json,pdf',
+            'name'      => 'nullable|string|max:255',
+            'report_id' => 'required|integer',
+            'format'    => 'required|in:csv,xlsx,json,pdf',
         ]);
 
-        $service = app(ExportService::class);
-        $export = $service->export($this->tenantId(), $request->input('report_id'), $request->input('format'), $request->input('filters', []));
-
-        return $this->successResponse($export, 201);
+        try {
+            $service = app(ExportService::class);
+            $export = $service->export($this->tenantId(), $request->input('report_id'), $request->input('format'), $request->input('filters', []));
+            return $this->successResponse($export, 201);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Report not found.', 404);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Export failed: ' . $e->getMessage(), 500);
+        }
     }
 
     public function show(int $id): JsonResponse

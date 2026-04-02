@@ -15,6 +15,8 @@ use Modules\AiSearch\Models\SearchLog;
  *   - Margin-Optimized Search Ranking (UC17)
  *   - Multi-Language Smart Segmentation (UC18)
  *   - Product discovery + auto-suggestions
+ *
+ * All configurable values are read from TenantSettings (module=aisearch).
  */
 class SearchService
 {
@@ -26,35 +28,99 @@ class SearchService
     }
 
     /**
+     * Load all aisearch settings for a tenant (cached 1 hour).
+     */
+    private function loadSettings(string $tenantId): array
+    {
+        return Cache::remember("tenant_settings:{$tenantId}:aisearch", 3600, function () use ($tenantId) {
+            return \App\Models\TenantSetting::where('tenant_id', (int) $tenantId)
+                ->where('module', 'aisearch')
+                ->pluck('value', 'key')
+                ->toArray();
+        });
+    }
+
+    private function setting(array $settings, string $key, mixed $default = null): mixed
+    {
+        return $settings[$key] ?? $default;
+    }
+
+    /**
+     * Return widget-facing configuration flags for the storefront.
+     * Mirrors the pattern used by Chatbot's getWidgetConfig().
+     */
+    public function getWidgetConfig(string $tenantId): array
+    {
+        $settings = $this->loadSettings($tenantId);
+
+        return [
+            'visual_search_enabled'  => (bool) $this->setting($settings, 'visual_search_enabled', false),
+            'voice_search_enabled'   => (bool) $this->setting($settings, 'voice_search_enabled', false),
+            'suggest_enabled'        => (bool) $this->setting($settings, 'autocomplete_enabled', true),
+            'trending_enabled'       => (bool) $this->setting($settings, 'trending_enabled', true),
+            'widget_color'           => $this->setting($settings, 'search_widget_color', null),
+            'widget_placeholder'     => $this->setting($settings, 'search_placeholder_text', 'Search products, brands, categories...'),
+            'widget_show_images'     => (bool) $this->setting($settings, 'suggest_show_images', true),
+            'widget_show_prices'     => (bool) $this->setting($settings, 'suggest_show_prices', true),
+            'widget_show_brands'     => (bool) $this->setting($settings, 'show_brand_in_results', true),
+            'widget_keyboard_shortcut' => (bool) $this->setting($settings, 'search_keyboard_shortcut', true),
+            'comparison_enabled'     => (bool) $this->setting($settings, 'comparison_enabled', false),
+        ];
+    }
+
+    /**
      * Search products with AI-powered ranking.
      */
     public function search(string|int $tenantId, array $params): array
     {
         $startTime = microtime(true);
+        $tenantId = (string) $tenantId;
+        $settings = $this->loadSettings($tenantId);
+
         $query = $params['query'] ?? '';
         $filters = $params['filters'] ?? [];
         $page = max(1, (int) ($params['page'] ?? 1));
-        $perPage = min(100, max(1, (int) ($params['per_page'] ?? 20)));
+        $defaultPerPage = (int) $this->setting($settings, 'search_results_per_page', 20);
+        $perPage = min(100, max(1, (int) ($params['per_page'] ?? $defaultPerPage)));
         $sortBy = $params['sort_by'] ?? 'relevance';
         $language = $params['language'] ?? 'en';
-        $tenantId = (string) $tenantId; // MongoDB stores tenant_id as string
+
+        $maxRawResults = (int) $this->setting($settings, 'search_max_raw_results', 500);
+        $nlqEnabled = (bool) $this->setting($settings, 'nlq_enabled', true);
+        $fuzzyEnabled = (bool) $this->setting($settings, 'fuzzy_matching_enabled', true);
+        $synonymEnabled = (bool) $this->setting($settings, 'synonym_expansion_enabled', true);
+        $currencySymbol = $this->setting($settings, 'search_currency_symbol', '₹');
 
         try {
-            // Expand query with synonyms and NLP
-            $expandedQuery = $this->expandQuery($query, $language);
+            // Step 1: Parse natural language intent (category + price extraction)
+            $nlq = $nlqEnabled
+                ? $this->parseNaturalLanguageQuery($tenantId, $query, $settings)
+                : ['text_query' => $query, 'filters' => [], 'interpretation' => null];
+            $searchQuery = $nlq['text_query'];
 
-            // Build MongoDB search — focus on name + sku for precision
+            // Merge NLQ-extracted filters with explicit filters (explicit takes priority)
+            $mergedFilters = array_merge($nlq['filters'], $filters);
+
+            // Step 2: Expand query with synonyms
+            $expandedQuery = ($searchQuery && $synonymEnabled)
+                ? $this->expandQuery($searchQuery, $language, $settings)
+                : ($searchQuery ? array_filter(explode(' ', trim($searchQuery))) : []);
+
+            // Step 3: Build MongoDB query
             $dbQuery = DB::connection('mongodb')
                 ->table('synced_products')
                 ->where('tenant_id', $tenantId);
 
-            // Text search: name + sku only (not description) for better precision
-            if ($query) {
+            // Text search with fuzzy matching
+            $significantTerms = [];
+            $fuzzyPatterns = [];
+            if ($searchQuery) {
                 $significantTerms = $this->getSignificantTerms($expandedQuery);
+                $fuzzyPatterns = $fuzzyEnabled ? $this->generateFuzzyPatterns($significantTerms) : [];
 
-                $dbQuery->where(function ($q) use ($query, $significantTerms) {
-                    // Full phrase match on name
-                    $escapedPhrase = preg_quote($query, '/');
+                $dbQuery->where(function ($q) use ($searchQuery, $significantTerms, $fuzzyPatterns) {
+                    // Full phrase match on name (highest priority)
+                    $escapedPhrase = preg_quote($searchQuery, '/');
                     $q->where('name', 'regex', "/{$escapedPhrase}/i");
 
                     // All significant terms in name (AND logic)
@@ -66,50 +132,116 @@ class SearchService
                         });
                     }
 
-                    // Individual significant terms in name or sku
+                    // Individual significant terms in name + sku
                     foreach ($significantTerms as $term) {
                         $escaped = preg_quote($term, '/');
-                        $q->orWhere('name', 'regex', "/{$escaped}/i")
-                          ->orWhere('sku', 'regex', "/{$escaped}/i");
+                        $q->orWhere('name', 'regex', "/{$escaped}/i");
+                        if (strlen($term) >= 4) {
+                            $q->orWhere('sku', 'regex', "/{$escaped}/i");
+                        }
+                    }
+
+                    // Fuzzy prefix patterns (catch typos like johhie→johnnie)
+                    foreach ($fuzzyPatterns as $pattern) {
+                        $q->orWhere('name', 'regex', $pattern);
                     }
                 });
             }
 
-            // Apply filters
-            $this->applyFilters($dbQuery, $filters);
+            // Apply filters (NLQ-extracted + explicit)
+            $this->applyFilters($dbQuery, $mergedFilters);
 
-            // Get raw results
-            $rawResults = $dbQuery->limit(200)->get();
+            // Get raw results (configurable limit)
+            $rawResults = $dbQuery->limit($maxRawResults)->get();
 
-            // Score and rank results
-            $scored = $this->relevanceService->scoreResults($tenantId, $rawResults, $query, $sortBy);
+            // Score and rank results (pass original query for relevance calc)
+            $scored = $this->relevanceService->scoreResults(
+                $tenantId, $rawResults, $searchQuery ?: $query, $sortBy, $settings
+            );
+
+            $total = count($scored);
+            $fallbackHint = null;
+            $facetSource = $rawResults;
+
+            // Smart fallback: if NLQ price filter yields 0 results, relax price and show hint
+            if ($total === 0 && (bool) $this->setting($settings, 'smart_price_fallback', true) &&
+                !empty($nlq['filters']) &&
+                (isset($nlq['filters']['min_price']) || isset($nlq['filters']['max_price']))) {
+
+                $relaxedFilters = $nlq['filters'];
+                unset($relaxedFilters['min_price'], $relaxedFilters['max_price']);
+                $relaxedMerged = array_merge($relaxedFilters, $filters);
+
+                $fallbackQuery = DB::connection('mongodb')
+                    ->table('synced_products')
+                    ->where('tenant_id', $tenantId);
+
+                // Re-apply text search if present
+                if ($searchQuery) {
+                    $fallbackQuery->where(function ($q) use ($searchQuery, $significantTerms, $fuzzyPatterns) {
+                        $escapedPhrase = preg_quote($searchQuery, '/');
+                        $q->where('name', 'regex', "/{$escapedPhrase}/i");
+                        foreach ($significantTerms as $term) {
+                            $escaped = preg_quote($term, '/');
+                            $q->orWhere('name', 'regex', "/{$escaped}/i");
+                        }
+                        foreach ($fuzzyPatterns as $pattern) {
+                            $q->orWhere('name', 'regex', $pattern);
+                        }
+                    });
+                }
+
+                $this->applyFilters($fallbackQuery, $relaxedMerged);
+                $fallbackRaw = $fallbackQuery->orderBy('price', 'asc')->limit($maxRawResults)->get();
+
+                if ($fallbackRaw->count() > 0) {
+                    $minPrice = $fallbackRaw->min('price');
+                    $categoryName = $nlq['filters']['category'] ?? 'products';
+                    $priceFormatted = $currencySymbol . number_format((float) $minPrice);
+
+                    if (isset($nlq['filters']['max_price'])) {
+                        $fallbackHint = "No {$categoryName} under {$currencySymbol}" . number_format($nlq['filters']['max_price']) . ". Cheapest starts at {$priceFormatted}.";
+                    } else {
+                        $fallbackHint = "Showing {$categoryName} results without price filter.";
+                    }
+
+                    $scored = $this->relevanceService->scoreResults(
+                        $tenantId, $fallbackRaw, $searchQuery ?: $query, $sortBy, $settings
+                    );
+                    $total = count($scored);
+                    $facetSource = $fallbackRaw;
+                }
+            }
 
             // Paginate
-            $total = count($scored);
             $results = array_slice($scored, ($page - 1) * $perPage, $perPage);
 
             $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
 
-            // Log search
             $this->logSearch($tenantId, $params, count($results), $responseTimeMs);
 
-            // Generate suggestions if no results
             $suggestions = $total === 0 ? $this->getSuggestions($tenantId, $query) : [];
 
             return [
-                'success'       => true,
-                'query'         => $query,
-                'results'       => $results,
-                'total'         => $total,
-                'page'          => $page,
-                'per_page'      => $perPage,
-                'has_more'      => ($page * $perPage) < $total,
-                'suggestions'   => $suggestions,
-                'facets'        => $this->buildFacets($rawResults),
+                'success'          => true,
+                'query'            => $query,
+                'interpreted_as'   => $nlq['interpretation'] ?? null,
+                'fallback_hint'    => $fallbackHint,
+                'results'          => $results,
+                'total'            => $total,
+                'page'             => $page,
+                'per_page'         => $perPage,
+                'has_more'         => ($page * $perPage) < $total,
+                'suggestions'      => $suggestions,
+                'facets'           => $this->buildFacets($facetSource, $settings),
                 'response_time_ms' => $responseTimeMs,
             ];
         } catch (\Exception $e) {
-            Log::error("SearchService::search error: {$e->getMessage()}");
+            Log::error("SearchService::search error: {$e->getMessage()}", [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return ['success' => false, 'error' => $e->getMessage(), 'results' => []];
         }
     }
@@ -120,9 +252,11 @@ class SearchService
     public function suggest(string|int $tenantId, string $prefix, int $limit = 8): array
     {
         $tenantId = (string) $tenantId; // MongoDB stores tenant_id as string
+        $settings = $this->loadSettings($tenantId);
+        $cacheTtl = (int) $this->setting($settings, 'suggest_cache_ttl', 300);
         $cacheKey = "search_suggest:{$tenantId}:" . md5($prefix);
 
-        return Cache::remember($cacheKey, 300, function () use ($tenantId, $prefix, $limit) {
+        return Cache::remember($cacheKey, $cacheTtl, function () use ($tenantId, $prefix, $limit) {
             try {
                 $escaped = preg_quote($prefix, '/');
 
@@ -272,11 +406,11 @@ class SearchService
 
     // ── Private helpers ──────────────────────────────────────────────
 
-    private function expandQuery(string $query, string $language): array
+    private function expandQuery(string $query, string $language, array $settings = []): array
     {
         $terms = array_filter(explode(' ', trim($query)));
 
-        // Domain-aware synonym expansion (duty-free / liquor store)
+        // Default domain-aware synonym expansion (duty-free / liquor store)
         $synonyms = [
             'whisky'    => ['whiskey'],
             'whiskey'   => ['whisky'],
@@ -292,6 +426,19 @@ class SearchService
             'chocolate' => ['confectionery'],
             'wine'      => ['champagne', 'sparkling'],
         ];
+
+        // Merge custom synonyms from admin settings (format: "word → syn1, syn2")
+        $customSynonyms = $this->setting($settings, 'custom_synonyms', '');
+        if (is_string($customSynonyms) && trim($customSynonyms)) {
+            foreach (explode("\n", $customSynonyms) as $line) {
+                $line = trim($line);
+                if (empty($line) || !str_contains($line, '→')) continue;
+                [$word, $syns] = array_map('trim', explode('→', $line, 2));
+                $word = strtolower($word);
+                $synList = array_map('trim', explode(',', $syns));
+                $synonyms[$word] = array_merge($synonyms[$word] ?? [], $synList);
+            }
+        }
 
         $expanded = $terms;
         foreach ($terms as $term) {
@@ -322,6 +469,234 @@ class SearchService
         }));
     }
 
+    // ── Natural Language Query (NLQ) Parser ──────────────────────────
+
+    /**
+     * Parse natural language queries to extract intent.
+     * Examples:
+     *   "liquor under 500"     → category=Liquor, max_price=500
+     *   "whisky above 5000"    → text=whisky, min_price=5000
+     *   "perfume between 1000 and 5000" → category=Perfumes, min_price=1000, max_price=5000
+     */
+    private function parseNaturalLanguageQuery(string $tenantId, string $query, array $settings = []): array
+    {
+        $original = $query;
+        $queryLower = strtolower(trim($query));
+        $filters = [];
+        $interpretation = [];
+        $currencySymbol = $this->setting($settings, 'search_currency_symbol', '₹');
+
+        // ── Price extraction ──
+
+        // "between X and Y" / "between X to Y"
+        if (preg_match('/between\s+[₹$]?\s*(\d+)\s*(?:and|to|-)\s*[₹$]?\s*(\d+)/i', $queryLower, $m)) {
+            $filters['min_price'] = (float) $m[1];
+            $filters['max_price'] = (float) $m[2];
+            $interpretation[] = "Price {$currencySymbol}" . number_format((float) $m[1]) . " - {$currencySymbol}" . number_format((float) $m[2]);
+            $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+        }
+        // "under 500" / "below 1000" / "less than" / "upto" / "within" / "max"
+        elseif (preg_match('/(?:under|below|less\s+than|upto|up\s+to|cheaper\s+than|within|max|budget)\s+[₹$]?\s*(\d+)/i', $queryLower, $m)) {
+            $filters['max_price'] = (float) $m[1];
+            $interpretation[] = "Price under {$currencySymbol}" . number_format((float) $m[1]);
+            $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+        }
+        // "from 4000 to 5000" / "from X - Y" (range with from keyword)
+        elseif (preg_match('/from\s+[₹$]?\s*(\d+)\s*(?:to|-)\s*[₹$]?\s*(\d+)/i', $queryLower, $m)) {
+            $filters['min_price'] = (float) $m[1];
+            $filters['max_price'] = (float) $m[2];
+            $interpretation[] = "Price {$currencySymbol}" . number_format((float) $m[1]) . " - {$currencySymbol}" . number_format((float) $m[2]);
+            $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+        }
+        // "above 5000" / "over 1000" / "more than" / "from" / "starting" / "min"
+        elseif (preg_match('/(?:above|over|more\s+than|from|starting|min|atleast|at\s+least)\s+[₹$]?\s*(\d+)/i', $queryLower, $m)) {
+            $filters['min_price'] = (float) $m[1];
+            $interpretation[] = "Price over {$currencySymbol}" . number_format((float) $m[1]);
+            $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+        }
+        // "₹X to Y" or "₹X-Y" as price range (currency prefixed)
+        elseif (preg_match('/[₹$]\s*(\d+)\s*(?:to|-)\s*[₹$]?\s*(\d+)/i', $queryLower, $m)) {
+            $min = (float) $m[1]; $max = (float) $m[2];
+            if ($min < $max && $min >= 100) {
+                $filters['min_price'] = $min;
+                $filters['max_price'] = $max;
+                $interpretation[] = "Price {$currencySymbol}" . number_format($min) . " - {$currencySymbol}" . number_format($max);
+                $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+            }
+        }
+        // "4000 to 5000" or "4000-5000" bare number range (min >= 100 to avoid age matches)
+        elseif (preg_match('/\b(\d{3,})\s*(?:to|-)\s*(\d{3,})\b/', $queryLower, $m)) {
+            $min = (float) $m[1]; $max = (float) $m[2];
+            if ($min < $max && $min >= 100) {
+                $filters['min_price'] = $min;
+                $filters['max_price'] = $max;
+                $interpretation[] = "Price {$currencySymbol}" . number_format($min) . " - {$currencySymbol}" . number_format($max);
+                $queryLower = trim(str_ireplace($m[0], '', $queryLower));
+            }
+        }
+
+        // ── Category extraction ── (match against real MongoDB categories + aliases)
+
+        $categoryAliases = [
+            'liquor'        => 'Liquor',
+            'liquors'       => 'Liquor',
+            'alcohol'       => 'Liquor',
+            'drinks'        => 'Liquor',
+            'spirits'       => 'Liquor',
+            'perfume'       => 'Perfumes',
+            'perfumes'      => 'Perfumes',
+            'fragrance'     => 'Perfumes',
+            'fragrances'    => 'Perfumes',
+            'cologne'       => 'Colognes',
+            'beauty'        => 'Beauty',
+            'cosmetics'     => 'Beauty',
+            'makeup'        => 'Beauty',
+            'chocolate'     => 'Confectionery',
+            'chocolates'    => 'Confectionery',
+            'confectionery' => 'Confectionery',
+            'candy'         => 'Confectionery',
+            'sweets'        => 'Confectionery',
+            'lipstick'      => 'Lips',
+            'lips'          => 'Lips',
+            'skincare'      => 'Skincare',
+            'wine'          => 'Wine',
+            'wines'         => 'Wine',
+            'champagne'     => 'Champagne',
+            'vodka'         => 'Vodka',
+            'gin'           => 'Gin',
+            'rum'           => 'Rum',
+            'brandy'        => 'Brandy',
+            'cognac'        => 'Cognac',
+            'tequila'       => 'Tequila',
+            'bourbon'       => 'Bourbon',
+            'scotch'        => 'Blended Scotch',
+        ];
+
+        // Merge custom category aliases from admin settings (format: "alias → Category Name")
+        $customAliases = $this->setting($settings, 'category_aliases', '');
+        if (is_string($customAliases) && trim($customAliases)) {
+            foreach (explode("\n", $customAliases) as $line) {
+                $line = trim($line);
+                if (empty($line) || !str_contains($line, '→')) continue;
+                [$alias, $category] = array_map('trim', explode('→', $line, 2));
+                $categoryAliases[strtolower($alias)] = $category;
+            }
+        }
+
+        // Also load actual categories from DB cache
+        $dbCategories = $this->getCachedCategories($tenantId);
+
+        $words = array_values(array_filter(explode(' ', $queryLower)));
+        $remainingWords = [];
+        $matchedCategory = null;
+
+        // Check multi-word categories first (e.g. "single malt", "blended scotch")
+        $skipNext = false;
+        for ($i = 0; $i < count($words); $i++) {
+            if ($skipNext) { $skipNext = false; continue; }
+            $word = $words[$i];
+            $bigram = ($i < count($words) - 1) ? $word . ' ' . $words[$i + 1] : '';
+
+            // Multi-word match
+            if ($bigram && !$matchedCategory) {
+                foreach ($dbCategories as $cat) {
+                    if (strtolower($cat) === $bigram) {
+                        $matchedCategory = $cat;
+                        $interpretation[] = "Category: {$cat}";
+                        $skipNext = true;
+                        break;
+                    }
+                }
+                if ($skipNext) continue;
+            }
+
+            // Single-word alias match
+            if (!$matchedCategory && isset($categoryAliases[$word])) {
+                $matchedCategory = $categoryAliases[$word];
+                $interpretation[] = "Category: {$matchedCategory}";
+                continue;
+            }
+
+            // Single-word exact category match
+            if (!$matchedCategory) {
+                foreach ($dbCategories as $cat) {
+                    if (strtolower($cat) === $word) {
+                        $matchedCategory = $cat;
+                        $interpretation[] = "Category: {$cat}";
+                        break;
+                    }
+                }
+                if ($matchedCategory) continue;
+            }
+
+            $remainingWords[] = $word;
+        }
+
+        if ($matchedCategory) {
+            $filters['category'] = $matchedCategory;
+        }
+
+        $textQuery = trim(implode(' ', $remainingWords));
+
+        return [
+            'text_query'     => $textQuery,
+            'filters'        => $filters,
+            'interpretation' => !empty($interpretation) ? implode(' · ', $interpretation) : null,
+        ];
+    }
+
+    // ── Fuzzy / Typo-Tolerant Search ─────────────────────────────────
+
+    /**
+     * Generate prefix-based fuzzy regex patterns for catching typos.
+     * "johhie" -> prefix "joh" -> matches "Johnnie"
+     * "glenlevit" -> prefix "glen" -> matches "Glenlivet"
+     */
+    private function generateFuzzyPatterns(array $significantTerms): array
+    {
+        $patterns = [];
+
+        foreach ($significantTerms as $term) {
+            $len = strlen($term);
+            if ($len < 3) continue;
+
+            // Use first 3 chars for short terms, first 4 for longer terms
+            $prefixLen = $len >= 6 ? 4 : 3;
+            $prefix = preg_quote(substr($term, 0, $prefixLen), '/');
+            $patterns[] = "/\\b{$prefix}\\w*/i";
+
+            // For 6+ char terms, also use middle trigram (catches suffix typos)
+            if ($len >= 6) {
+                $mid = (int)($len / 2);
+                $midTri = preg_quote(substr($term, $mid - 1, 3), '/');
+                $patterns[] = "/\\b\\w*{$midTri}\\w*/i";
+            }
+        }
+
+        return array_unique($patterns);
+    }
+
+    /**
+     * Get cached distinct categories for a tenant.
+     */
+    private function getCachedCategories(string $tenantId): array
+    {
+        return Cache::remember("tenant_categories:{$tenantId}", 3600, function () use ($tenantId) {
+            try {
+                $categories = DB::connection('mongodb')
+                    ->table('synced_products')
+                    ->where('tenant_id', $tenantId)
+                    ->raw(function ($collection) use ($tenantId) {
+                        return $collection->distinct('categories', ['tenant_id' => $tenantId]);
+                    });
+                return array_values(array_filter(is_array($categories) ? $categories : iterator_to_array($categories)));
+            } catch (\Exception $e) {
+                Log::error("getCachedCategories error: {$e->getMessage()}");
+                return [];
+            }
+        });
+    }
+
     private function applyFilters($query, array $filters): void
     {
         if (!empty($filters['category'])) {
@@ -340,6 +715,10 @@ class SearchService
         if (!empty($filters['brand'])) {
             $query->where('brand', $filters['brand']);
         }
+        // Alias: 'brands' (plural) → same as 'brand'
+        if (empty($filters['brand']) && !empty($filters['brands'])) {
+            $query->where('brand', $filters['brands']);
+        }
         if (!empty($filters['color'])) {
             $query->where('attributes.color', $filters['color']);
         }
@@ -348,47 +727,71 @@ class SearchService
         }
     }
 
-    private function buildFacets($results): array
+    private function buildFacets($results, array $settings = []): array
     {
+        $facets = [];
+
         // Categories — flatten the categories array field
-        $categories = $results->flatMap(function ($p) {
-            $p = $p instanceof \stdClass ? (array) $p : $p;
-            $cats = $p['categories'] ?? [];
-            if ($cats instanceof \MongoDB\Model\BSONArray) {
-                $cats = (array) $cats;
-            }
-            return is_array($cats) ? $cats : [$cats];
-        })->filter()->countBy()->sortDesc()->take(10);
+        if ((bool) ($settings['facet_categories_enabled'] ?? true)) {
+            $catLimit = (int) ($settings['facet_categories_limit'] ?? 10);
+            $categories = $results->flatMap(function ($p) {
+                $p = $p instanceof \stdClass ? (array) $p : $p;
+                $cats = $p['categories'] ?? [];
+                if ($cats instanceof \MongoDB\Model\BSONArray) {
+                    $cats = (array) $cats;
+                }
+                return is_array($cats) ? $cats : [$cats];
+            })->filter()->countBy()->sortDesc()->take($catLimit);
 
-        $categoryFacets = $categories->map(function ($count, $name) {
-            return ['label' => $name, 'value' => $name, 'count' => $count];
-        })->values()->toArray();
+            $facets['categories'] = $categories->map(function ($count, $name) {
+                return ['label' => $name, 'value' => $name, 'count' => $count];
+            })->values()->toArray();
+        } else {
+            $facets['categories'] = [];
+        }
 
-        // Dynamic price ranges based on actual result prices (INR)
-        $prices = $results->map(function ($p) {
-            $p = $p instanceof \stdClass ? (array) $p : $p;
-            return (float) ($p['price'] ?? 0);
-        })->filter(fn($p) => $p > 0)->sort()->values();
+        // Dynamic price ranges based on actual result prices
+        if ((bool) ($settings['facet_price_enabled'] ?? true)) {
+            $currencySymbol = $settings['search_currency_symbol'] ?? '₹';
+            $prices = $results->map(function ($p) {
+                $p = $p instanceof \stdClass ? (array) $p : $p;
+                return (float) ($p['price'] ?? 0);
+            })->filter(fn($p) => $p > 0)->sort()->values();
 
-        $priceRanges = $this->buildDynamicPriceRanges($prices);
+            $facets['price_ranges'] = $this->buildDynamicPriceRanges($prices, $currencySymbol);
+        } else {
+            $facets['price_ranges'] = [];
+        }
 
-        return [
-            'categories'   => $categoryFacets,
-            'price_ranges' => $priceRanges,
-        ];
+        // Brands — aggregate from the brand field
+        if ((bool) ($settings['facet_brands_enabled'] ?? true)) {
+            $brandLimit = (int) ($settings['facet_brands_limit'] ?? 15);
+            $brands = $results->map(function ($p) {
+                $p = $p instanceof \stdClass ? (array) $p : $p;
+                return $p['brand'] ?? null;
+            })->filter()->countBy()->sortDesc()->take($brandLimit);
+
+            $facets['brands'] = $brands->map(function ($count, $name) {
+                return ['label' => $name, 'value' => $name, 'count' => $count];
+            })->values()->toArray();
+        } else {
+            $facets['brands'] = [];
+        }
+
+        return $facets;
     }
 
     /**
      * Build dynamic INR price ranges based on actual result price distribution.
      */
-    private function buildDynamicPriceRanges($prices): array
+    private function buildDynamicPriceRanges($prices, string $currencySymbol = '₹'): array
     {
         if ($prices->isEmpty()) return [];
 
         $min = $prices->min();
         $max = $prices->max();
 
-        // INR-appropriate break points
+        // Currency-appropriate break points
         $breakPoints = [500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
         // Keep break points that fall within the price range
@@ -396,7 +799,6 @@ class SearchService
 
         // Limit to 5 ranges max
         if (count($relevantBreaks) > 4) {
-            // Pick evenly spaced break points
             $step = max(1, (int) ceil(count($relevantBreaks) / 4));
             $filtered = [];
             for ($i = 0; $i < count($relevantBreaks) && count($filtered) < 4; $i += $step) {
@@ -412,8 +814,8 @@ class SearchService
             $count = $prices->filter(fn($p) => $p >= $prev && $p < $bp)->count();
             if ($count > 0) {
                 $label = $prev === 0
-                    ? 'Under ₹' . number_format($bp)
-                    : '₹' . number_format($prev) . ' - ₹' . number_format($bp);
+                    ? "Under {$currencySymbol}" . number_format($bp)
+                    : "{$currencySymbol}" . number_format($prev) . " - {$currencySymbol}" . number_format($bp);
                 $ranges[] = [
                     'label' => $label,
                     'value' => $prev . '-' . $bp,
@@ -429,7 +831,7 @@ class SearchService
         $count = $prices->filter(fn($p) => $p >= $prev)->count();
         if ($count > 0) {
             $ranges[] = [
-                'label' => 'Over ₹' . number_format($prev),
+                'label' => "Over {$currencySymbol}" . number_format($prev),
                 'value' => $prev . '-',
                 'min'   => $prev,
                 'max'   => null,

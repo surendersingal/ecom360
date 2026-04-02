@@ -14,18 +14,18 @@ final class Alert extends Model
     protected $table = 'bi_alerts';
 
     protected $fillable = [
-        'tenant_id', 'kpi_id', 'name', 'condition', 'threshold',
-        'channels', 'recipients', 'cooldown_minutes',
-        'is_active', 'last_triggered_at',
+        'tenant_id', 'kpi_id', 'name', 'metric_key', 'condition', 'threshold',
+        'channels', 'recipients', 'is_active', 'cooldown_minutes', 'last_triggered_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'threshold' => 'decimal:4',
-            'channels' => 'array',
-            'recipients' => 'array',
-            'is_active' => 'boolean',
+            'threshold'         => 'decimal:4',
+            'channels'          => 'array',
+            'recipients'        => 'array',
+            'is_active'         => 'boolean',
+            'cooldown_minutes'  => 'integer',
             'last_triggered_at' => 'datetime',
         ];
     }
@@ -37,7 +37,8 @@ final class Alert extends Model
     public function shouldTrigger(float $value): bool
     {
         if (!$this->is_active) return false;
-        if ($this->last_triggered_at && $this->last_triggered_at->diffInMinutes(now()) < $this->cooldown_minutes) {
+        $cooldown = $this->cooldown_minutes ?? 60;
+        if ($this->last_triggered_at && $this->last_triggered_at->diffInMinutes(now()) < $cooldown) {
             return false;
         }
 

@@ -1,0 +1,16 @@
+<?php
+/** @var \Ecom360\Analytics\Block\SearchResults $block */
+if (!$block->isEnabled()) { return; }
+?>
+<div class="block filter" id="ecom360-filter-block"
+     data-mage-init='{"collapsible":{"openedState":"active","collapsible":true,"active":true,"collateral":{"openedState":"filter-active","element":"body"}}}'>
+    <div class="block-title filter-title" data-count="0">
+        <strong data-role="title">Filter(s)</strong>
+    </div>
+    <div class="block-content filter-content">
+        <strong role="heading" aria-level="2" class="block-subtitle filter-subtitle">Shopping Options</strong>
+        <div id="ecom360-srp-active-filters"></div>
+        <div class="filter-options" id="ecom360-srp-filters" data-role="content"
+             data-mage-init='{"accordion":{"openedState":"active","collapsible":true,"active":[0,1,2],"multipleCollapsible":true}}'></div>
+    </div>
+</div>

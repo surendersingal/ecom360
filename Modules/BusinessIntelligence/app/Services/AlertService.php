@@ -28,23 +28,26 @@ final class AlertService
     public function list(int $tenantId, array $filters = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return Alert::where('tenant_id', $tenantId)
-            ->when($filters['kpi_id'] ?? null, fn($q, $kpiId) => $q->where('kpi_id', $kpiId))
             ->when(isset($filters['is_active']), fn($q) => $q->where('is_active', (bool) $filters['is_active']))
-            ->with('kpi')
             ->orderByDesc('updated_at')
             ->paginate((int) ($filters['per_page'] ?? 15));
     }
 
     /**
-     * Create a new alert.
+     * Create a new alert. Maps to actual bi_alerts table columns.
      */
     public function create(int $tenantId, array $data): Alert
     {
-        return Alert::create(array_merge($data, [
-            'tenant_id' => $tenantId,
-            'is_active' => $data['is_active'] ?? true,
-            'cooldown_minutes' => $data['cooldown_minutes'] ?? 60,
-        ]));
+        return Alert::create([
+            'tenant_id'  => $tenantId,
+            'name'       => $data['name'],
+            'metric_key' => $data['metric_key'] ?? 'custom',
+            'condition'  => $data['condition'],
+            'threshold'  => $data['threshold'] ?? null,
+            'channels'   => $data['channels'] ?? $data['notify_channels'] ?? [],
+            'recipients' => $data['recipients'] ?? [],
+            'is_active'  => $data['is_active'] ?? true,
+        ]);
     }
 
     /**
@@ -52,7 +55,7 @@ final class AlertService
      */
     public function find(int $tenantId, int $id): ?Alert
     {
-        return Alert::where('tenant_id', $tenantId)->with('kpi')->find($id);
+        return Alert::where('tenant_id', $tenantId)->find($id);
     }
 
     /**
@@ -106,7 +109,6 @@ final class AlertService
     {
         $alerts = Alert::where('tenant_id', $tenantId)
             ->where('is_active', true)
-            ->with('kpi')
             ->get();
 
         $stats = ['evaluated' => 0, 'triggered' => 0];
@@ -126,9 +128,10 @@ final class AlertService
      */
     public function evaluate(Alert $alert): bool
     {
-        $kpi = $alert->kpi;
+        $kpi = $alert->kpi
+            ?? Kpi::where('tenant_id', $alert->tenant_id)->where('metric', $alert->metric_key)->first();
         if (!$kpi) {
-            Log::warning("[AlertService] Alert #{$alert->id} has no KPI.");
+            Log::warning("[AlertService] Alert #{$alert->id} has no matching KPI.");
             return false;
         }
 
@@ -179,7 +182,7 @@ final class AlertService
      */
     private function calculateAnomalyScore(Kpi $kpi): float
     {
-        $history = AlertHistory::whereHas('alert', fn($q) => $q->where('kpi_id', $kpi->id))
+        $history = AlertHistory::whereHas('alert', fn($q) => $q->where('metric_key', $kpi->metric))
             ->orderByDesc('created_at')
             ->limit(30)
             ->pluck('triggered_value')
@@ -245,7 +248,7 @@ final class AlertService
 
     private function notifySlack(Alert $alert, AlertHistory $history): void
     {
-        $webhookUrl = $alert->kpi?->tenant?->settings?->where('key', 'slack_webhook_url')->first();
+        $webhookUrl = $alert->tenant?->settings?->where('key', 'slack_webhook_url')->first();
         if (!$webhookUrl) return;
 
         try {

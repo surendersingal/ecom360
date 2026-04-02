@@ -1,0 +1,2833 @@
+[
+  {
+    "title": "SECTION 0 \u2014 TEST EXECUTION OVERVIEW",
+    "subsections": [
+      {
+        "title": "0.1 Testing Approach",
+        "tests": []
+      },
+      {
+        "title": "0.2 Test Environments",
+        "tests": []
+      },
+      {
+        "title": "0.3 Pre-Test Checklist (Both Sides)",
+        "tests": []
+      },
+      {
+        "title": "0.4 Test Status Legend",
+        "tests": []
+      }
+    ],
+    "description": ""
+  },
+  {
+    "title": "SECTION 1 \u2014 DATASYNC MODULE TESTS",
+    "subsections": [
+      {
+        "title": "1.1 Store Registration & Connection",
+        "tests": [
+          {
+            "test id": "DS-001",
+            "test case": "Auto store registration on plugin install",
+            "steps": "1. Install/re-enable plugin 2. Check Ecom360 backend",
+            "magento side": "Plugin sends POST /api/v1/sync/register",
+            "ecom360 side": "Verify SyncConnection record created in DB with store name, platform=magento2, URL",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-002",
+            "test case": "Heartbeat connection is alive",
+            "steps": "1. Wait 5 minutes after setup 2. Check logs",
+            "magento side": "Plugin sends periodic heartbeat via cron",
+            "ecom360 side": "Check sync_connections.last_heartbeat_at is recent (< 10 mins)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-003",
+            "test case": "Connection status endpoint",
+            "steps": "Call GET /api/v1/sync/status with credentials",
+            "magento side": "Magento plugin checks this on config page",
+            "ecom360 side": "Returns {connected: true, platform: magento2, last_sync: ...}",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-004",
+            "test case": "Invalid API key rejected",
+            "steps": "Use wrong API key in X-Ecom360-Key header",
+            "magento side": "Configure wrong key in Magento",
+            "ecom360 side": "Backend returns 401 Unauthorized",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-005",
+            "test case": "Invalid secret key rejected",
+            "steps": "Use wrong secret key",
+            "magento side": "Configure wrong secret in Magento",
+            "ecom360 side": "Backend returns 401 Unauthorized",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-006",
+            "test case": "Connection with correct credentials succeeds",
+            "steps": "Use correct API key + secret",
+            "magento side": "Plugin registers with correct credentials",
+            "ecom360 side": "Returns 200 with connection details",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.2 Product Catalog Sync",
+        "tests": [
+          {
+            "test id": "DS-010",
+            "test case": "Full product catalog sync",
+            "steps": "1. Trigger bin/magento ecom360:sync:products 2. Or wait for cron",
+            "verify on magento": "Check Magento product count",
+            "verify on ecom360": "Go to DataSync admin \u2192 Products. Count must match Magento",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-011",
+            "test case": "New product syncs in real-time",
+            "steps": "1. Add new product in Magento admin 2. Wait for observer/cron",
+            "verify on magento": "Product saved via ProductSaveObserver",
+            "verify on ecom360": "New product appears in synced_products collection in MongoDB",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-012",
+            "test case": "Product update syncs",
+            "steps": "1. Update product price in Magento 2. Wait for sync",
+            "verify on magento": "ProductSaveObserver fires on save",
+            "verify on ecom360": "Updated price reflects in Ecom360 within cron cycle",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-013",
+            "test case": "Product deletion syncs",
+            "steps": "1. Delete a product in Magento 2. Check Ecom360",
+            "verify on magento": "Product removed from Magento catalog",
+            "verify on ecom360": "Product marked inactive or removed in synced_products",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-014",
+            "test case": "Product with variants syncs correctly",
+            "steps": "Use a configurable product with size/color options",
+            "verify on magento": "Configurable product with 5+ variants",
+            "verify on ecom360": "All variants appear with correct attributes in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-015",
+            "test case": "Product images sync",
+            "steps": "Check synced product has image URLs",
+            "verify on magento": "Product has multiple images in Magento",
+            "verify on ecom360": "Image URLs are present and accessible in synced_products",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-016",
+            "test case": "Product with special price syncs",
+            "steps": "Create product with sale price",
+            "verify on magento": "Product has regular + special price",
+            "verify on ecom360": "Both prices synced correctly, special_price field populated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-017",
+            "test case": "Out of stock product syncs",
+            "steps": "Set product to out of stock",
+            "verify on magento": "Stock qty = 0, in_stock = false",
+            "verify on ecom360": "Inventory synced as out_of_stock = true in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-018",
+            "test case": "Product in multiple categories syncs",
+            "steps": "Assign product to 3 categories",
+            "verify on magento": "Product assigned to multiple category IDs",
+            "verify on ecom360": "synced_product has all category_ids array populated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-019",
+            "test case": "Large catalog sync (100+ products)",
+            "steps": "Trigger full sync with 100+ products",
+            "verify on magento": "Magento catalog with many products",
+            "verify on ecom360": "All products synced, check SyncLog for created/updated/failed counts",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.3 Category Sync",
+        "tests": [
+          {
+            "test id": "DS-020",
+            "test case": "Full category hierarchy sync",
+            "steps": "Run bin/magento ecom360:sync:categories",
+            "verify on magento": "Check all categories in Magento",
+            "verify on ecom360": "synced_categories has full hierarchy with parent_id relationships",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-021",
+            "test case": "New category syncs",
+            "steps": "Create new category in Magento",
+            "verify on magento": "CategorySaveObserver fires",
+            "verify on ecom360": "New category appears in Ecom360 with correct parent",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-022",
+            "test case": "Category with subcategories syncs",
+            "steps": "Create parent with 3 child categories",
+            "verify on magento": "Nested category structure",
+            "verify on ecom360": "Hierarchy preserved in synced_categories",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-023",
+            "test case": "Category update syncs",
+            "steps": "Rename a category in Magento",
+            "verify on magento": "CategorySaveObserver fires on save",
+            "verify on ecom360": "Updated name reflected in Ecom360",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.4 Order Sync",
+        "tests": [
+          {
+            "test id": "DS-030",
+            "test case": "New order syncs to Ecom360",
+            "steps": "Place a test order on Magento staging storefront",
+            "verify on magento": "OrderPlacedObserver fires on checkout_onepage_controller_success_action",
+            "verify on ecom360": "Order appears in synced_orders with all line items, shipping, payment",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-031",
+            "test case": "Order with multiple line items syncs",
+            "steps": "Place order with 3+ products",
+            "verify on magento": "Order created with 3 line items",
+            "verify on ecom360": "All line items with SKU, qty, price appear in synced order",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-032",
+            "test case": "Order status change syncs",
+            "steps": "Change order status from Processing to Complete",
+            "verify on magento": "OrderStatusObserver fires",
+            "verify on ecom360": "Order status updated in synced_orders",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-033",
+            "test case": "Order refund syncs",
+            "steps": "Create a credit memo / refund in Magento",
+            "verify on magento": "OrderRefundObserver + RefundObserver fire",
+            "verify on ecom360": "Refund event recorded in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-034",
+            "test case": "Order shipment syncs",
+            "steps": "Create shipment for order",
+            "verify on magento": "ShipmentObserver fires",
+            "verify on ecom360": "Shipment tracking data appears in synced order",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-035",
+            "test case": "Guest order syncs (no customer)",
+            "steps": "Place order as guest without login",
+            "verify on magento": "Guest checkout order created",
+            "verify on ecom360": "Order syncs with guest email, no customer_id reference",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-036",
+            "test case": "Order consent level \u2014 anonymized mode",
+            "steps": "Set order consent to anonymized",
+            "verify on magento": "Sync runs with anonymized consent",
+            "verify on ecom360": "PII (email, name, address) is removed/masked in synced order",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-037",
+            "test case": "Order consent level \u2014 none",
+            "steps": "Set order consent to none",
+            "verify on magento": "Order sync permission = none",
+            "verify on ecom360": "Orders are not synced at all when consent = none",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-038",
+            "test case": "Bulk order sync (50+ orders)",
+            "steps": "Run bin/magento ecom360:sync:orders",
+            "verify on magento": "50+ historical orders in Magento",
+            "verify on ecom360": "All orders synced, SyncLog shows correct counts",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.5 Customer Sync",
+        "tests": [
+          {
+            "test id": "DS-040",
+            "test case": "New customer registration syncs",
+            "steps": "Register new account on Magento storefront",
+            "verify on magento": "CustomerRegisterObserver fires",
+            "verify on ecom360": "New customer appears in synced_customers with email, name",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-041",
+            "test case": "Customer login event tracked",
+            "steps": "Log into Magento storefront",
+            "verify on magento": "CustomerLoginObserver fires",
+            "verify on ecom360": "Login event recorded in tracking_events in MongoDB",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-042",
+            "test case": "Customer profile update syncs",
+            "steps": "Edit customer address/name in Magento",
+            "verify on magento": "CustomerSaveObserver fires",
+            "verify on ecom360": "Updated customer data in synced_customers",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-043",
+            "test case": "Customer sync with full consent",
+            "steps": "Consent level = full",
+            "verify on magento": "Customer data sent with PII",
+            "verify on ecom360": "Full customer profile with email, name, address in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-044",
+            "test case": "Customer sync with anonymized consent",
+            "steps": "Set customer consent to anonymized",
+            "verify on magento": "PII stripped before sending",
+            "verify on ecom360": "Customer in Ecom360 has no identifiable PII, only behavioral data",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-045",
+            "test case": "Bulk customer sync",
+            "steps": "Run bin/magento ecom360:sync:customers",
+            "verify on magento": "Multiple customers in Magento",
+            "verify on ecom360": "All customers synced correctly",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.6 Inventory Sync",
+        "tests": [
+          {
+            "test id": "DS-050",
+            "test case": "Real-time inventory sync on purchase",
+            "steps": "Place order that reduces stock by 1",
+            "verify on magento": "InventoryObserver fires after order",
+            "verify on ecom360": "Stock quantity updated in synced_inventory",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-051",
+            "test case": "Inventory sync when stock added",
+            "steps": "Update product stock qty in Magento admin",
+            "verify on magento": "InventoryObserver fires on save",
+            "verify on ecom360": "New stock level in synced_inventory",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-052",
+            "test case": "Out of stock triggers alert",
+            "steps": "Set product stock to 0",
+            "verify on magento": "Product becomes out of stock",
+            "verify on ecom360": "Low stock alert visible in Ecom360 BI module",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-053",
+            "test case": "Bulk inventory sync",
+            "steps": "Run bin/magento ecom360:sync all",
+            "verify on magento": "All product stock levels",
+            "verify on ecom360": "synced_inventory has all products with current qty",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.7 Abandoned Cart Sync",
+        "tests": [
+          {
+            "test id": "DS-060",
+            "test case": "Abandoned cart detected and synced",
+            "steps": "1. Add items to cart 2. Leave site without purchasing 3. Wait for AbandonedCartCron",
+            "verify on magento": "CartSaveObserver records cart, AbandonedCartCron runs",
+            "verify on ecom360": "Cart appears in synced_abandoned_carts with products, customer info, cart value",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-061",
+            "test case": "Cart recovery link works",
+            "steps": "Click recovery link from Ecom360 marketing email",
+            "verify on magento": "Cart recovery URL restores cart",
+            "verify on ecom360": "Cart marked as recovered in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-062",
+            "test case": "Abandoned cart consent required",
+            "steps": "Set abandoned_carts consent to none",
+            "verify on magento": "Plugin skips syncing carts",
+            "verify on ecom360": "No abandoned carts in Ecom360 when consent is none",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-063",
+            "test case": "Cart with multiple items abandoned",
+            "steps": "Add 5 products to cart then abandon",
+            "verify on magento": "Full cart with 5 line items",
+            "verify on ecom360": "All 5 items appear in synced_abandoned_carts",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.8 Popup Captures Sync",
+        "tests": [
+          {
+            "test id": "DS-070",
+            "test case": "Popup appears on storefront",
+            "steps": "Visit staging site, check if popup widget loads",
+            "verify on magento": "PopupWidget block renders in frontend layout",
+            "verify on ecom360": "Popup configured in Ecom360 marketing settings",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-071",
+            "test case": "Popup submission syncs",
+            "steps": "Fill and submit the popup lead capture form",
+            "verify on magento": "POST submitted to Controller/Popup/Submit.php",
+            "verify on ecom360": "Lead appears in synced_popup_captures with email, name, timestamp",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-072",
+            "test case": "Exit intent popup triggers",
+            "steps": "Move cursor toward browser close",
+            "verify on magento": "Exit intent detection fires popup",
+            "verify on ecom360": "Lead capture works on exit intent trigger",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-073",
+            "test case": "Timed popup triggers after delay",
+            "steps": "Visit page and wait for popup timer",
+            "verify on magento": "Popup appears after configured delay",
+            "verify on ecom360": "Lead capture works on timed trigger",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "1.9 DataSync Admin Panel Tests (Ecom360 Backend)",
+        "tests": [
+          {
+            "test id": "DS-080",
+            "test case": "View all sync connections",
+            "steps": "Go to Ecom360 admin \u2192 DataSync \u2192 Connections",
+            "expected result": "Shows Magento staging store connection with status, last heartbeat, platform info",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-081",
+            "test case": "View sync logs",
+            "steps": "Go to DataSync \u2192 Sync Logs",
+            "expected result": "Shows all sync batches with created/updated/failed counts per entity type",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-082",
+            "test case": "View sync permissions",
+            "steps": "Go to DataSync \u2192 Permissions",
+            "expected result": "Shows all entity types (products, orders, customers, etc.) with their consent levels",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-083",
+            "test case": "Update sync permission via admin",
+            "steps": "Change order sync permission from full to anonymized",
+            "expected result": "Permission updates and next sync uses new consent level",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-084",
+            "test case": "View synced products in admin",
+            "steps": "Go to DataSync \u2192 Synced Products",
+            "expected result": "Lists all synced products with name, SKU, price, stock, last_synced_at",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-085",
+            "test case": "View synced orders in admin",
+            "steps": "Go to DataSync \u2192 Synced Orders",
+            "expected result": "Lists all synced orders with order ID, customer, total, status, line items",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-086",
+            "test case": "View synced customers in admin",
+            "steps": "Go to DataSync \u2192 Synced Customers",
+            "expected result": "Lists all synced customers with profile info (based on consent level)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-087",
+            "test case": "View synced inventory in admin",
+            "steps": "Go to DataSync \u2192 Synced Inventory",
+            "expected result": "Lists all products with current stock levels from Magento",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-088",
+            "test case": "Failed sync log shows error reason",
+            "steps": "Check SyncLog entries with failed_count > 0",
+            "expected result": "Error message explains why records failed (validation, consent, etc.)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "DS-089",
+            "test case": "SyncLog audit trail complete",
+            "steps": "Check each sync batch log entry",
+            "expected result": "Each entry has: entity_type, created, updated, failed, timestamp, connection_id",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "DataSync is the foundation. All other modules depend on products, orders, customers and inventory being synced correctly from Magento to Ecom360. Test this first before any other module."
+  },
+  {
+    "title": "SECTION 2 \u2014 ANALYTICS MODULE TESTS",
+    "subsections": [
+      {
+        "title": "2.1 Event Tracking (Magento \u2192 Ecom360)",
+        "tests": [
+          {
+            "test id": "AN-001",
+            "test case": "Page view event tracked",
+            "steps on magento storefront": "Visit any product page on staging site",
+            "verify on ecom360 backend": "tracking_events collection has page_view event with URL, timestamp, session_id, tenant_id",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-002",
+            "test case": "Session tracking works",
+            "steps on magento storefront": "Browse multiple pages in one session",
+            "verify on ecom360 backend": "All events share same session_id in tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-003",
+            "test case": "Product view event tracked",
+            "steps on magento storefront": "View a product detail page",
+            "verify on ecom360 backend": "product_view event with product_id, product_name, price in MongoDB",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-004",
+            "test case": "Add to cart event tracked",
+            "steps on magento storefront": "Add a product to cart",
+            "verify on ecom360 backend": "add_to_cart event with product_id, qty, price in tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-005",
+            "test case": "Remove from cart event tracked",
+            "steps on magento storefront": "Remove item from cart",
+            "verify on ecom360 backend": "remove_from_cart event in tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-006",
+            "test case": "Checkout started event tracked",
+            "steps on magento storefront": "Proceed to checkout",
+            "verify on ecom360 backend": "checkout_started event with cart total, item count",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-007",
+            "test case": "Purchase event tracked",
+            "steps on magento storefront": "Complete a test order",
+            "verify on ecom360 backend": "purchase event with order_id, revenue, items array in MongoDB",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-008",
+            "test case": "Search event tracked",
+            "steps on magento storefront": "Search for a product using Magento search",
+            "verify on ecom360 backend": "search event with query string in tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-009",
+            "test case": "Review submission tracked",
+            "steps on magento storefront": "Submit a product review",
+            "verify on ecom360 backend": "review_submitted event with product_id, rating",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-010",
+            "test case": "Wishlist add tracked",
+            "steps on magento storefront": "Add product to wishlist",
+            "verify on ecom360 backend": "wishlist_add event with product_id in tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-011",
+            "test case": "Customer login event tracked",
+            "steps on magento storefront": "Log into Magento account",
+            "verify on ecom360 backend": "customer_login event with customer_id (anonymized if consent)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-012",
+            "test case": "Batch events sent correctly",
+            "steps on magento storefront": "Browse quickly through 5+ pages",
+            "verify on ecom360 backend": "Events batched and sent to /api/v1/collect/batch endpoint, all arrive in MongoDB",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-013",
+            "test case": "Tracker JS loads on storefront",
+            "steps on magento storefront": "Check browser network tab for tracker.js",
+            "verify on ecom360 backend": "ecom360-tracker.js loaded, no 404 errors in console",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-014",
+            "test case": "API key authentication works",
+            "steps on magento storefront": "Check tracker sends X-Api-Key header",
+            "verify on ecom360 backend": "Events accepted with correct API key, rejected with wrong key (401)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-015",
+            "test case": "Device fingerprint generated",
+            "steps on magento storefront": "Browse from same device in incognito",
+            "verify on ecom360 backend": "FingerprintResolutionService links sessions via device fingerprint",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "2.2 Analytics Dashboard (Ecom360 Admin)",
+        "tests": [
+          {
+            "test id": "AN-020",
+            "test case": "Overview dashboard loads",
+            "steps": "Go to Ecom360 admin \u2192 Analytics \u2192 Overview",
+            "expected result": "KPI cards show: revenue, orders, visitors, conversion rate, AOV with trend indicators",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-021",
+            "test case": "Revenue analytics chart",
+            "steps": "Go to Analytics \u2192 Revenue",
+            "expected result": "Revenue trend chart shows data from synced orders, daily/weekly/monthly toggle works",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-022",
+            "test case": "Traffic analytics shows visitor data",
+            "steps": "Go to Analytics \u2192 Traffic",
+            "expected result": "Page view counts, session counts, bounce rate, average session duration from tracking_events",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-023",
+            "test case": "Product analytics shows top products",
+            "steps": "Go to Analytics \u2192 Products",
+            "expected result": "Top products by revenue, views, add-to-carts. Data matches Magento sales",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-024",
+            "test case": "Category analytics loads",
+            "steps": "Go to Analytics \u2192 Categories",
+            "expected result": "Revenue and views by product category, hierarchy visible",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-025",
+            "test case": "Conversion funnel shows drop-offs",
+            "steps": "Go to Analytics \u2192 Funnel",
+            "expected result": "Funnel shows: Browse \u2192 Cart \u2192 Checkout \u2192 Purchase with % at each stage",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-026",
+            "test case": "Geographic analytics shows locations",
+            "steps": "Go to Analytics \u2192 Geographic",
+            "expected result": "Map or table showing visitors/revenue by country, city, device type",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-027",
+            "test case": "Customer analytics shows RFM",
+            "steps": "Go to Analytics \u2192 Customers",
+            "expected result": "RFM distribution chart, customer segments (Champions, Loyal, At-Risk, Lost)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-028",
+            "test case": "Cohort retention analysis",
+            "steps": "Go to Analytics \u2192 Cohorts",
+            "expected result": "Cohort table showing week-by-week customer retention percentages",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-029",
+            "test case": "Real-time pulse dashboard",
+            "steps": "Go to Analytics \u2192 Real-Time Pulse",
+            "expected result": "Live count of active visitors, current carts, revenue today. Updates without refresh",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-030",
+            "test case": "Session analytics shows engagement",
+            "steps": "Go to Analytics \u2192 Sessions",
+            "expected result": "Average session duration, pages per session, bounce rate, top entry/exit pages",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-031",
+            "test case": "Campaign / UTM analytics",
+            "steps": "Use UTM parameters in URL on staging, then check analytics",
+            "expected result": "UTM source, medium, campaign tracked. Revenue attribution per campaign visible",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-032",
+            "test case": "Date range filter works",
+            "steps": "Change date range on any analytics page",
+            "expected result": "Data updates for selected range (Today, 7d, 30d, 90d, custom)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-033",
+            "test case": "Page visits analytics",
+            "steps": "Go to Analytics \u2192 Page Visits",
+            "expected result": "Top pages by views, unique visitors, average time on page",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "2.3 Advanced Analytics",
+        "tests": [
+          {
+            "test id": "AN-040",
+            "test case": "Predictive CLV calculation",
+            "steps": "Go to Analytics \u2192 Advanced \u2192 CLV",
+            "expected result": "Customer lifetime value predictions with score, predicted_revenue_12mo, segment",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-041",
+            "test case": "CLV what-if simulation",
+            "steps": "Use CLV what-if endpoint: change acquisition cost",
+            "expected result": "Returns recalculated CLV and ROI projections",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-042",
+            "test case": "Revenue waterfall visualization",
+            "steps": "Go to Advanced \u2192 Revenue Waterfall",
+            "expected result": "Period-over-period revenue breakdown showing gains/losses by category",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-043",
+            "test case": "Why explanation engine",
+            "steps": "Ask: Why did revenue change last week?",
+            "expected result": "AI-generated explanation with 3+ contributing factors and supporting evidence",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-044",
+            "test case": "Natural language query",
+            "steps": "Type: Show me top 5 products last month",
+            "expected result": "Analytics engine returns correct product list matching the query",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-045",
+            "test case": "NLQ suggestions work",
+            "steps": "Start typing a query",
+            "expected result": "Autocomplete suggestions appear for common analytics questions",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-046",
+            "test case": "Customer journey mapping",
+            "steps": "Go to Advanced \u2192 Journey",
+            "expected result": "Visual map showing customer touchpoints from first visit to purchase",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-047",
+            "test case": "Journey drop-off points",
+            "steps": "View journey drop-off analysis",
+            "expected result": "Top 3 pages where customers leave the funnel identified with drop-off %",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-048",
+            "test case": "Smart recommendations generated",
+            "steps": "Go to Advanced \u2192 Recommendations",
+            "expected result": "AI product recommendation list per customer segment based on behavior",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-049",
+            "test case": "Purchase intent scoring",
+            "steps": "Browse a product multiple times on staging",
+            "expected result": "IntentScoringService assigns score 0-100 to the customer session",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-050",
+            "test case": "Real-time alerts fire",
+            "steps": "Set alert: notify if revenue drops 20%",
+            "expected result": "Alert fires and appears in alerts list when threshold breached",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-051",
+            "test case": "Alert acknowledgement",
+            "steps": "Acknowledge a triggered alert",
+            "expected result": "Alert moves to acknowledged state, history recorded",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-052",
+            "test case": "Behavioral trigger evaluation",
+            "steps": "Set trigger: show popup when cart value > $100",
+            "expected result": "Trigger evaluates when customer has $100+ in cart on staging",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-053",
+            "test case": "Industry benchmarks loaded",
+            "steps": "Go to Advanced \u2192 Benchmarks",
+            "expected result": "Comparison of store KPIs vs industry averages (conversion rate, AOV, etc.)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-054",
+            "test case": "Audience segment creation",
+            "steps": "Create segment: Customers who purchased 3+ times",
+            "expected result": "Segment created with rule engine, customer count displayed",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-055",
+            "test case": "Custom event definition",
+            "steps": "Create custom event: newsletter_signup",
+            "expected result": "Custom event schema saved, tracker sends event, appears in analytics",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-056",
+            "test case": "Identity resolution across sessions",
+            "steps": "Browse as anonymous then log in",
+            "expected result": "IdentityResolutionService links anonymous session to known customer profile",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "2.4 Analytics Edge Cases",
+        "tests": [
+          {
+            "test id": "AN-EC-001",
+            "test case": "No events in date range selected",
+            "expected result": "Analytics shows zeros/empty state gracefully, no server error",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-002",
+            "test case": "Single event in entire history",
+            "expected result": "Analytics computes correctly with minimal data",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-003",
+            "test case": "Revenue = $0 period",
+            "expected result": "Revenue chart shows $0 without divide-by-zero errors",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-004",
+            "test case": "100,000+ events in MongoDB",
+            "expected result": "Dashboard loads within 5 seconds, no timeout errors",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-005",
+            "test case": "Special characters in product name",
+            "expected result": "Products with &, <, > or unicode in names display correctly",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-006",
+            "test case": "Multiple currencies in orders",
+            "expected result": "Multi-currency store orders display with correct currency symbols",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-007",
+            "test case": "Bot traffic filtered",
+            "expected result": "Known bot user-agents do not pollute analytics data",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AN-EC-008",
+            "test case": "Duplicate events (retry storm)",
+            "expected result": "Same event sent twice only recorded once via idempotency",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "Analytics is the core intelligence engine. Test tracking events from Magento storefront flowing into Ecom360 MongoDB, then verify all dashboards and analytics endpoints return correct data."
+  },
+  {
+    "title": "SECTION 3 \u2014 MARKETING MODULE TESTS",
+    "subsections": [
+      {
+        "title": "3.1 Contact Management",
+        "tests": [
+          {
+            "test id": "MK-001",
+            "test case": "Create contact manually",
+            "steps": "Go to Marketing \u2192 Contacts \u2192 Create. Fill name, email, phone",
+            "expected result": "Contact saved with correct tenant_id, appears in contacts list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-002",
+            "test case": "View contact list",
+            "steps": "Go to Marketing \u2192 Contacts",
+            "expected result": "All contacts listed with name, email, status, created date",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-003",
+            "test case": "Edit contact",
+            "steps": "Click edit on a contact, change phone number",
+            "expected result": "Updated contact saved, change reflected in list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-004",
+            "test case": "Delete contact",
+            "steps": "Delete a test contact",
+            "expected result": "Contact removed from list, soft-deleted or permanently deleted",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-005",
+            "test case": "Bulk import contacts via CSV",
+            "steps": "POST /api/v1/marketing/contacts/bulk-import with CSV data",
+            "expected result": "All contacts imported, duplicates handled (skip or update)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-006",
+            "test case": "Unsubscribe contact",
+            "steps": "POST /api/v1/marketing/contacts/{id}/unsubscribe",
+            "expected result": "Contact marked unsubscribed, excluded from future campaigns",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-007",
+            "test case": "Contact list creation",
+            "steps": "Create list named \u2018VIP Customers\u2019",
+            "expected result": "List created, can add/remove contacts",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-008",
+            "test case": "Add contacts to list",
+            "steps": "POST /api/v1/marketing/lists/{id}/members with contact IDs",
+            "expected result": "Contacts added to list, member count updates",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-009",
+            "test case": "Remove contacts from list",
+            "steps": "DELETE /api/v1/marketing/lists/{id}/members",
+            "expected result": "Contacts removed from list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-010",
+            "test case": "Synced customer becomes contact",
+            "steps": "Customer synced via DataSync from Magento",
+            "expected result": "Customer auto-creates or updates contact in Marketing module",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-011",
+            "test case": "Duplicate email contact handling",
+            "steps": "Try creating two contacts with same email",
+            "expected result": "Second creation returns error or updates existing contact",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-012",
+            "test case": "Contact search/filter",
+            "steps": "Search for contact by email in admin panel",
+            "expected result": "Correct contact returned in filtered results",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "3.2 Template Management",
+        "tests": [
+          {
+            "test id": "MK-020",
+            "test case": "Create email template",
+            "steps": "Marketing \u2192 Templates \u2192 Create. Type=email, add HTML with {{customer_name}}",
+            "expected result": "Template saved with variable placeholders intact",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-021",
+            "test case": "Create SMS template",
+            "steps": "Create template with type=sms, short text with {{order_id}}",
+            "expected result": "SMS template saved, character count shown",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-022",
+            "test case": "Template preview with variables",
+            "steps": "GET /api/v1/marketing/templates/{id}/preview",
+            "expected result": "Preview renders with real data substituted for variables",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-023",
+            "test case": "Template variable resolution",
+            "steps": "Use {{customer_name}}, {{order_total}}, {{product_name}} in template",
+            "expected result": "VariableResolverService substitutes all variables with actual data",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-024",
+            "test case": "Duplicate template",
+            "steps": "POST /api/v1/marketing/templates/{id}/duplicate",
+            "expected result": "New template created with \u2018Copy of\u2019 prefix, identical content",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-025",
+            "test case": "Update template",
+            "steps": "Edit template HTML/content",
+            "expected result": "Updated content saved, previous version overwritten",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-026",
+            "test case": "Delete template",
+            "steps": "Delete a test template",
+            "expected result": "Template removed, campaigns using it show warning or use fallback",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-027",
+            "test case": "WhatsApp template creation",
+            "steps": "Create template with type=whatsapp",
+            "expected result": "Template saved with WhatsApp-compatible format",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-028",
+            "test case": "Push notification template",
+            "steps": "Create template with type=push, title + body fields",
+            "expected result": "Push template saved correctly",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "3.3 Channel Configuration",
+        "tests": [
+          {
+            "test id": "MK-030",
+            "test case": "View available channel providers",
+            "steps": "GET /api/v1/marketing/channels/providers/email",
+            "expected result": "Returns list of email providers (SendGrid, Mailgun, SMTP, etc.)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-031",
+            "test case": "Create email channel",
+            "steps": "POST /api/v1/marketing/channels with type=email, provider config",
+            "expected result": "Email channel saved with SMTP/API credentials",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-032",
+            "test case": "Create SMS channel",
+            "steps": "POST /api/v1/marketing/channels with type=sms",
+            "expected result": "SMS channel saved with provider credentials",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-033",
+            "test case": "Test email channel delivery",
+            "steps": "POST /api/v1/marketing/channels/{id}/test",
+            "expected result": "Test email sent to specified address, delivery confirmed",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-034",
+            "test case": "Test SMS channel delivery",
+            "steps": "POST channel test with type=sms",
+            "expected result": "Test SMS sent to specified phone number",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-035",
+            "test case": "Push notification channel setup",
+            "steps": "Configure web push channel with VAPID keys",
+            "expected result": "Push channel configured, ready to send browser notifications",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-036",
+            "test case": "WhatsApp channel configuration",
+            "steps": "Configure WhatsApp Business API credentials",
+            "expected result": "WhatsApp channel ready for message sending",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-037",
+            "test case": "Invalid channel credentials rejected",
+            "steps": "Enter wrong API key for email provider",
+            "expected result": "Channel test fails with descriptive error, not silent failure",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "3.4 Campaign Management",
+        "tests": [
+          {
+            "test id": "MK-040",
+            "test case": "Create email campaign",
+            "steps": "Marketing \u2192 Campaigns \u2192 Create. Select email channel, template, audience",
+            "expected result": "Campaign created with status=draft",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-041",
+            "test case": "Send email campaign immediately",
+            "steps": "POST /api/v1/marketing/campaigns/{id}/send",
+            "expected result": "Campaign dispatched to all contacts in target list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-042",
+            "test case": "Campaign statistics tracked",
+            "steps": "GET /api/v1/marketing/campaigns/{id}/stats after send",
+            "expected result": "Returns sent_count, open_rate, click_rate, conversion_rate, revenue_attributed",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-043",
+            "test case": "Duplicate campaign",
+            "steps": "POST /api/v1/marketing/campaigns/{id}/duplicate",
+            "expected result": "New campaign created as copy, status=draft",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-044",
+            "test case": "Campaign with audience segment",
+            "steps": "Target campaign at \u2018High Value Customers\u2019 segment from Analytics",
+            "expected result": "Campaign only sent to contacts in that segment",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-045",
+            "test case": "Dynamic coupon in campaign",
+            "steps": "Add {{coupon_code}} variable, CouponService generates unique code",
+            "expected result": "Each recipient gets unique coupon code in their email",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-046",
+            "test case": "Magic link in campaign",
+            "steps": "Add magic link for passwordless checkout",
+            "expected result": "Magic link in email logs customer directly to checkout",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-047",
+            "test case": "Unsubscribed contacts excluded",
+            "steps": "Send campaign, check unsubscribed contacts",
+            "expected result": "Unsubscribed contacts do not receive campaign messages",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-048",
+            "test case": "SMS campaign send",
+            "steps": "Create SMS campaign with SMS template and channel",
+            "expected result": "SMS sent to all contacts in target list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-049",
+            "test case": "Push notification campaign",
+            "steps": "Create push campaign for all opted-in subscribers",
+            "expected result": "Browser push notifications delivered to opted-in users",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-050",
+            "test case": "Campaign update before send",
+            "steps": "Edit campaign name, template, and audience then send",
+            "expected result": "Updated campaign configuration used for send",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "3.5 Automation Flows",
+        "tests": [
+          {
+            "test id": "MK-060",
+            "test case": "Create automation flow",
+            "steps": "Marketing \u2192 Flows \u2192 Create. Add trigger + wait + email nodes",
+            "expected result": "Flow created with canvas data saved, status=inactive",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-061",
+            "test case": "Abandoned cart recovery flow",
+            "steps": "Create flow: Trigger=cart_abandoned \u2192 Wait 1hr \u2192 Send email",
+            "expected result": "When cart abandoned on Magento, flow triggers and sends recovery email",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-062",
+            "test case": "Welcome email flow",
+            "steps": "Create flow: Trigger=customer_registered \u2192 Send welcome email",
+            "expected result": "New customer registration on Magento triggers welcome email",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-063",
+            "test case": "Activate flow",
+            "steps": "POST /api/v1/marketing/flows/{id}/activate",
+            "expected result": "Flow status changes to active, starts evaluating triggers",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-064",
+            "test case": "Pause flow",
+            "steps": "POST /api/v1/marketing/flows/{id}/pause",
+            "expected result": "Flow paused, no new enrollments while paused",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-065",
+            "test case": "Enroll contact in flow manually",
+            "steps": "POST /api/v1/marketing/flows/{id}/enroll with contact_id",
+            "expected result": "Contact enrolled in flow, starts executing from first node",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-066",
+            "test case": "Flow statistics",
+            "steps": "GET /api/v1/marketing/flows/{id}/stats",
+            "expected result": "Returns enrolled_count, completed_count, conversion_rate, revenue_attributed",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-067",
+            "test case": "Multi-channel flow (email + SMS)",
+            "steps": "Create flow that sends email then SMS 24hrs later",
+            "expected result": "Contact receives email, then SMS after delay",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-068",
+            "test case": "Save flow canvas",
+            "steps": "PUT /api/v1/marketing/flows/{id}/canvas with node positions",
+            "expected result": "Canvas layout saved, reopening shows same node positions",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-069",
+            "test case": "Analytics-triggered flow",
+            "steps": "Analytics detects high intent score \u2192 triggers marketing flow",
+            "expected result": "EventBusRouter: analytics::behavioral_trigger \u2192 Marketing intervention dispatched",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-070",
+            "test case": "RFM segment change triggers flow",
+            "steps": "Customer moves from Active to At-Risk segment",
+            "expected result": "Analytics::rfm_segment_changed event triggers retention flow enrollment",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "3.6 Marketing Edge Cases",
+        "tests": [
+          {
+            "test id": "MK-EC-001",
+            "test case": "Campaign to empty contact list",
+            "expected result": "Campaign status shows sent=0, no errors thrown",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-002",
+            "test case": "Template with missing variable value",
+            "expected result": "Variable resolves to empty string or \u2018[N/A]\u2019, not raw placeholder",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-003",
+            "test case": "Flow with contact already enrolled",
+            "expected result": "Duplicate enrollment prevented or handled gracefully",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-004",
+            "test case": "Bulk import with 1000+ contacts",
+            "expected result": "Import completes without timeout, all contacts created",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-005",
+            "test case": "Campaign to invalid email address",
+            "expected result": "Invalid emails skipped, delivery failure logged in stats",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-006",
+            "test case": "Flow activated with no trigger configured",
+            "expected result": "Activation fails with descriptive error message",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "MK-EC-007",
+            "test case": "Delete template used by active campaign",
+            "expected result": "Warning shown, deletion prevented or campaign updated",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "Marketing module handles multi-channel campaigns (email, SMS, WhatsApp, Push, RCS), automation flows, contact management, and templates. Test all CRUD operations plus actual send functionality."
+  },
+  {
+    "title": "SECTION 4 \u2014 CHATBOT MODULE TESTS",
+    "subsections": [
+      {
+        "title": "4.1 Widget & Configuration",
+        "tests": [
+          {
+            "test id": "CB-001",
+            "test case": "Chatbot widget loads on storefront",
+            "steps": "Visit staging site homepage",
+            "expected result": "Chat bubble appears in corner. ChatbotWidget.php block renders correctly",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-002",
+            "test case": "Widget configuration fetched",
+            "steps": "GET /api/v1/chatbot/widget-config",
+            "expected result": "Returns: position, color, greeting_message, bot_name, avatar_url, is_enabled",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-003",
+            "test case": "Widget matches brand colors",
+            "steps": "Configure custom color in Ecom360 admin",
+            "expected result": "Widget color on staging matches configured hex color",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-004",
+            "test case": "Widget disabled when toggle off",
+            "steps": "Disable chatbot in Magento plugin settings",
+            "expected result": "Chat bubble does not appear on storefront",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-005",
+            "test case": "Widget greeting message shows",
+            "steps": "Open chat widget",
+            "expected result": "Configured greeting message shown immediately",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-006",
+            "test case": "Widget opens and closes correctly",
+            "steps": "Click chat bubble to open, click X to close",
+            "expected result": "Widget expands and collapses with animation, state preserved",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "4.2 Chat Messaging",
+        "tests": [
+          {
+            "test id": "CB-010",
+            "test case": "Send a message and get response",
+            "steps": "Open widget, type \u2018Hello\u2019 and send",
+            "expected result": "POST to /api/v1/chatbot/send, bot responds within 3 seconds",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-011",
+            "test case": "Conversation history saved",
+            "steps": "Send 5 messages in a session",
+            "expected result": "GET /api/v1/chatbot/history/{conversationId} returns all 5 messages in order",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-012",
+            "test case": "Conversation persists across pages",
+            "steps": "Browse to product page after starting chat",
+            "expected result": "Chat history preserved when navigating to new page",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-013",
+            "test case": "List all conversations in admin",
+            "steps": "GET /api/v1/chatbot/conversations in Ecom360 admin",
+            "expected result": "All conversations listed with customer info, start time, message count, status",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-014",
+            "test case": "Resolve conversation",
+            "steps": "POST /api/v1/chatbot/resolve/{conversationId}",
+            "expected result": "Conversation marked resolved, appears in resolved tab in admin",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-015",
+            "test case": "New conversation starts after resolution",
+            "steps": "Customer sends message after conversation resolved",
+            "expected result": "New conversation_id created, fresh session started",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-016",
+            "test case": "Empty message not sent",
+            "steps": "Try to submit empty message",
+            "expected result": "Send button disabled or empty message rejected",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-017",
+            "test case": "Very long message handled",
+            "steps": "Send 1000-character message",
+            "expected result": "Message handled without server error, response generated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-018",
+            "test case": "Special characters in message",
+            "steps": "Send message with HTML tags and SQL-like content",
+            "expected result": "XSS and injection sanitized, bot responds safely",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "4.3 Intent Detection",
+        "tests": [
+          {
+            "test id": "CB-020",
+            "test case": "Order tracking intent",
+            "message to send": "Where is my order #12345?",
+            "expected intent + response": "Intent: order_tracking. Bot calls OrderTrackingService, returns order status",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-021",
+            "test case": "Return/refund intent",
+            "message to send": "I want to return my order",
+            "expected intent + response": "Intent: return_request. Bot provides return instructions or RMA process",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-022",
+            "test case": "Product inquiry intent",
+            "message to send": "Tell me more about the wireless headphones",
+            "expected intent + response": "Intent: product_inquiry. Bot retrieves product info from synced catalog",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-023",
+            "test case": "Complaint/frustration intent",
+            "message to send": "This is terrible service!",
+            "expected intent + response": "Intent: complaint. Bot escalates with empathetic response and support options",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-024",
+            "test case": "Shipping question intent",
+            "message to send": "How long does delivery take?",
+            "expected intent + response": "Intent: shipping_question. Bot answers from FAQ/configured responses",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-025",
+            "test case": "Payment question intent",
+            "message to send": "What payment methods do you accept?",
+            "expected intent + response": "Intent: payment_question. Returns accepted payment methods",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-026",
+            "test case": "Discount/coupon intent",
+            "message to send": "Do you have any discount codes?",
+            "expected intent + response": "Intent: discount_inquiry. Returns available promotions or offers",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-027",
+            "test case": "Unknown intent",
+            "message to send": "Blahblah random gibberish xyz",
+            "expected intent + response": "Bot responds with helpful fallback, does not crash",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-028",
+            "test case": "Multi-language intent",
+            "message to send": "Send message in Arabic or Hindi",
+            "expected intent + response": "Bot detects language, responds appropriately or switches to supported fallback",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "4.4 Proactive Support & Rage Clicks",
+        "tests": [
+          {
+            "test id": "CB-030",
+            "test case": "Abandoned cart proactive trigger",
+            "steps": "Add items to cart, browse away for 5+ minutes",
+            "expected result": "Chatbot widget pops up with: \u2018You left items in your cart, need help?\u2019",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-031",
+            "test case": "High intent proactive trigger",
+            "steps": "Browse same product page 3 times",
+            "expected result": "Analytics intent score rises, chatbot proactively offers help",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-032",
+            "test case": "Stuck checkout proactive trigger",
+            "steps": "Stay on checkout page 3+ minutes without completing",
+            "expected result": "Chatbot proactively opens offering assistance",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-033",
+            "test case": "Rage click detection",
+            "steps": "Rapidly click same button 5+ times in quick succession",
+            "expected result": "POST /api/v1/chatbot/rage-click fires, chatbot offers help proactively",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-034",
+            "test case": "Rage click event logged in admin",
+            "steps": "Trigger rage click then check admin",
+            "expected result": "Rage click event recorded in analytics, session flagged in admin",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-035",
+            "test case": "Proactive chat not repeated",
+            "steps": "Trigger proactive chat, close it, browse more",
+            "expected result": "Same proactive trigger does not fire again in same session",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "4.5 Chatbot Analytics (Admin)",
+        "tests": [
+          {
+            "test id": "CB-040",
+            "test case": "Chatbot analytics dashboard loads",
+            "expected result": "GET /api/v1/chatbot/analytics returns: total_conversations, avg_response_time, resolution_rate, top_intents, CSAT_score",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-041",
+            "test case": "Top intents chart",
+            "expected result": "Most common intent types displayed with frequency count",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-042",
+            "test case": "Average response time metric",
+            "expected result": "Response time in seconds/ms shown in analytics",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-043",
+            "test case": "Resolution rate tracked",
+            "expected result": "% of conversations marked resolved vs escalated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "CB-044",
+            "test case": "Conversation volume by day",
+            "expected result": "Chart showing conversation count over last 30 days",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "The chatbot widget appears on the Magento storefront and communicates with the Ecom360 backend. Test widget rendering, message sending, intent detection, order tracking, and rage-click detection."
+  },
+  {
+    "title": "SECTION 5 \u2014 AI SEARCH MODULE TESTS",
+    "subsections": [
+      {
+        "title": "5.1 Search Widget on Storefront",
+        "tests": [
+          {
+            "test id": "AS-001",
+            "test case": "AI Search widget loads on storefront",
+            "steps": "Visit staging site, check search functionality",
+            "expected result": "AiSearchWidget block renders, custom search overlay or bar visible",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-002",
+            "test case": "Widget disabled when toggle off",
+            "steps": "Disable AI Search in Magento plugin settings",
+            "expected result": "Magento default search used, no Ecom360 search overlay",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-003",
+            "test case": "Search results appear on keypress",
+            "steps": "Type 3+ characters in search box",
+            "expected result": "Results appear within 500ms using /api/v1/search/suggest",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-004",
+            "test case": "Full search executes on Enter",
+            "steps": "Press Enter after typing search query",
+            "expected result": "POST /api/v1/search executes, full results page loads",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "5.2 Semantic Search",
+        "tests": [
+          {
+            "test id": "AS-010",
+            "test case": "Exact product name search",
+            "search query": "Wireless Headphones",
+            "expected result": "Exact matching products returned first with correct relevance",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-011",
+            "test case": "Natural language semantic search",
+            "search query": "something to listen to music while exercising",
+            "expected result": "SemanticSearchService returns relevant products (headphones, earbuds, speakers)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-012",
+            "test case": "Synonym search",
+            "search query": "cheap earphones (vs expensive earbuds)",
+            "expected result": "Returns earphones AND earbuds \u2014 understands synonyms",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-013",
+            "test case": "Attribute-based search",
+            "search query": "red dress for wedding",
+            "expected result": "Returns dresses filtered by red color and formal occasion",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-014",
+            "test case": "Price-based search",
+            "search query": "under $50",
+            "expected result": "Products filtered by price range in results",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-015",
+            "test case": "Brand-based search",
+            "search query": "Sony products",
+            "expected result": "Returns all Sony brand products from synced catalog",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-016",
+            "test case": "Zero results query",
+            "search query": "xyzxyzxyz123nonsense",
+            "expected result": "Empty results returned gracefully with \u2018no results\u2019 message, zero-result logged",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-017",
+            "test case": "Search with special characters",
+            "search query": "caf\u00e9 or caf\u00e9 chair",
+            "expected result": "UTF-8 special characters handled, search executes without error",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-018",
+            "test case": "Very short query (1 char)",
+            "search query": "a",
+            "expected result": "Returns top products matching \u2018a\u2019 or triggers autocomplete suggestions only",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-019",
+            "test case": "Very long query (100+ chars)",
+            "search query": "Long sentence describing a very specific product in detail...",
+            "expected result": "Search executes without timeout, best-match results returned",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "5.3 Autocomplete & Suggestions",
+        "tests": [
+          {
+            "test id": "AS-020",
+            "test case": "Autocomplete suggestions appear",
+            "steps": "Type \u2018head\u2019 in search box",
+            "expected result": "GET /api/v1/search/suggest returns: headphones, headband, etc. within 200ms",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-021",
+            "test case": "Suggestions include product thumbnails",
+            "steps": "Check suggest response format",
+            "expected result": "Each suggestion has: query, products array with image_url, name, price",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-022",
+            "test case": "Trending searches shown on focus",
+            "steps": "Click search box without typing",
+            "expected result": "GET /api/v1/search/trending returns top trending search terms",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-023",
+            "test case": "Suggestion click executes search",
+            "steps": "Click on a suggestion from dropdown",
+            "expected result": "Full search executed for selected suggestion, results page loads",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-024",
+            "test case": "No suggestions for unknown term",
+            "steps": "Type \u2018zzz999nonsense\u2019",
+            "expected result": "Empty suggestions array returned, no 500 error",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "5.4 Visual Search",
+        "tests": [
+          {
+            "test id": "AS-030",
+            "test case": "Visual search with product image",
+            "steps": "POST /api/v1/search/visual with product image file",
+            "expected result": "VisualSearchService analyzes image, returns visually similar products",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-031",
+            "test case": "Visual search with non-product image",
+            "steps": "Submit a photo of a landscape",
+            "expected result": "Returns closest matching products or graceful empty result",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-032",
+            "test case": "Visual search with invalid file type",
+            "steps": "Submit a PDF or TXT file",
+            "expected result": "Returns 422 Unprocessable Entity, not 500 error",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-033",
+            "test case": "Visual search with large image",
+            "steps": "Submit 10MB+ image file",
+            "expected result": "Appropriate file size limit enforced with clear error message",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-034",
+            "test case": "Visual search results have relevance scores",
+            "steps": "Check visual search response",
+            "expected result": "Results include similarity_score per product, ordered by relevance",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "5.5 Similar Products & Personalization",
+        "tests": [
+          {
+            "test id": "AS-040",
+            "test case": "Similar products for existing product",
+            "steps": "GET /api/v1/search/similar/{productId}",
+            "expected result": "Returns 4-8 similar products based on category, attributes, and embeddings",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-041",
+            "test case": "Similar products for non-existent product",
+            "steps": "GET /api/v1/search/similar/99999999",
+            "expected result": "Returns 404 or empty array, not 500 error",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-042",
+            "test case": "Personalized search ranking",
+            "steps": "Search same term as anonymous vs logged-in customer",
+            "expected result": "PersonalizedSearchService re-ranks results based on customer history for logged-in user",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-043",
+            "test case": "Search tracking event fired",
+            "steps": "Search for products on staging site",
+            "expected result": "SearchObserver fires, search event logged in tracking_events with query and result count",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "5.6 Search Analytics",
+        "tests": [
+          {
+            "test id": "AS-050",
+            "test case": "Search analytics dashboard",
+            "expected result": "GET /api/v1/search/analytics returns: total_searches, top_queries, zero_result_queries, click_through_rate, avg_results_per_query",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-051",
+            "test case": "Zero-result queries tracked",
+            "expected result": "Queries listed with count, alerting product team of catalog gaps",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-052",
+            "test case": "Trending searches update",
+            "expected result": "Term appears in trending searches after volume threshold",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AS-053",
+            "test case": "Search to Purchase attribution",
+            "expected result": "Analytics attributes revenue to search query that led to purchase",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "AI Search widget appears on Magento storefront. Test semantic search, autocomplete, visual search, similar products, trending, and search analytics. Verify results are powered by synced product catalog."
+  },
+  {
+    "title": "SECTION 6 \u2014 BUSINESS INTELLIGENCE MODULE TESTS",
+    "subsections": [
+      {
+        "title": "6.1 Report Management",
+        "tests": [
+          {
+            "test id": "BI-001",
+            "test case": "List report templates",
+            "steps": "GET /api/v1/bi/reports/meta/templates",
+            "expected result": "Returns pre-built templates: Revenue Report, Product Performance, Customer Acquisition, Inventory Report",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-002",
+            "test case": "Create report from template",
+            "steps": "POST /api/v1/bi/reports/from-template with template_id",
+            "expected result": "Report created with pre-configured query and visualization",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-003",
+            "test case": "Create custom report",
+            "steps": "POST /api/v1/bi/reports with custom query config",
+            "expected result": "Report saved with custom source, metrics, filters, grouping",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-004",
+            "test case": "Execute report",
+            "steps": "POST /api/v1/bi/reports/{id}/execute",
+            "expected result": "Report runs and returns data array with correct columns and values",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-005",
+            "test case": "Revenue report accuracy",
+            "steps": "Create Revenue Report, verify against Magento orders",
+            "expected result": "Total revenue in report matches sum of synced_orders for same period",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-006",
+            "test case": "Product performance report",
+            "steps": "Execute Product Performance template",
+            "expected result": "Shows top products by revenue, units sold, return rate",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-007",
+            "test case": "Customer acquisition report",
+            "steps": "Execute Customer Acquisition template",
+            "expected result": "Shows new customer count, source, CLV, acquisition cost by period",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-008",
+            "test case": "Update report",
+            "steps": "PUT /api/v1/bi/reports/{id} with new filters",
+            "expected result": "Report updated, next execution uses new configuration",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-009",
+            "test case": "Delete report",
+            "steps": "DELETE /api/v1/bi/reports/{id}",
+            "expected result": "Report deleted, no longer appears in list",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-010",
+            "test case": "Query builder visual interface",
+            "steps": "POST /api/v1/bi/insights/query with source=orders, metric=revenue, group_by=category",
+            "expected result": "Custom query executes and returns correct grouped data",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-011",
+            "test case": "Available fields for query builder",
+            "steps": "GET /api/v1/bi/insights/fields/orders",
+            "expected result": "Returns all available fields with data types for the orders source",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "6.2 KPI Dashboard",
+        "tests": [
+          {
+            "test id": "BI-020",
+            "test case": "Initialize default KPIs",
+            "steps": "POST /api/v1/bi/kpis/defaults",
+            "expected result": "Default KPIs created: Revenue, Orders, AOV, Conversion Rate, New Customers, Cart Abandonment Rate",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-021",
+            "test case": "List KPIs",
+            "steps": "GET /api/v1/bi/kpis",
+            "expected result": "All configured KPIs listed with current_value, target, trend, last_updated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-022",
+            "test case": "Create custom KPI",
+            "steps": "POST /api/v1/bi/kpis with metric, target, threshold",
+            "expected result": "KPI created with custom definition, appears in dashboard",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-023",
+            "test case": "Refresh KPIs",
+            "steps": "POST /api/v1/bi/kpis/refresh",
+            "expected result": "All KPIs recalculated from latest data, updated_at timestamps refresh",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-024",
+            "test case": "KPI shows trend indicator",
+            "steps": "Check KPI response",
+            "expected result": "Each KPI has trend: up/down/stable and percentage change from previous period",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-025",
+            "test case": "KPI target vs actual comparison",
+            "steps": "Set target for Revenue KPI",
+            "expected result": "KPI shows current_value vs target with % achievement",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-026",
+            "test case": "Update KPI target",
+            "steps": "PUT /api/v1/bi/kpis/{id} with new target",
+            "expected result": "KPI target updated, achievement % recalculated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-027",
+            "test case": "Delete KPI",
+            "steps": "DELETE /api/v1/bi/kpis/{id}",
+            "expected result": "KPI removed from dashboard",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "6.3 Dashboard Management",
+        "tests": [
+          {
+            "test id": "BI-030",
+            "test case": "Create BI dashboard",
+            "steps": "POST /api/v1/bi/dashboards with name and widget list",
+            "expected result": "Dashboard created with configured widgets and layout",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-031",
+            "test case": "View dashboard",
+            "steps": "GET /api/v1/bi/dashboards/{id}",
+            "expected result": "Returns dashboard with all widget data pre-loaded",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-032",
+            "test case": "Duplicate dashboard",
+            "steps": "POST /api/v1/bi/dashboards/{id}/duplicate",
+            "expected result": "New dashboard created with \u2018Copy of\u2019 prefix, same widget config",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-033",
+            "test case": "Update dashboard layout",
+            "steps": "PUT /api/v1/bi/dashboards/{id} with new widget positions",
+            "expected result": "Layout saved, reopening shows updated positions",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-034",
+            "test case": "Delete dashboard",
+            "steps": "DELETE /api/v1/bi/dashboards/{id}",
+            "expected result": "Dashboard deleted, widgets not affected",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "6.4 Alerts System",
+        "tests": [
+          {
+            "test id": "BI-040",
+            "test case": "Create revenue alert",
+            "steps": "POST /api/v1/bi/alerts with metric=revenue, threshold=5000, condition=below",
+            "expected result": "Alert created with active status",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-041",
+            "test case": "Alert fires when threshold breached",
+            "steps": "POST /api/v1/bi/alerts/evaluate when revenue is below threshold",
+            "expected result": "Alert triggered, appears in alert history with triggered_at timestamp",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-042",
+            "test case": "View alert history",
+            "steps": "GET /api/v1/bi/alerts/{id}/history",
+            "expected result": "Returns all times this alert has triggered with values at trigger time",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-043",
+            "test case": "Acknowledge alert",
+            "steps": "POST /api/v1/bi/alerts/history/{id}/acknowledge",
+            "expected result": "Alert marked acknowledged, removed from active alerts dashboard",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-044",
+            "test case": "Low stock alert from inventory",
+            "steps": "Set inventory threshold, reduce product stock below it",
+            "expected result": "BI alert fires, notification created for low stock condition",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-045",
+            "test case": "Cart abandonment rate alert",
+            "steps": "Set alert for abandonment rate > 70%",
+            "expected result": "Alert fires when cart abandonment exceeds threshold",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-046",
+            "test case": "Update alert threshold",
+            "steps": "Change revenue alert threshold from 5000 to 10000",
+            "expected result": "New threshold used for next evaluation",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-047",
+            "test case": "Delete alert",
+            "steps": "DELETE /api/v1/bi/alerts/{id}",
+            "expected result": "Alert removed, no more evaluations",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "6.5 Data Exports",
+        "tests": [
+          {
+            "test id": "BI-050",
+            "test case": "Create CSV export",
+            "steps": "POST /api/v1/bi/exports with format=csv, source=orders, date_range",
+            "expected result": "Export job created, queued for processing",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-051",
+            "test case": "Create Excel export",
+            "steps": "POST /api/v1/bi/exports with format=excel",
+            "expected result": "Excel file generated with proper formatting",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-052",
+            "test case": "Create PDF export",
+            "steps": "POST /api/v1/bi/exports with format=pdf",
+            "expected result": "PDF report generated with chart visualizations",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-053",
+            "test case": "Download export file",
+            "steps": "GET /api/v1/bi/exports/{id}/download",
+            "expected result": "File downloads with correct content-type header, readable content",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-054",
+            "test case": "Large data export (10,000+ rows)",
+            "steps": "Export all orders for last 12 months",
+            "expected result": "Export completes without timeout, all rows included in file",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-055",
+            "test case": "Delete export",
+            "steps": "DELETE /api/v1/bi/exports/{id}",
+            "expected result": "Export removed from list, file deleted from storage",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-056",
+            "test case": "Export with filters",
+            "steps": "Export orders with filter: status=complete, date_range=last_30_days",
+            "expected result": "Only filtered data appears in exported file",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "6.6 Predictive Analytics & Insights",
+        "tests": [
+          {
+            "test id": "BI-060",
+            "test case": "Generate demand forecast",
+            "steps": "POST /api/v1/bi/insights/predictions/generate with type=demand_forecast",
+            "expected result": "ML model returns demand predictions for next 30 days per product",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-061",
+            "test case": "Generate revenue projection",
+            "steps": "POST insights/predictions/generate with type=revenue_projection",
+            "expected result": "Revenue projections for next quarter with confidence intervals",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-062",
+            "test case": "Churn prediction",
+            "steps": "POST insights/predictions/generate with type=churn_prediction",
+            "expected result": "Customers ranked by churn probability, top 20% at-risk customers identified",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-063",
+            "test case": "Dynamic pricing recommendations",
+            "steps": "GET /api/v1/bi/insights/predictions \u2014 check dynamic pricing results",
+            "expected result": "AI-recommended prices for top products based on demand and competition",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-064",
+            "test case": "Inventory forecasting",
+            "steps": "Run inventory forecast prediction",
+            "expected result": "Predicted stockout dates per product with reorder recommendations",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-065",
+            "test case": "Return risk scoring",
+            "steps": "Run return risk prediction on recent orders",
+            "expected result": "Orders scored 0-100 for return probability, high-risk orders flagged",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "BI-066",
+            "test case": "Industry benchmarks",
+            "steps": "GET /api/v1/bi/insights/benchmarks",
+            "expected result": "Returns benchmark comparisons: your conversion rate vs industry avg, AOV vs avg, etc.",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "The BI module provides custom reports, KPI dashboards, predictive analytics, alerts, and data exports. All BI data is derived from synced Magento data and tracked events."
+  },
+  {
+    "title": "SECTION 7 \u2014 ADMIN PANEL, CORE & SECURITY TESTS",
+    "subsections": [
+      {
+        "title": "7.1 Ecom360 Admin Panel (Filament)",
+        "tests": [
+          {
+            "test id": "AD-001",
+            "test case": "Admin panel loads",
+            "steps": "Navigate to ecom.buildnetic.com/admin",
+            "expected result": "Filament admin panel loads, login page shown",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-002",
+            "test case": "Super admin login",
+            "steps": "Login with super admin credentials",
+            "expected result": "Dashboard loads with all modules visible in navigation",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-003",
+            "test case": "Tenant panel loads for tenant user",
+            "steps": "Login as tenant user (not super admin)",
+            "expected result": "Tenant-scoped Filament panel loads, only tenant data visible",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-004",
+            "test case": "All 6 modules visible in nav",
+            "steps": "Check admin sidebar",
+            "expected result": "Analytics, DataSync, Marketing, Chatbot, AI Search, Business Intelligence all visible",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-005",
+            "test case": "Tenant management (super admin)",
+            "steps": "Navigate to Tenants section",
+            "expected result": "Can create, edit, activate/deactivate tenants",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-006",
+            "test case": "Create new tenant",
+            "steps": "Create new tenant with name, domain, generate API keys",
+            "expected result": "Tenant created, API key and secret key auto-generated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-007",
+            "test case": "User management",
+            "steps": "Navigate to Users section",
+            "expected result": "Can create users, assign roles, link to tenant",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-008",
+            "test case": "RBAC role assignment",
+            "steps": "Assign analytics.read role to test user",
+            "expected result": "User can access analytics but not marketing (test access control)",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-009",
+            "test case": "Tenant settings configuration",
+            "steps": "Update tenant settings: site_name, currency, timezone",
+            "expected result": "Settings saved in tenant_settings table, reflected in platform",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-010",
+            "test case": "Dashboard layout customization",
+            "steps": "Rearrange dashboard widgets using DashboardLayout",
+            "expected result": "Layout saved, persists on refresh, user-specific",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-011",
+            "test case": "Module enable/disable from admin",
+            "steps": "Toggle a module off in super admin panel",
+            "expected result": "Module disabled, its routes/features unavailable for that tenant",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AD-012",
+            "test case": "Notifications panel",
+            "steps": "Check notification bell in admin",
+            "expected result": "System notifications visible (alerts triggered, sync failures, etc.)",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "7.2 Authentication Tests",
+        "tests": [
+          {
+            "test id": "AU-001",
+            "test case": "Login with valid credentials",
+            "steps": "POST to auth/login with correct email/password",
+            "expected result": "Returns Sanctum token, 200 response",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-002",
+            "test case": "Login with invalid password",
+            "steps": "POST to auth/login with wrong password",
+            "expected result": "Returns 401 Unauthorized, no token issued",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-003",
+            "test case": "Access protected endpoint without token",
+            "steps": "GET /api/v1/analytics/overview without Authorization header",
+            "expected result": "Returns 401 Unauthorized",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-004",
+            "test case": "Access endpoint with expired token",
+            "steps": "Use revoked Sanctum token",
+            "expected result": "Returns 401, user must re-login",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-005",
+            "test case": "API key authentication for tracking",
+            "steps": "POST /api/v1/collect with X-Api-Key header",
+            "expected result": "Event accepted with valid API key, rejected with invalid key",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-006",
+            "test case": "Sync auth with correct key+secret",
+            "steps": "POST /api/v1/sync/register with X-Ecom360-Key + X-Ecom360-Secret",
+            "expected result": "Registration accepted, 200 response",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-007",
+            "test case": "Sync auth with wrong credentials",
+            "steps": "POST /api/v1/sync with wrong key or secret",
+            "expected result": "Returns 401 Unauthorized",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-008",
+            "test case": "Cross-tenant data isolation",
+            "steps": "Use Tenant A token, try to access Tenant B data by ID",
+            "expected result": "Returns 404 or 403, Tenant B data never exposed",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-009",
+            "test case": "Rate limiting on tracking endpoint",
+            "steps": "Send 301+ requests to /api/v1/collect in under 1 minute",
+            "expected result": "Returns 429 Too Many Requests after limit exceeded",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "AU-010",
+            "test case": "Rate limiting on API endpoints",
+            "steps": "Send 121+ requests to /api/v1/analytics/ in 1 minute",
+            "expected result": "Rate limit enforced, 429 returned",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "7.3 Security Tests",
+        "tests": [
+          {
+            "test id": "SC-001",
+            "test case": "SQL injection attempt",
+            "attack vector": "Send ' OR '1'='1 in search parameter",
+            "expected defense": "Input sanitized, no SQL error, no data leakage",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-002",
+            "test case": "XSS in chatbot message",
+            "attack vector": "Send <script>alert('xss')</script> as chat message",
+            "expected defense": "Script tags sanitized/escaped, no execution in admin view",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-003",
+            "test case": "XSS in product search",
+            "attack vector": "Search for <img src=x onerror=alert(1)>",
+            "expected defense": "Sanitized output, no XSS execution",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-004",
+            "test case": "CSRF protection active",
+            "attack vector": "Attempt state-changing request without CSRF token from browser",
+            "expected defense": "CSRF protection blocks the request",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-005",
+            "test case": "Auth bypass via modified token",
+            "attack vector": "Modify JWT/Sanctum token payload",
+            "expected defense": "Modified token rejected with 401",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-006",
+            "test case": "Path traversal attempt",
+            "attack vector": "Include ../../../etc/passwd in file parameters",
+            "expected defense": "Path traversal blocked, 400/422 returned",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-007",
+            "test case": "Mass assignment protection",
+            "attack vector": "Include tenant_id in POST body trying to change tenant",
+            "expected defense": "tenant_id from body ignored, server uses auth context",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-008",
+            "test case": "HMAC webhook signature verification",
+            "attack vector": "POST to webhook endpoint with invalid signature",
+            "expected defense": "Request rejected, 401 or 403 returned",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-009",
+            "test case": "Brute force login protection",
+            "attack vector": "Attempt 10+ failed logins in quick succession",
+            "expected defense": "Account temporarily locked or rate limited",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "SC-010",
+            "test case": "Sensitive data in logs",
+            "attack vector": "Check laravel.log after various operations",
+            "expected defense": "No passwords, API keys, or PII in plain text in log files",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "7.4 Event Bus & Inter-Module Communication",
+        "tests": [
+          {
+            "test id": "EB-001",
+            "test case": "Analytics \u2192 Marketing: Cart abandonment",
+            "trigger": "Cart abandoned on Magento staging",
+            "expected outcome": "Within 60 seconds: Analytics detects abandonment, dispatches event, Marketing sends recovery email",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-002",
+            "test case": "Analytics \u2192 Marketing: High intent trigger",
+            "trigger": "Customer browses product 3+ times (intent score > 70)",
+            "expected outcome": "Chatbot proactively triggers, Marketing can auto-send targeted campaign",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-003",
+            "test case": "Analytics \u2192 Marketing: RFM segment change",
+            "trigger": "Customer makes 3rd purchase, moves to Champion segment",
+            "expected outcome": "Analytics::rfm_segment_changed event fired, Marketing enrolls in loyalty flow",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-004",
+            "test case": "AiSearch \u2192 Analytics: Search event recorded",
+            "trigger": "Customer searches on storefront",
+            "expected outcome": "AiSearch::search.completed dispatched, Analytics::RecordSearchEvent job runs",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-005",
+            "test case": "Chatbot \u2192 BI: Intent aggregation",
+            "trigger": "Multiple customers ask order tracking intent",
+            "expected outcome": "Chatbot::intent.captured dispatched, BI::AggregateIntent job updates intent analytics",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-006",
+            "test case": "BI \u2192 Notifications: Alert triggered",
+            "trigger": "BI alert threshold breached",
+            "expected outcome": "BI::alert_triggered event logged, admin notification created",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-007",
+            "test case": "DataSync \u2192 Analytics: Product synced",
+            "trigger": "New product synced from Magento",
+            "expected outcome": "Product available in AI Search and Analytics within one queue cycle",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "EB-008",
+            "test case": "Queue worker running verification",
+            "trigger": "Check Redis event-bus queue status",
+            "expected outcome": "Queue worker active, no stuck jobs, event-bus queue processing correctly",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": ""
+  },
+  {
+    "title": "SECTION 8 \u2014 PUSH NOTIFICATIONS & POPUP TESTS",
+    "subsections": [
+      {
+        "title": "8.1 Web Push Notifications",
+        "tests": [
+          {
+            "test id": "PN-001",
+            "test case": "Push notification permission prompt",
+            "steps": "Visit staging site for first time",
+            "expected result": "Browser prompts for push notification permission",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-002",
+            "test case": "Subscriber registered on opt-in",
+            "steps": "Accept push notification permission",
+            "expected result": "Subscriber data saved to Ecom360, ready for push campaigns",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-003",
+            "test case": "Push notification campaign delivery",
+            "steps": "Send push campaign to all subscribers",
+            "expected result": "Browser notification appears on subscriber's device",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-004",
+            "test case": "Push notification click tracking",
+            "steps": "Click the push notification",
+            "expected result": "Click event tracked, user redirected to configured URL",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-005",
+            "test case": "Opt-out unsubscribes",
+            "steps": "Unsubscribe from browser push in browser settings",
+            "expected result": "Subscriber marked as unsubscribed, excluded from future pushes",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-006",
+            "test case": "Back-in-stock push notification",
+            "steps": "Sign up for back-in-stock notification, restock product",
+            "expected result": "Push notification sent when product back in stock",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "PN-007",
+            "test case": "Price drop push notification",
+            "steps": "Sign up for price drop alert, reduce product price",
+            "expected result": "Push notification sent when price drops",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": ""
+  },
+  {
+    "title": "SECTION 9 \u2014 END-TO-END BUSINESS SCENARIO TESTS",
+    "subsections": [
+      {
+        "title": "9.1 New Customer Journey (Full E2E)",
+        "tests": [
+          {
+            "test id": "E2E-001",
+            "step": "1. First visit",
+            "action": "Visit staging site as new anonymous user",
+            "what to verify on ecom360": "tracking_events: page_view with anonymous session_id, fingerprint generated",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-002",
+            "step": "2. Product discovery",
+            "action": "Search for \u2018headphones\u2019 using AI Search",
+            "what to verify on ecom360": "Search event tracked, semantic results returned, session tracking continues",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-003",
+            "step": "3. Product view",
+            "action": "View product detail page",
+            "what to verify on ecom360": "product_view event tracked, intent score increases in IntentScoringService",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-004",
+            "step": "4. Chatbot interaction",
+            "action": "Ask chatbot: \u2018What\u2019s the return policy?\u2019",
+            "what to verify on ecom360": "Chatbot responds correctly, conversation saved in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-005",
+            "step": "5. Add to cart",
+            "action": "Add product to cart",
+            "what to verify on ecom360": "add_to_cart event tracked, cart value updated, intent score spikes",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-006",
+            "step": "6. Account registration",
+            "action": "Register new customer account",
+            "what to verify on ecom360": "CustomerRegisterObserver fires, customer synced, welcome email flow triggered",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-007",
+            "step": "7. Identity resolution",
+            "action": "Check if anonymous session linked to new customer",
+            "what to verify on ecom360": "IdentityResolutionService links all prior events to new customer profile",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-008",
+            "step": "8. Complete purchase",
+            "action": "Place order with payment",
+            "what to verify on ecom360": "purchase event tracked, order synced via DataSync, revenue in analytics",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-009",
+            "step": "9. Post-purchase analytics",
+            "action": "Check Analytics overview",
+            "what to verify on ecom360": "Revenue increased, funnel shows 1 conversion, new customer in CRM",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-010",
+            "step": "10. Review submission",
+            "action": "Submit product review",
+            "what to verify on ecom360": "review_submitted event tracked, review data in analytics",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "9.2 Abandoned Cart Recovery E2E",
+        "tests": [
+          {
+            "test id": "E2E-020",
+            "step": "1. Add to cart",
+            "action": "Add 2 products to cart, proceed to checkout",
+            "expected outcome": "add_to_cart events tracked, cart value noted",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-021",
+            "step": "2. Abandon cart",
+            "action": "Close browser / navigate away without purchasing",
+            "expected outcome": "AbandonedCartCron detects after timeout, syncs to synced_abandoned_carts",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-022",
+            "step": "3. Recovery email",
+            "action": "Check email inbox (if flow configured)",
+            "expected outcome": "Recovery email arrives with correct cart contents and recovery link",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-023",
+            "step": "4. Cart recovery link click",
+            "action": "Click recovery link in email",
+            "expected outcome": "Cart restored in Magento, analytics records recovery click",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-024",
+            "step": "5. Complete purchase",
+            "action": "Complete the recovered cart purchase",
+            "expected outcome": "Purchase recorded, abandoned cart marked recovered in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-025",
+            "step": "6. Revenue attribution",
+            "action": "Check BI report",
+            "expected outcome": "Revenue attributed to abandoned cart recovery campaign",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "9.3 Inventory Management E2E",
+        "tests": [
+          {
+            "test id": "E2E-030",
+            "step": "1. Inventory synced",
+            "action": "Check synced_inventory matches Magento stock",
+            "expected outcome": "All product stock levels accurate in Ecom360",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-031",
+            "step": "2. Place orders to reduce stock",
+            "action": "Place 5 orders for same product",
+            "expected outcome": "Stock decreases in synced_inventory after each order via InventoryObserver",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-032",
+            "step": "3. Low stock alert fires",
+            "action": "Stock reaches configured threshold",
+            "expected outcome": "BI alert fires: \u2018Product X low stock: 2 units remaining\u2019",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-033",
+            "step": "4. Inventory forecast",
+            "action": "Run inventory forecast prediction",
+            "expected outcome": "Predicts stockout date based on current sales velocity",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-034",
+            "step": "5. Restock product",
+            "action": "Update stock qty in Magento admin",
+            "expected outcome": "InventoryObserver fires, synced_inventory updated, back-in-stock push sent",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      },
+      {
+        "title": "9.4 VIP Customer Segment E2E",
+        "tests": [
+          {
+            "test id": "E2E-040",
+            "step": "1. Customer makes multiple purchases",
+            "action": "Place 5+ orders from same account",
+            "expected outcome": "Customer RFM score computed: high frequency, high recency, high monetary",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-041",
+            "step": "2. VIP segment assignment",
+            "action": "Check Analytics \u2192 Customer Segments",
+            "expected outcome": "Customer auto-assigned to \u2018Champion\u2019 or \u2018VIP\u2019 segment based on RFM score",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-042",
+            "step": "3. Segment change event fires",
+            "action": "Analytics detects segment change",
+            "expected outcome": "Analytics::rfm_segment_changed event dispatched to Event Bus",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-043",
+            "step": "4. VIP marketing flow triggers",
+            "action": "Check Marketing \u2192 Flows for VIP flow",
+            "expected outcome": "Customer auto-enrolled in VIP loyalty flow, VIP email sent",
+            "status": "\u23f3 PENDING"
+          },
+          {
+            "test id": "E2E-044",
+            "step": "5. CLV prediction updated",
+            "action": "Check customer CLV in Analytics",
+            "expected outcome": "PredictiveCLVService shows high lifetime value estimate for VIP customer",
+            "status": "\u23f3 PENDING"
+          }
+        ]
+      }
+    ],
+    "description": "These tests simulate real business scenarios combining multiple modules working together. Must all pass before production deployment."
+  },
+  {
+    "title": "SECTION 10 \u2014 PRE-PRODUCTION DEPLOYMENT CHECKLIST",
+    "subsections": [
+      {
+        "title": "10.1 Functional Sign-off",
+        "tests": []
+      },
+      {
+        "title": "10.2 Performance Checklist",
+        "tests": []
+      },
+      {
+        "title": "10.3 Server Configuration Checklist",
+        "tests": []
+      },
+      {
+        "title": "10.4 Production Deployment Steps",
+        "tests": []
+      }
+    ],
+    "description": "All items below must be checked before migrating from staging to client production server."
+  }
+]

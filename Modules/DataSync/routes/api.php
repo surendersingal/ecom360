@@ -26,9 +26,10 @@ use Modules\DataSync\Http\Middleware\ValidateSyncAuth;
 
 // CORS preflight for cross-origin module requests.
 Route::options('v1/sync/{any}', fn () => response('', 204)
-    ->header('Access-Control-Allow-Origin', '*')
+    ->header('Access-Control-Allow-Origin', request()->header('Origin', '*'))
     ->header('Access-Control-Allow-Methods', 'POST, OPTIONS')
     ->header('Access-Control-Allow-Headers', 'Content-Type, X-Ecom360-Key, X-Ecom360-Secret')
+    ->header('Access-Control-Allow-Credentials', 'true')
     ->header('Access-Control-Max-Age', '86400')
 )->where('any', '.*');
 
@@ -68,5 +69,6 @@ Route::middleware(ValidateSyncAuth::class)->prefix('v1/sync')->group(function ()
     | Status
     |----------------------------------------------------------------------
     */
-    Route::get('/status', [SyncController::class, 'status'])->name('datasync.status');
+    Route::get('/status',   [SyncController::class, 'status'])->name('datasync.status');
+    Route::post('/webhook', [SyncController::class, 'syncWebhook'])->name('datasync.webhook');
 });

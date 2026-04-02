@@ -121,7 +121,7 @@ final class TrackingService
             $metadata['device'] = $deviceData;
         }
 
-        $event = TrackingEvent::create([
+        $eventData = [
             'tenant_id'   => $tenantId,
             'session_id'  => $validated['session_id'],
             'event_type'  => $validated['event_type'],
@@ -130,7 +130,14 @@ final class TrackingService
             'custom_data' => $validated['custom_data'] ?? [],
             'ip_address'  => $validated['ip_address'] ?? '',
             'user_agent'  => $validated['user_agent'] ?? '',
-        ]);
+        ];
+
+        // Allow client-supplied timestamp for event ordering within sessions
+        if (! empty($validated['timestamp'])) {
+            $eventData['created_at'] = \Carbon\Carbon::parse($validated['timestamp']);
+        }
+
+        $event = TrackingEvent::create($eventData);
 
         Log::debug("[Analytics] Tracked {$validated['event_type']} for tenant {$tenantId}");
 

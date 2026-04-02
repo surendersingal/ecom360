@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Layout for AI Search Results page.
+ * Route: ecom360/search/results
+ * Uses 2columns-left to match native Magento catalogsearch layout.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="2columns-left"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <title>Search Results</title>
+    </head>
+    <body>
+        <attribute name="class" value="page-products"/>
+        <attribute name="class" value="page-with-filter"/>
+        <!-- Sidebar filters rendered by JS into this container -->
+        <referenceContainer name="sidebar.main">
+            <block class="Ecom360\Analytics\Block\SearchResults"
+                   name="ecom360.search.filters"
+                   template="Ecom360_Analytics::search_filters.phtml"/>
+        </referenceContainer>
+        <!-- Main content area -->
+        <referenceContainer name="content">
+            <block class="Ecom360\Analytics\Block\SearchResults"
+                   name="ecom360.search.results"
+                   template="Ecom360_Analytics::search_results.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

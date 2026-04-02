@@ -1,7 +1,42 @@
-@php $slug = $tenant->slug; @endphp
+@php
+    $slug = $tenant->slug;
+    $user = auth()->user();
+    $isSuperAdmin = $user?->is_super_admin ?? false;
+
+    // Permission checks (super admin bypasses all)
+    $canAnalytics       = $isSuperAdmin || $user?->can('analytics.view');
+    $canAnalyticsManage = $isSuperAdmin || $user?->can('analytics.manage');
+    $canSearch          = $isSuperAdmin || $user?->can('ai_search.query');
+    $canSearchManage    = $isSuperAdmin || $user?->can('ai_search.manage');
+    $canMarketing       = $isSuperAdmin || $user?->can('marketing.view');
+    $canMarketingManage = $isSuperAdmin || $user?->can('marketing.manage');
+    $canBI              = $isSuperAdmin || $user?->can('business_intelligence.view');
+    $canBIManage        = $isSuperAdmin || $user?->can('business_intelligence.manage');
+    $canChatbot         = $isSuperAdmin || $user?->can('chatbot.view');
+    $canChatbotManage   = $isSuperAdmin || $user?->can('chatbot.configure');
+    $canManage          = $isSuperAdmin || $user?->can('analytics.manage'); // Data Sync, Developer, Settings
+
+    $initials = collect(explode(' ', $user->name ?? 'U'))->map(fn($w) => strtoupper(substr($w,0,1)))->take(2)->implode('');
+@endphp
 <!-- ========== Left Sidebar Start ========== -->
 <div class="vertical-menu">
-    <div data-simplebar class="h-100">
+
+    {{-- Sidebar collapse toggle --}}
+    <button class="sidebar-toggle-btn" onclick="window.ecom360ToggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+
+    <div data-simplebar class="h-100" style="display:flex;flex-direction:column;">
+
+        {{-- Store selector --}}
+        <div class="e360-store-selector" title="{{ $tenant->name }}">
+            <span class="store-dot"></span>
+            <span class="store-name">{{ $tenant->name }}</span>
+            <span class="store-chevron"><i class="bx bx-chevron-down" style="font-size:14px;color:var(--neutral-500)"></i></span>
+        </div>
+
         <div id="sidebar-menu">
             <ul class="metismenu list-unstyled" id="side-menu">
 
@@ -26,6 +61,7 @@
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    ANALYTICS
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canAnalytics)
                 <li class="menu-title" key="t-analytics">Analytics</li>
 
                 {{-- Traffic submenu --}}
@@ -85,10 +121,26 @@
                     </ul>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    AI SEARCH & DISCOVERY
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canSearch)
                 <li class="menu-title" key="t-ai-search">AI Search & Discovery</li>
+
+                <li>
+                    <a href="{{ route('tenant.search.settings', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.search.settings') ? 'active' : '' }}">
+                        <i class="bx bx-cog"></i>
+                        <span>Search Settings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.search.analytics', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.search.analytics') ? 'active' : '' }}">
+                        <i class="bx bx-bar-chart"></i>
+                        <span>Search Analytics</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.search.gift-concierge', 'tenant.search.shop-the-room', 'tenant.search.personalized-size', 'tenant.search.oos-reroute', 'tenant.search.typo-correction') ? 'mm-active' : '' }}">
@@ -117,9 +169,12 @@
                     </ul>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    MARKETING
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canMarketing)
                 <li class="menu-title" key="t-marketing">Marketing</li>
 
                 <li>
@@ -183,11 +238,40 @@
                     </ul>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    BUSINESS INTELLIGENCE
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canBI)
                 <li class="menu-title" key="t-bi">Business Intelligence</li>
 
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.bi.revenue', 'tenant.bi.products', 'tenant.bi.customers', 'tenant.bi.cohorts', 'tenant.bi.operations', 'tenant.bi.coupons') ? 'mm-active' : '' }}">
+                        <i class="bx bx-line-chart"></i>
+                        <span>Intelligence</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.bi.revenue', $slug) }}" class="{{ request()->routeIs('tenant.bi.revenue') ? 'active' : '' }}">Revenue Center</a></li>
+                        <li><a href="{{ route('tenant.bi.products', $slug) }}" class="{{ request()->routeIs('tenant.bi.products') ? 'active' : '' }}">Product Intel</a></li>
+                        <li><a href="{{ route('tenant.bi.customers', $slug) }}" class="{{ request()->routeIs('tenant.bi.customers') ? 'active' : '' }}">Customer Intel</a></li>
+                        <li><a href="{{ route('tenant.bi.cohorts', $slug) }}" class="{{ request()->routeIs('tenant.bi.cohorts') ? 'active' : '' }}">Cohort Retention</a></li>
+                        <li><a href="{{ route('tenant.bi.operations', $slug) }}" class="{{ request()->routeIs('tenant.bi.operations') ? 'active' : '' }}">Operations</a></li>
+                        <li><a href="{{ route('tenant.bi.coupons', $slug) }}" class="{{ request()->routeIs('tenant.bi.coupons') ? 'active' : '' }}">Coupon Intel</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.bi.attribution', 'tenant.bi.search-revenue', 'tenant.bi.chatbot-impact', 'tenant.bi.copilot') ? 'mm-active' : '' }}">
+                        <i class="bx bx-git-merge"></i>
+                        <span>Cross-Module</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('tenant.bi.attribution', $slug) }}" class="{{ request()->routeIs('tenant.bi.attribution') ? 'active' : '' }}">Marketing ROI</a></li>
+                        <li><a href="{{ route('tenant.bi.search-revenue', $slug) }}" class="{{ request()->routeIs('tenant.bi.search-revenue') ? 'active' : '' }}">Search Revenue</a></li>
+                        <li><a href="{{ route('tenant.bi.chatbot-impact', $slug) }}" class="{{ request()->routeIs('tenant.bi.chatbot-impact') ? 'active' : '' }}">Chatbot Impact</a></li>
+                        <li><a href="{{ route('tenant.bi.copilot', $slug) }}" class="{{ request()->routeIs('tenant.bi.copilot') ? 'active' : '' }}">AI Copilot</a></li>
+                    </ul>
+                </li>
                 <li>
                     <a href="{{ route('tenant.bi.dashboards', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.dashboards*') ? 'active' : '' }}">
                         <i class="bx bxs-bar-chart-alt-2"></i>
@@ -210,12 +294,6 @@
                     <a href="{{ route('tenant.bi.alerts', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.alerts*') ? 'active' : '' }}">
                         <i class="bx bx-bell"></i>
                         <span>Alerts</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('tenant.bi.predictions', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.bi.predictions*') ? 'active' : '' }}">
-                        <i class="bx bx-trending-up"></i>
-                        <span>Predictions</span>
                     </a>
                 </li>
                 <li>
@@ -251,9 +329,12 @@
                     </ul>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    MONITORING & ALERTS
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canAnalytics)
                 <li class="menu-title" key="t-monitoring">Monitoring</li>
 
                 <li>
@@ -269,10 +350,38 @@
                     </a>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    CUSTOMER SUPPORT
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canChatbot)
                 <li class="menu-title" key="t-support">Customer Support</li>
+
+                <li>
+                    <a href="{{ route('tenant.chatbot.settings', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.chatbot.settings') ? 'active' : '' }}">
+                        <i class="bx bx-cog"></i>
+                        <span>Chatbot Settings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.chatbot.flows', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.chatbot.flows') ? 'active' : '' }}">
+                        <i class="bx bx-git-branch"></i>
+                        <span>Flow Builder</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.chatbot.conversations', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.chatbot.conversations') ? 'active' : '' }}">
+                        <i class="bx bx-conversation"></i>
+                        <span>Conversations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.chatbot.analytics', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.chatbot.analytics') ? 'active' : '' }}">
+                        <i class="bx bx-bar-chart"></i>
+                        <span>Chatbot Analytics</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.support.order-modification', 'tenant.support.sentiment-router', 'tenant.support.vip-greeting', 'tenant.support.warranty-claims', 'tenant.support.sizing-assistant') ? 'mm-active' : '' }}">
@@ -301,41 +410,57 @@
                     </ul>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    CDP & ANALYTICS OPS
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
-                <li class="menu-title" key="t-cdp">CDP & Analytics Ops</li>
+                @if($canBI)
+                <li class="menu-title" key="t-cdp">Customer Data Platform</li>
 
                 <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.cdp.offline-stitching', 'tenant.cdp.zombie-accounts', 'tenant.cdp.product-affinity', 'tenant.cdp.zero-party-data', 'tenant.cdp.refund-impact') ? 'mm-active' : '' }}">
-                        <i class="bx bx-data"></i>
-                        <span>CDP Operations</span>
+                    <a href="{{ route('tenant.cdp.dashboard', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-tachometer"></i>
+                        <span>CDP Dashboard</span>
                     </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="{{ route('tenant.cdp.offline-stitching', $slug) }}" class="{{ request()->routeIs('tenant.cdp.offline-stitching') ? 'active' : '' }}">Offline Stitching</a></li>
-                        <li><a href="{{ route('tenant.cdp.zombie-accounts', $slug) }}" class="{{ request()->routeIs('tenant.cdp.zombie-accounts') ? 'active' : '' }}">Zombie Accounts</a></li>
-                        <li><a href="{{ route('tenant.cdp.product-affinity', $slug) }}" class="{{ request()->routeIs('tenant.cdp.product-affinity') ? 'active' : '' }}">Product Affinity</a></li>
-                        <li><a href="{{ route('tenant.cdp.zero-party-data', $slug) }}" class="{{ request()->routeIs('tenant.cdp.zero-party-data') ? 'active' : '' }}">Zero-Party Data</a></li>
-                        <li><a href="{{ route('tenant.cdp.refund-impact', $slug) }}" class="{{ request()->routeIs('tenant.cdp.refund-impact') ? 'active' : '' }}">Refund Impact</a></li>
-                    </ul>
                 </li>
                 <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect {{ request()->routeIs('tenant.cdp.attribution', 'tenant.cdp.journey-replay', 'tenant.cdp.gdpr-purge', 'tenant.cdp.form-abandonment', 'tenant.cdp.cross-benchmarking') ? 'mm-active' : '' }}">
-                        <i class="bx bx-scatter-chart"></i>
-                        <span>Analytics Ops</span>
+                    <a href="{{ route('tenant.cdp.profiles', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.profiles', 'tenant.cdp.profile-detail') ? 'active' : '' }}">
+                        <i class="bx bx-group"></i>
+                        <span>Customer Profiles</span>
                     </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="{{ route('tenant.cdp.attribution', $slug) }}" class="{{ request()->routeIs('tenant.cdp.attribution') ? 'active' : '' }}">Multi-Touch Attribution</a></li>
-                        <li><a href="{{ route('tenant.cdp.journey-replay', $slug) }}" class="{{ request()->routeIs('tenant.cdp.journey-replay') ? 'active' : '' }}">Journey Replay</a></li>
-                        <li><a href="{{ route('tenant.cdp.gdpr-purge', $slug) }}" class="{{ request()->routeIs('tenant.cdp.gdpr-purge') ? 'active' : '' }}">GDPR Purge Sim</a></li>
-                        <li><a href="{{ route('tenant.cdp.form-abandonment', $slug) }}" class="{{ request()->routeIs('tenant.cdp.form-abandonment') ? 'active' : '' }}">Form Abandonment</a></li>
-                        <li><a href="{{ route('tenant.cdp.cross-benchmarking', $slug) }}" class="{{ request()->routeIs('tenant.cdp.cross-benchmarking') ? 'active' : '' }}">Cross Benchmarking</a></li>
-                    </ul>
                 </li>
+                <li>
+                    <a href="{{ route('tenant.cdp.segments', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.segments', 'tenant.cdp.segment-detail') ? 'active' : '' }}">
+                        <i class="bx bx-target-lock"></i>
+                        <span>Segments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.cdp.rfm', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.rfm') ? 'active' : '' }}">
+                        <i class="bx bx-grid-alt"></i>
+                        <span>RFM Analysis</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.cdp.predictions', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.predictions') ? 'active' : '' }}">
+                        <i class="bx bx-brain"></i>
+                        <span>Predictions</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('tenant.cdp.data-health', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.cdp.data-health') ? 'active' : '' }}">
+                        <i class="bx bx-check-shield"></i>
+                        <span>Data Health</span>
+                    </a>
+                </li>
+
+                @endif
 
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    DATA SYNC
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canManage)
                 <li class="menu-title" key="t-datasync">Data Sync</li>
 
                 <li>
@@ -377,10 +502,19 @@
                         <span>Sync Logs</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('tenant.datasync.settings', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.datasync.settings') ? 'active' : '' }}">
+                        <i class="bx bx-cog"></i>
+                        <span>Sync Settings</span>
+                    </a>
+                </li>
+
+                @endif
 
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    DEVELOPER
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canManage)
                 <li class="menu-title" key="t-developer">Developer</li>
 
                 <li>
@@ -402,9 +536,12 @@
                     </a>
                 </li>
 
+                @endif
+
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                    SETTINGS
                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
+                @if($canManage)
                 <li class="menu-title" key="t-settings">Settings</li>
 
                 <li>
@@ -413,8 +550,20 @@
                         <span>Store Settings</span>
                     </a>
                 </li>
+                @endif
 
             </ul>
+        </div>
+
+        {{-- Sidebar footer — user info --}}
+        <div style="margin-top:auto;">
+            <div class="e360-sidebar-user">
+                <div class="user-avatar">{{ $initials }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ $user->name ?? 'User' }}</div>
+                    <div class="user-role">{{ $isSuperAdmin ? 'Super Admin' : ($user?->roles?->first()?->name ?? 'Store Owner') }}</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

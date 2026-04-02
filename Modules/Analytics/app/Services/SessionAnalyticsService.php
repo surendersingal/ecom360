@@ -170,7 +170,7 @@ final class SessionAnalyticsService
             ]],
             ['$group' => [
                 '_id' => [
-                    'date'    => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at']],
+                    'date'    => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
                     'session' => '$session_id',
                 ],
             ]],

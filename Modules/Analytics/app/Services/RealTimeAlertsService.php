@@ -236,7 +236,7 @@ final class RealTimeAlertsService
 
     // ── Helpers ───────────────────────────────────────────────────────
 
-    private function countEvents(int $tid, string $start, string $end): int
+    private function countEvents(int|string $tid, string $start, string $end): int
     {
         return DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)
@@ -245,7 +245,7 @@ final class RealTimeAlertsService
             ->count();
     }
 
-    private function countSessions(int $tid, string $start, string $end): int
+    private function countSessions(int|string $tid, string $start, string $end): int
     {
         return DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)
@@ -255,7 +255,7 @@ final class RealTimeAlertsService
             ->count('session_id');
     }
 
-    private function countPurchases(int $tid, string $start, string $end): int
+    private function countPurchases(int|string $tid, string $start, string $end): int
     {
         return DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tid)
@@ -265,7 +265,7 @@ final class RealTimeAlertsService
             ->count();
     }
 
-    private function getHistoricalAverage(int $tid, string $metric, int $hours): float
+    private function getHistoricalAverage(int|string $tid, string $metric, int $hours): float
     {
         $cacheKey = "rt_alert:{$tid}:hist_avg:{$metric}";
         return (float) Cache::remember($cacheKey, now()->addMinutes(30), function () use ($tid, $metric, $hours) {

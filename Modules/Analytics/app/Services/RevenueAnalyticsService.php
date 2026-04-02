@@ -35,7 +35,7 @@ final class RevenueAnalyticsService
                 ],
             ]],
             ['$group' => [
-                '_id'     => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at']],
+                '_id'     => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
                 'revenue' => ['$sum' => '$metadata.order_total'],
                 'orders'  => ['$sum' => 1],
             ]],

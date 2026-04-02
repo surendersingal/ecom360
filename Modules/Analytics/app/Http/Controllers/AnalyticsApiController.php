@@ -164,10 +164,41 @@ final class AnalyticsApiController extends Controller
         $range = $request->query('date_range', '30d');
         $service = app(GeographicAnalyticsService::class);
 
+        $deviceData = $service->getDeviceBreakdown($tenantId, $range);
+
+        // Flatten devices dict → array for blade consumption
+        $deviceArray = [];
+        foreach (($deviceData['devices'] ?? []) as $type => $count) {
+            $deviceArray[] = ['device' => ucfirst($type), 'count' => $count];
+        }
+        usort($deviceArray, fn($a, $b) => $b['count'] <=> $a['count']);
+
+        // Flatten browsers dict → array
+        $browserArray = [];
+        foreach (($deviceData['browsers'] ?? []) as $name => $count) {
+            $browserArray[] = ['browser' => $name, 'count' => $count];
+        }
+
+        // OS breakdown from user_agent parsing (already done in service)
+        $osArray = [];
+        foreach (($deviceData['operating_systems'] ?? []) as $name => $count) {
+            $osArray[] = ['os' => $name, 'count' => $count];
+        }
+
+        // Resolution breakdown
+        $resArray = [];
+        foreach (($deviceData['resolutions'] ?? []) as $name => $count) {
+            $resArray[] = ['resolution' => $name, 'count' => $count];
+        }
+
         return $this->successResponse([
             'by_country' => $service->getVisitorsByCountry($tenantId, $range),
             'by_city' => $service->getVisitorsByCity($tenantId, $range, 20),
-            'devices' => $service->getDeviceBreakdown($tenantId, $range),
+            'devices' => $deviceData,
+            'device_breakdown' => $deviceArray,
+            'browser_breakdown' => $browserArray,
+            'os_breakdown' => $osArray,
+            'resolution_breakdown' => $resArray,
             'traffic_by_hour' => $service->getTrafficByHour($tenantId, $range),
         ]);
     }
@@ -551,7 +582,363 @@ final class AnalyticsApiController extends Controller
         ]);
     }
 
-    private function tenantId(): int
+    // ────────── MATOMO-PARITY ENDPOINTS ──────────
+
+    /**
+     * All Pages – aggregate page_view events by URL, Matomo "Behaviour > Pages" equivalent
+     */
+    public function allPages(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        [$from, $to] = $this->parseDateRange($request->input('range', '30d'));
+        $dateMatch = ['$gte' => new \MongoDB\BSON\UTCDateTime($from->getTimestamp() * 1000), '$lte' => new \MongoDB\BSON\UTCDateTime($to->getTimestamp() * 1000)];
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        // ── Step 1: Compute per-session landing/exit/duration for bounce & exit rate ──
+        $sessionStats = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'event_type' => ['$in' => ['page_view', 'product_view']], 'created_at' => $dateMatch]],
+            ['$sort' => ['created_at' => 1]],
+            ['$group' => [
+                '_id' => '$session_id',
+                'pages' => ['$push' => ['$ifNull' => ['$metadata.url', '$url']]],
+                'first_time' => ['$first' => '$created_at'],
+                'last_time' => ['$last' => '$created_at'],
+                'event_count' => ['$sum' => 1],
+            ]],
+        ]));
+
+        // Build per-URL bounce/exit/time maps
+        $urlBounce = [];
+        $urlExit = [];
+        $urlTime = [];
+        $urlTotal = [];
+
+        foreach ($sessionStats as $sess) {
+            $pages = $sess['pages'] ?? [];
+            if (empty($pages)) continue;
+
+            $isBounce = count($pages) === 1;
+            $landing = $pages[0] ?? '';
+            $exit = end($pages);
+
+            // Session duration shared equally across pages
+            $first = $sess['first_time'];
+            $last = $sess['last_time'];
+            $durMs = 0;
+            if ($first instanceof \MongoDB\BSON\UTCDateTime && $last instanceof \MongoDB\BSON\UTCDateTime) {
+                $durMs = (int) ((string) $last) - (int) ((string) $first);
+            }
+            $avgTimePerPage = count($pages) > 0 ? ($durMs / 1000) / count($pages) : 0;
+
+            foreach ($pages as $url) {
+                $urlTotal[$url] = ($urlTotal[$url] ?? 0) + 1;
+                $urlTime[$url] = ($urlTime[$url] ?? 0) + $avgTimePerPage;
+            }
+
+            if ($isBounce && $landing) {
+                $urlBounce[$landing] = ($urlBounce[$landing] ?? 0) + 1;
+            }
+            if ($exit) {
+                $urlExit[$exit] = ($urlExit[$exit] ?? 0) + 1;
+            }
+        }
+
+        // ── Step 2: Page view counts per URL (includes product_view) ──
+        $pages = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'event_type' => ['$in' => ['page_view', 'product_view']], 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => ['$ifNull' => ['$metadata.url', '$url']],
+                'pageviews' => ['$sum' => 1],
+                'unique_sessions' => ['$addToSet' => '$session_id'],
+            ]],
+            ['$project' => [
+                '_id' => 0,
+                'url' => '$_id',
+                'pageviews' => 1,
+                'unique' => ['$size' => '$unique_sessions'],
+            ]],
+            ['$sort' => ['pageviews' => -1]],
+            ['$limit' => 100],
+        ]));
+
+        // Merge bounce/exit/time into page rows
+        foreach ($pages as &$p) {
+            $url = $p['url'] ?? '';
+            $total = $urlTotal[$url] ?? 0;
+            $p['avg_time'] = $total > 0 ? round(($urlTime[$url] ?? 0) / $total) : 0;
+            $p['bounce_rate'] = $p['pageviews'] > 0 ? round((($urlBounce[$url] ?? 0) / $p['pageviews']) * 100, 1) : 0;
+            $p['exit_rate'] = $p['pageviews'] > 0 ? round((($urlExit[$url] ?? 0) / $p['pageviews']) * 100, 1) : 0;
+        }
+        unset($p);
+
+        return $this->successResponse(['pages' => $pages]);
+    }
+
+    /**
+     * Search Analytics – aggregate site search events, Matomo "Behaviour > Site Search" equivalent
+     */
+    public function searchAnalytics(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        [$from, $to] = $this->parseDateRange($request->input('range', '30d'));
+        $dateMatch = ['$gte' => new \MongoDB\BSON\UTCDateTime($from->getTimestamp() * 1000), '$lte' => new \MongoDB\BSON\UTCDateTime($to->getTimestamp() * 1000)];
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        $keywords = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => '$metadata.query',
+                'searches' => ['$sum' => 1],
+                'unique_sessions' => ['$addToSet' => '$session_id'],
+                'avg_results' => ['$avg' => ['$ifNull' => ['$metadata.results_count', 0]]],
+            ]],
+            ['$project' => [
+                '_id' => 0,
+                'keyword' => '$_id',
+                'searches' => 1,
+                'unique' => ['$size' => '$unique_sessions'],
+                'avg_results' => ['$round' => ['$avg_results', 0]],
+            ]],
+            ['$sort' => ['searches' => -1]],
+            ['$limit' => 50],
+        ]));
+
+        $totalSearches = $collection->countDocuments([
+            'tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch,
+        ]);
+
+        $uniqueKeywords = count($keywords);
+
+        // No-results searches
+        $noResults = $collection->countDocuments([
+            'tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch,
+            'metadata.results_count' => 0,
+        ]);
+
+        return $this->successResponse([
+            'total_searches' => $totalSearches,
+            'unique_keywords' => $uniqueKeywords,
+            'no_result_searches' => $noResults,
+            'no_result_rate' => $totalSearches > 0 ? round($noResults / $totalSearches * 100, 1) : 0,
+            'keywords' => $keywords,
+        ]);
+    }
+
+    /**
+     * Events Breakdown – aggregate events by event_type (category/action/label), Matomo "Behaviour > Events" equivalent
+     */
+    public function eventsBreakdown(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        [$from, $to] = $this->parseDateRange($request->input('range', '30d'));
+        $dateMatch = ['$gte' => new \MongoDB\BSON\UTCDateTime($from->getTimestamp() * 1000), '$lte' => new \MongoDB\BSON\UTCDateTime($to->getTimestamp() * 1000)];
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        $breakdown = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => [
+                    'category' => ['$ifNull' => ['$metadata.event_category', '$event_type']],
+                    'action' => ['$ifNull' => ['$metadata.event_action', '$event_type']],
+                ],
+                'count' => ['$sum' => 1],
+                'unique_sessions' => ['$addToSet' => '$session_id'],
+                'label' => ['$first' => ['$ifNull' => ['$metadata.event_label', '']]],
+            ]],
+            ['$project' => [
+                '_id' => 0,
+                'category' => '$_id.category',
+                'action' => '$_id.action',
+                'label' => 1,
+                'count' => 1,
+                'unique' => ['$size' => '$unique_sessions'],
+            ]],
+            ['$sort' => ['count' => -1]],
+            ['$limit' => 100],
+        ]));
+
+        // Summary by category only
+        $categories = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => ['$ifNull' => ['$metadata.event_category', '$event_type']],
+                'count' => ['$sum' => 1],
+                'unique_sessions' => ['$addToSet' => '$session_id'],
+            ]],
+            ['$project' => [
+                '_id' => 0,
+                'category' => '$_id',
+                'count' => 1,
+                'unique' => ['$size' => '$unique_sessions'],
+            ]],
+            ['$sort' => ['count' => -1]],
+        ]));
+
+        return $this->successResponse([
+            'breakdown' => $breakdown,
+            'categories' => $categories,
+            'total_events' => array_sum(array_column($categories, 'count')),
+        ]);
+    }
+
+    /**
+     * Visitor Frequency – session count distribution, Matomo "Visitors > Visits Frequency" equivalent
+     */
+    public function visitorFrequency(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        [$from, $to] = $this->parseDateRange($request->input('range', '30d'));
+        $dateMatch = ['$gte' => new \MongoDB\BSON\UTCDateTime($from->getTimestamp() * 1000), '$lte' => new \MongoDB\BSON\UTCDateTime($to->getTimestamp() * 1000)];
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        // Count sessions per visitor_id, then bucket
+        $perVisitor = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch, 'session_id' => ['$exists' => true]]],
+            ['$group' => [
+                '_id' => ['$ifNull' => ['$visitor_id', '$session_id']],
+                'sessions' => ['$addToSet' => '$session_id'],
+            ]],
+            ['$project' => [
+                '_id' => 0,
+                'visit_count' => ['$size' => '$sessions'],
+            ]],
+        ]));
+
+        $buckets = ['1 visit' => 0, '2 visits' => 0, '3-5 visits' => 0, '6-10 visits' => 0, '11+ visits' => 0];
+        foreach ($perVisitor as $v) {
+            $c = $v['visit_count'] ?? ($v->visit_count ?? 0);
+            if ($c <= 1) $buckets['1 visit']++;
+            elseif ($c == 2) $buckets['2 visits']++;
+            elseif ($c <= 5) $buckets['3-5 visits']++;
+            elseif ($c <= 10) $buckets['6-10 visits']++;
+            else $buckets['11+ visits']++;
+        }
+
+        $total = array_sum($buckets);
+        $frequency = [];
+        foreach ($buckets as $name => $value) {
+            $frequency[] = [
+                'name' => $name,
+                'count' => $value,
+                'percentage' => $total > 0 ? round($value / $total * 100, 1) : 0,
+            ];
+        }
+
+        return $this->successResponse(['frequency' => $frequency, 'total_visitors' => $total]);
+    }
+
+    /**
+     * Day-of-Week traffic + hourly heatmap from real data, Matomo "Visitors > Times" equivalent
+     */
+    public function dayOfWeek(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        [$from, $to] = $this->parseDateRange($request->input('range', '30d'));
+        $dateMatch = ['$gte' => new \MongoDB\BSON\UTCDateTime($from->getTimestamp() * 1000), '$lte' => new \MongoDB\BSON\UTCDateTime($to->getTimestamp() * 1000)];
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        // Traffic by day-of-week (1=Sunday .. 7=Saturday in Mongo)
+        $byDay = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                'count' => ['$sum' => 1],
+            ]],
+            ['$sort' => ['_id' => 1]],
+        ]));
+
+        $dayNames = [1 => 'Sun', 2 => 'Mon', 3 => 'Tue', 4 => 'Wed', 5 => 'Thu', 6 => 'Fri', 7 => 'Sat'];
+        $dayOfWeekData = [];
+        foreach ($dayNames as $num => $name) {
+            $found = 0;
+            foreach ($byDay as $d) {
+                if (($d['_id'] ?? ($d->_id ?? 0)) == $num) {
+                    $found = $d['count'] ?? ($d->count ?? 0);
+                    break;
+                }
+            }
+            $dayOfWeekData[] = ['day' => $name, 'count' => $found];
+        }
+
+        // Heatmap: hour x day-of-week
+        $heatmap = iterator_to_array($collection->aggregate([
+            ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
+            ['$group' => [
+                '_id' => [
+                    'dow' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                    'hour' => ['$hour' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                ],
+                'count' => ['$sum' => 1],
+            ]],
+        ]));
+
+        $heatmapData = [];
+        foreach ($heatmap as $h) {
+            $id = $h['_id'] ?? $h->_id;
+            $dow = is_object($id) ? $id->dow : ($id['dow'] ?? 0);
+            $hour = is_object($id) ? $id->hour : ($id['hour'] ?? 0);
+            $count = $h['count'] ?? ($h->count ?? 0);
+            $heatmapData[] = ['day' => $dow, 'hour' => $hour, 'count' => $count];
+        }
+
+        return $this->successResponse([
+            'day_of_week' => $dayOfWeekData,
+            'heatmap' => $heatmapData,
+        ]);
+    }
+
+    /**
+     * Recent Events – live/raw event stream for real-time dashboard, replaces Math.random() fake data
+     */
+    public function recentEvents(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId();
+        $limit = min((int) $request->input('limit', 50), 200);
+
+        $collection = \DB::connection('mongodb')->getCollection('tracking_events');
+
+        $events = iterator_to_array($collection->find(
+            ['tenant_id' => $tenantId],
+            [
+                'sort' => ['created_at' => -1],
+                'limit' => $limit,
+                'projection' => [
+                    '_id' => 0,
+                    'event_type' => 1,
+                    'session_id' => 1,
+                    'visitor_id' => 1,
+                    'metadata.url' => 1,
+                    'metadata.title' => 1,
+                    'metadata.product_name' => 1,
+                    'metadata.query' => 1,
+                    'metadata.order_total' => 1,
+                    'metadata.geo' => 1,
+                    'metadata.country' => 1,
+                    'metadata.city' => 1,
+                    'custom_data' => 1,
+                    'ip_address' => 1,
+                    'user_agent' => 1,
+                    'created_at' => 1,
+                ],
+            ]
+        ));
+
+        // Convert MongoDB dates to ISO strings
+        foreach ($events as &$e) {
+            if (isset($e['created_at']) && $e['created_at'] instanceof \MongoDB\BSON\UTCDateTime) {
+                $e['created_at'] = $e['created_at']->toDateTime()->format('c');
+            }
+        }
+
+        return $this->successResponse(['events' => $events]);
+    }
+
+    private function tenantId(): string
     {
         $user = Auth::user();
 
@@ -559,7 +946,7 @@ final class AnalyticsApiController extends Controller
             abort(403, 'Tenant context required.');
         }
 
-        return (int) $user->tenant_id;
+        return (string) $user->tenant_id;
     }
 
     /** @return array{0: \Carbon\CarbonImmutable, 1: \Carbon\CarbonImmutable} */

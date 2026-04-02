@@ -1,0 +1,998 @@
+{
+  "results": [
+    {
+      "test_id": "US-CP-251",
+      "title": "Accept All Cookies \u2192 Full Tracking + Mktg",
+      "modules": "Analytics, Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Consent-all event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Full tracking page_view after consent",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing Event Bus active",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 524,
+      "timestamp": "2026-03-05T12:39:28.269180"
+    },
+    {
+      "test_id": "US-CP-252",
+      "title": "Reject Mktg Cookies \u2192 Anon BI + Mktg Suppressed",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Functional-only consent event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Anonymized session tracking works",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI receives anonymized data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 77,
+      "timestamp": "2026-03-05T12:39:28.509432"
+    },
+    {
+      "test_id": "US-CP-253",
+      "title": "GDPR Delete \u2192 Cascade All Modules",
+      "modules": "All Modules",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "GDPR deletion request event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Analytics accessible for data purge",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contacts for profile erasure",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync for order PII anonymization",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 90,
+      "timestamp": "2026-03-05T12:39:28.863810"
+    },
+    {
+      "test_id": "US-CP-254",
+      "title": "Validate GDPR \u2192 Zero PII + BI Intact",
+      "modules": "BI, Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI KPIs accessible (revenue intact)",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Analytics export for PII audit",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 81,
+      "timestamp": "2026-03-05T12:39:29.025982"
+    },
+    {
+      "test_id": "US-CP-255",
+      "title": "CCPA Opt-Out \u2192 Block Meta/Google Audiences",
+      "modules": "Mktg, Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "CCPA opt-out event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Audience destinations for block check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 77,
+      "timestamp": "2026-03-05T12:39:29.185305"
+    },
+    {
+      "test_id": "US-CP-256",
+      "title": "DSAR Export \u2192 ZIP All Tracking Data",
+      "modules": "Core, All",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Analytics export endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI exports for DSAR compilation",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contacts for DSAR data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 72,
+      "timestamp": "2026-03-05T12:39:29.419854"
+    },
+    {
+      "test_id": "US-CP-257",
+      "title": "Unsubscribe Mid-Flow \u2192 Cancel Next Email",
+      "modules": "Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Consent revocation event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing flows for instant removal",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:29.576211"
+    },
+    {
+      "test_id": "US-CP-258",
+      "title": "PII Encryption \u2192 AES-256 at Rest",
+      "modules": "Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Customer sync with encryption flag accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status for encryption health",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 92,
+      "timestamp": "2026-03-05T12:39:29.763639"
+    },
+    {
+      "test_id": "US-CP-259",
+      "title": "IP Anonymize \u2192 192.168.1.0 Stored",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "IP-anonymized event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 73,
+      "timestamp": "2026-03-05T12:39:29.839185"
+    },
+    {
+      "test_id": "US-CP-260",
+      "title": "Magento customer.deleted \u2192 GDPR Cascade",
+      "modules": "Sync, Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Customer deletion webhook accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status for GDPR cascade",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 83,
+      "timestamp": "2026-03-05T12:39:30.014355"
+    },
+    {
+      "test_id": "US-CP-261",
+      "title": "Consent true\u2192false \u2192 Mktg Suppressed",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Consent change event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing contacts for suppression",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 80,
+      "timestamp": "2026-03-05T12:39:30.187068"
+    },
+    {
+      "test_id": "US-CP-262",
+      "title": "Retention Policy \u2192 Purge > 90 Days",
+      "modules": "Core, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI KPIs for aggregate retention",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Analytics overview for log age check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:30.338517"
+    },
+    {
+      "test_id": "US-CP-263",
+      "title": "Chat PII Scrub \u2192 SSN/CC Redacted",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Chatbot handles PII-containing message",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:30.415352"
+    },
+    {
+      "test_id": "US-MB-264",
+      "title": "Pinch-Zoom \u2192 BI Image Engagement Score",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Pinch-zoom micro-interaction accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI for image engagement score",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T12:39:30.563457"
+    },
+    {
+      "test_id": "US-MB-265",
+      "title": "Swipe Carousel \u2192 Mktg Mobile Popup",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Carousel swipe event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing for mobile popup trigger",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:30.711734"
+    },
+    {
+      "test_id": "US-MB-266",
+      "title": "SMS Deep Link \u2192 Campaign Attribution",
+      "modules": "Mktg, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Deep link event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaign analytics for SMS attribution",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 73,
+      "timestamp": "2026-03-05T12:39:30.863358"
+    },
+    {
+      "test_id": "US-MB-267",
+      "title": "Mobile Chatbot \u2192 Full-Screen UX",
+      "modules": "Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Mobile chatbot renders",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 110,
+      "timestamp": "2026-03-05T12:39:30.974844"
+    },
+    {
+      "test_id": "US-MB-268",
+      "title": "PWA Add-to-Cart \u2192 BI PWA Segment",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "PWA cart event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI segments PWA vs browser",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 80,
+      "timestamp": "2026-03-05T12:39:31.140057"
+    },
+    {
+      "test_id": "US-MB-269",
+      "title": "Double-Tap Wishlist \u2192 Price-Drop Queue",
+      "modules": "Analytics, Event Bus",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Double-tap wishlist event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Event Bus \u2192 price-drop notification queue",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T12:39:31.283894"
+    },
+    {
+      "test_id": "US-MB-270",
+      "title": "Native Share \u2192 Virality Metric",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Native share event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 78,
+      "timestamp": "2026-03-05T12:39:31.364383"
+    },
+    {
+      "test_id": "US-MB-271",
+      "title": "FaceID Login \u2192 Identity Map Session",
+      "modules": "Sync, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Biometric login event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Sync maps session to customer",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 85,
+      "timestamp": "2026-03-05T12:39:31.549592"
+    },
+    {
+      "test_id": "US-MB-272",
+      "title": "Safari Resize \u2192 Ignore False Layout Shift",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Safari resize event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:31.623477"
+    },
+    {
+      "test_id": "US-MB-273",
+      "title": "3G Fallback \u2192 Buffer + Cached Search",
+      "modules": "Analytics, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Network downgrade event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "AI Search still responds on slow net",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 80,
+      "timestamp": "2026-03-05T12:39:31.797719"
+    },
+    {
+      "test_id": "US-MB-274",
+      "title": "Mobile Voice Input \u2192 AI Search Results",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Speech-to-text search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 106,
+      "timestamp": "2026-03-05T12:39:31.905591"
+    },
+    {
+      "test_id": "US-MB-275",
+      "title": "Push Click \u2192 BI Revenue Attribution",
+      "modules": "Mktg, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Push open + purchase ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "BI maps revenue to push channel",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 149,
+      "timestamp": "2026-03-05T12:39:32.140275"
+    },
+    {
+      "test_id": "US-AF-276",
+      "title": "Influencer Link \u2192 30-Day Affiliate Cookie",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Affiliate landing event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Campaign attribution for influencer",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:32.288075"
+    },
+    {
+      "test_id": "US-AF-277",
+      "title": "Multi-Touch \u2192 Linear Attribution Split",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Multi-touch journey ingested",
+          "pass": true,
+          "details": "ingested=3"
+        },
+        {
+          "label": "BI linear attribution calculation",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 230,
+      "timestamp": "2026-03-05T12:39:32.600009"
+    },
+    {
+      "test_id": "US-AF-278",
+      "title": "Promo SARAH10 \u2192 BI Influencer Attribution",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Promo code purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI attributes sale to influencer",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync recognizes promo code origin",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:32.835941"
+    },
+    {
+      "test_id": "US-AF-279",
+      "title": "Influencer ROI \u2192 Revenue + Commissions",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI dashboards for affiliate ROI",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "KPIs for payout commission calc",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:32.991008"
+    },
+    {
+      "test_id": "US-AF-280",
+      "title": "Affiliate Abandon \u2192 Recovery Email + Credit",
+      "modules": "Mktg, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Affiliate abandon journey ingested",
+          "pass": true,
+          "details": "ingested=3"
+        },
+        {
+          "label": "Cart recovery flow for affiliate sale",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 228,
+      "timestamp": "2026-03-05T12:39:33.303739"
+    },
+    {
+      "test_id": "US-AF-281",
+      "title": "Cookie Overwrite \u2192 Last Click to inf_B",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Last-click override journey ingested",
+          "pass": true,
+          "details": "ingested=3"
+        },
+        {
+          "label": "BI credits Influencer B (last click)",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 226,
+      "timestamp": "2026-03-05T12:39:33.609784"
+    },
+    {
+      "test_id": "US-AF-282",
+      "title": "Affiliate Refund \u2192 BI Deduct Commission",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Affiliate refund sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI deducts commission on refund",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 87,
+      "timestamp": "2026-03-05T12:39:33.776168"
+    },
+    {
+      "test_id": "US-AF-283",
+      "title": "Custom Referral Link \u2192 YouTube Tracking",
+      "modules": "Core, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Admin referral link creation event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Analytics campaign tracking ready",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:33.923306"
+    },
+    {
+      "test_id": "US-AF-284",
+      "title": "Refer Friend \u2192 Friend Buys \u2192 $10 Reward",
+      "modules": "Analytics, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Referral + friend purchase ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "Marketing flow for $10 reward email",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 154,
+      "timestamp": "2026-03-05T12:39:34.173873"
+    },
+    {
+      "test_id": "US-AF-285",
+      "title": "100 Sales Same IP \u2192 Fraud Flag + Pause",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI alerts for fraud detection",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Fraud signal event ingested",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Sync for payout pause check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 73,
+      "timestamp": "2026-03-05T12:39:34.406766"
+    },
+    {
+      "test_id": "US-AF-286",
+      "title": "Awin Sub-ID \u2192 Postback Params Stored",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Sub-affiliate tracking event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T12:39:34.479364"
+    },
+    {
+      "test_id": "US-AF-287",
+      "title": "Checkout \u2192 S2S Postback to Awin",
+      "modules": "Sync, Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Postback sale sync accepted",
+          "pass": true,
+          "details": "HTTP 422"
+        },
+        {
+          "label": "Sync status for S2S webhook",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:34.639312"
+    },
+    {
+      "test_id": "US-AF-288",
+      "title": "Affiliate LTV \u2192 Influencer vs Facebook Ads",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "CLV endpoint for affiliate LTV",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI dashboard for LTV comparison",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 72,
+      "timestamp": "2026-03-05T12:39:34.789136"
+    },
+    {
+      "test_id": "US-AF-289",
+      "title": "NEWBIE Rejected \u2192 Chatbot Loyalty Offer",
+      "modules": "Sync, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Promo rejection event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Chatbot offers loyalty code instead",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:34.936085"
+    },
+    {
+      "test_id": "US-AF-290",
+      "title": "IG Webview \u2192 Affiliate Cookie Persists",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "IG webview affiliate event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 74,
+      "timestamp": "2026-03-05T12:39:35.011770"
+    },
+    {
+      "test_id": "US-CP-291",
+      "title": "Cookie Auto-Expire \u2192 12 Month Max",
+      "modules": "Core",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Cookie expiration check event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        }
+      ],
+      "elapsed_ms": 72,
+      "timestamp": "2026-03-05T12:39:35.085871"
+    },
+    {
+      "test_id": "US-CP-292",
+      "title": "GeoIP DE \u2192 Double Opt-In + Cookie Block",
+      "modules": "Core, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "EU region event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Marketing flows enforce double opt-in",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T12:39:35.245934"
+    },
+    {
+      "test_id": "US-MB-293",
+      "title": "Phone Auto-Format \u2192 E.164 for SMS",
+      "modules": "Core, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Phone number sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing validates SMS format",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 91,
+      "timestamp": "2026-03-05T12:39:35.417900"
+    },
+    {
+      "test_id": "US-AF-294",
+      "title": "Gift Wrap Fee \u2192 Affiliate Paid on Products Only",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Order with custom fees sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI separates product vs fee revenue",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 81,
+      "timestamp": "2026-03-05T12:39:35.576127"
+    },
+    {
+      "test_id": "US-AF-295",
+      "title": "50% Refund \u2192 BI Halves Commission",
+      "modules": "Sync, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Partial refund sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI recalculates 50% commission",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 85,
+      "timestamp": "2026-03-05T12:39:35.739108"
+    },
+    {
+      "test_id": "US-MB-296",
+      "title": "Add to Home Screen \u2192 BI High-Intent Event",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "A2HS install event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI tracks high-intent conversion",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 86,
+      "timestamp": "2026-03-05T12:39:35.914191"
+    },
+    {
+      "test_id": "US-CP-297",
+      "title": "Batch Anonymize 3yr Inactive \u2192 BI Intact",
+      "modules": "Core, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI KPIs surviving anonymization",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Customer analytics for batch check",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 80,
+      "timestamp": "2026-03-05T12:39:36.079686"
+    },
+    {
+      "test_id": "US-AF-298",
+      "title": "Radio Coupon \u2192 BI Offline Attribution",
+      "modules": "Analytics, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Offline coupon purchase accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI attributes to Radio channel",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 75,
+      "timestamp": "2026-03-05T12:39:36.231333"
+    },
+    {
+      "test_id": "US-MB-299",
+      "title": "Back Button \u2192 History API No Double-Count",
+      "modules": "Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Back navigation events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        }
+      ],
+      "elapsed_ms": 152,
+      "timestamp": "2026-03-05T12:39:36.387300"
+    },
+    {
+      "test_id": "US-AF-300",
+      "title": "Monthly Affiliate Payout \u2192 CSV Export",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI exports for payout CSV",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI reports for monthly rollup",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 77,
+      "timestamp": "2026-03-05T12:39:36.546656"
+    }
+  ],
+  "summary": {
+    "total": 50,
+    "pass": 50,
+    "warn": 0,
+    "fail": 0,
+    "pass_rate": 100.0,
+    "execution_time_s": 8.97,
+    "timestamp": "2026-03-05T12:39:36.548902"
+  }
+}

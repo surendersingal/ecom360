@@ -1,0 +1,973 @@
+{
+  "results": [
+    {
+      "test_id": "US-AS-101",
+      "title": "Semantic Search 'warm winter' \u2192 NLP Intent",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Semantic search endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Response contains results structure",
+          "pass": true,
+          "details": "dict"
+        }
+      ],
+      "elapsed_ms": 166,
+      "timestamp": "2026-03-05T11:06:49.137844"
+    },
+    {
+      "test_id": "US-AS-102",
+      "title": "Typo 'snkrs' \u2192 Fuzzy Match Sneakers",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Fuzzy search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T11:06:49.210401"
+    },
+    {
+      "test_id": "US-AS-103",
+      "title": "Visual Search red_dress.jpg \u2192 Top 3 Matches",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Visual search endpoint responsive",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 78,
+      "timestamp": "2026-03-05T11:06:49.290571"
+    },
+    {
+      "test_id": "US-AS-104",
+      "title": "Past Buyer Search 'shoes' \u2192 Boost Running",
+      "modules": "AI Search, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Past purchase event ingested",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Personalised search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Analytics product data for boost signal",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T11:06:49.493231"
+    },
+    {
+      "test_id": "US-AS-105",
+      "title": "Zero-Result 'spaceship' \u2192 Trending Fallback",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Zero-result search responds 200",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Trending fallback endpoint accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 72,
+      "timestamp": "2026-03-05T11:06:49.623183"
+    },
+    {
+      "test_id": "US-AS-106",
+      "title": "Voice Search 'black leather boots'",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Voice search query responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 85,
+      "timestamp": "2026-03-05T11:06:49.709284"
+    },
+    {
+      "test_id": "US-AS-107",
+      "title": "Multi-Lang 'zapatos rojos' \u2192 Red Shoes",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Spanish search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T11:06:49.781831"
+    },
+    {
+      "test_id": "US-AS-108",
+      "title": "Search 'watch' < $50 \u2192 DataSync Prices",
+      "modules": "AI Search, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Price-filtered search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status verifies price accuracy",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T11:06:49.924876"
+    },
+    {
+      "test_id": "US-AS-109",
+      "title": "Click 3rd Result \u2192 Analytics + Ranking",
+      "modules": "AI Search, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "search_click event accepted",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "Search analytics for ranking update",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:06:50.038257"
+    },
+    {
+      "test_id": "US-AS-110",
+      "title": "Autocomplete 'jac' \u2192 Under 50ms Target",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Suggest/autocomplete responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Autocomplete under 2s",
+          "pass": true,
+          "details": "0.052s"
+        }
+      ],
+      "elapsed_ms": 52,
+      "timestamp": "2026-03-05T11:06:50.092410"
+    },
+    {
+      "test_id": "US-AS-111",
+      "title": "Exact SKU 'SKU-9988' \u2192 Direct PDP",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Exact SKU search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T11:06:50.165143"
+    },
+    {
+      "test_id": "US-AS-112",
+      "title": "Synonym 'mobile' \u2192 Smartphone Results",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Synonym search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T11:06:50.238443"
+    },
+    {
+      "test_id": "US-AS-113",
+      "title": "Search \u2192 Cart \u2192 BI Revenue Attribution",
+      "modules": "AI Search, BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Search \u2192 cart events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "BI KPIs for search-attributed revenue",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 112,
+      "timestamp": "2026-03-05T11:06:50.421981"
+    },
+    {
+      "test_id": "US-AS-114",
+      "title": "OOS 'Yeezy' \u2192 Marketing Notify Me",
+      "modules": "AI Search, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "OOS search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing notify-me flow accessible",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 68,
+      "timestamp": "2026-03-05T11:06:50.553179"
+    },
+    {
+      "test_id": "US-AS-115",
+      "title": "Promo Boost 'shirt' \u2192 Summer Top 5",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Promo-boosted search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 67,
+      "timestamp": "2026-03-05T11:06:50.623546"
+    },
+    {
+      "test_id": "US-AS-116",
+      "title": "Category 'Electronics' \u2192 AI Search Listing",
+      "modules": "AI Search, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Category search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync feeds category data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 76,
+      "timestamp": "2026-03-05T11:06:50.773337"
+    },
+    {
+      "test_id": "US-AS-117",
+      "title": "Faceted Search Brand=Sony \u2192 API Filter",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Faceted search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T11:06:50.836208"
+    },
+    {
+      "test_id": "US-AS-118",
+      "title": "Admin Name Update \u2192 Sync \u2192 Search Index",
+      "modules": "Sync, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Product name update sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "AI Search indexes updated name",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 71,
+      "timestamp": "2026-03-05T11:06:51.003604"
+    },
+    {
+      "test_id": "US-AS-119",
+      "title": "XSS Injection \u2192 Sanitised + 0 Results",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "XSS search sanitised (no 500)",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Server handled XSS input gracefully",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 69,
+      "timestamp": "2026-03-05T11:06:51.075083"
+    },
+    {
+      "test_id": "US-AS-120",
+      "title": "Dimension '24x36 rug' \u2192 NLP Attr Extract",
+      "modules": "AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Dimension search responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 69,
+      "timestamp": "2026-03-05T11:06:51.146887"
+    },
+    {
+      "test_id": "US-BI-121",
+      "title": "Daily Revenue Dashboard \u2192 Sync Aggregation",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Revenue endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status for order feed",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 62,
+      "timestamp": "2026-03-05T11:06:51.280694"
+    },
+    {
+      "test_id": "US-BI-122",
+      "title": "CVR Funnel \u2192 Sessions to Purchase",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Funnel endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sessions data for funnel numerator",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T11:06:51.400818"
+    },
+    {
+      "test_id": "US-BI-123",
+      "title": "Churn Prediction \u2192 Flag High Risk",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI predictions endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Customer data for churn model",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T11:06:51.528337"
+    },
+    {
+      "test_id": "US-BI-124",
+      "title": "Export Monthly Sales CSV \u2192 Presigned URL",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI exports endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T11:06:51.588324"
+    },
+    {
+      "test_id": "US-BI-125",
+      "title": "Stock-out Forecast \u2192 SKU Velocity Alert",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Predictions for inventory burn",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status for inventory feed",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:06:51.724781"
+    },
+    {
+      "test_id": "US-BI-126",
+      "title": "CLV \u2192 Historical + Predictive Value",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "CLV endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync order history for CLV calc",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:06:51.854238"
+    },
+    {
+      "test_id": "US-BI-127",
+      "title": "Revenue < $1k Alert \u2192 Slack/Email",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI alerts endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Alert evaluation endpoint callable",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 53,
+      "timestamp": "2026-03-05T11:06:51.967116"
+    },
+    {
+      "test_id": "US-BI-128",
+      "title": "Marketing Attribution \u2192 ROI %",
+      "modules": "BI, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Campaign analytics for ROI calc",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing campaigns for cost data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 67,
+      "timestamp": "2026-03-05T11:06:52.093778"
+    },
+    {
+      "test_id": "US-BI-129",
+      "title": "Cohort Retention \u2192 Jan Signup Heatmap",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Cohort endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T11:06:52.152838"
+    },
+    {
+      "test_id": "US-BI-130",
+      "title": "500% Traffic Spike \u2192 Bot Alert",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Traffic analytics responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI alerts for anomaly flags",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T11:06:52.266568"
+    },
+    {
+      "test_id": "US-BI-131",
+      "title": "Weekly Report \u2192 Monday 8AM PDF Email",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI reports endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T11:06:52.328293"
+    },
+    {
+      "test_id": "US-BI-132",
+      "title": "Search Revenue KPI \u2192 Search vs Menu",
+      "modules": "BI, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "KPIs endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Search analytics for revenue isolation",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 61,
+      "timestamp": "2026-03-05T11:06:52.450945"
+    },
+    {
+      "test_id": "US-BI-133",
+      "title": "Multi-tenant Filter \u2192 Store A Only",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI dashboards responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync status for store isolation",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 57,
+      "timestamp": "2026-03-05T11:06:52.581762"
+    },
+    {
+      "test_id": "US-BI-134",
+      "title": "Chatbot Deflection Rate \u2192 BI KPI",
+      "modules": "BI, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "KPIs for deflection metric",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Chatbot WISMO handled",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 62,
+      "timestamp": "2026-03-05T11:06:52.704901"
+    },
+    {
+      "test_id": "US-BI-135",
+      "title": "AOV by Device \u2192 Desktop $150, Mobile $85",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Device-tagged purchases ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "BI KPIs segment AOV by device",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 118,
+      "timestamp": "2026-03-05T11:06:52.889720"
+    },
+    {
+      "test_id": "US-BI-136",
+      "title": "Market Basket \u2192 Flashlight + Batteries",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Predictions for market basket",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync feeds order data for affinity",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 54,
+      "timestamp": "2026-03-05T11:06:53.016291"
+    },
+    {
+      "test_id": "US-BI-137",
+      "title": "Time-to-Purchase \u2192 3d 4h Avg",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Sessions for TTP calculation",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI KPIs for TTP metric",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 65,
+      "timestamp": "2026-03-05T11:06:53.145075"
+    },
+    {
+      "test_id": "US-BI-138",
+      "title": "Refund % > 5% \u2192 Operations Alert",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI alerts for refund threshold",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync feeds refund data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 60,
+      "timestamp": "2026-03-05T11:06:53.282265"
+    },
+    {
+      "test_id": "US-BI-139",
+      "title": "Abandon by Gateway \u2192 Stripe vs PayPal",
+      "modules": "BI, Analytics",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Gateway abandon events ingested",
+          "pass": true,
+          "details": "ingested=2"
+        },
+        {
+          "label": "BI segments abandonment by gateway",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 116,
+      "timestamp": "2026-03-05T11:06:53.464867"
+    },
+    {
+      "test_id": "US-BI-140",
+      "title": "GDPR Export U302 \u2192 Compliant JSON",
+      "modules": "BI, All",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Analytics export endpoint responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI exports for GDPR compilation",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing contacts for user data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 55,
+      "timestamp": "2026-03-05T11:06:53.645981"
+    },
+    {
+      "test_id": "US-BI-141",
+      "title": "Gross Margin \u2192 Revenue - COGS - Discounts",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Revenue endpoint for margin calc",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync COGS data available",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 59,
+      "timestamp": "2026-03-05T11:06:53.778175"
+    },
+    {
+      "test_id": "US-BI-142",
+      "title": "Chatbot Sentiment \u2192 BI NLP Mood Score",
+      "modules": "BI, Chatbot",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "KPIs for sentiment aggregation",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Chatbot handles frustrated user",
+          "pass": true,
+          "details": "HTTP 429"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T11:07:09.286947"
+    },
+    {
+      "test_id": "US-BI-143",
+      "title": "Cross-Sell \u2192 Replacement Part Buyers",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Predictions for cross-sell model",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Sync order history for cross-sell",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 66,
+      "timestamp": "2026-03-05T11:07:09.430282"
+    },
+    {
+      "test_id": "US-BI-144",
+      "title": "DataSync Health \u2192 5min Delay Alert",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Sync status for latency check",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI alerts for sync delay threshold",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 69,
+      "timestamp": "2026-03-05T11:07:09.560353"
+    },
+    {
+      "test_id": "US-BI-145",
+      "title": "Custom Report \u2192 City \u00d7 Revenue Chart",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI reports for custom builder",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Field definitions for drag & drop",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 63,
+      "timestamp": "2026-03-05T11:07:09.682852"
+    },
+    {
+      "test_id": "US-BI-146",
+      "title": "YOY BF 2025 vs 2026 \u2192 % Growth",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Revenue date range 2025 responds",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI dashboards for YOY comparison",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:07:09.801027"
+    },
+    {
+      "test_id": "US-BI-147",
+      "title": "Channel Net Profit \u2192 Ads vs Organic",
+      "modules": "BI, Mktg",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Campaign analytics for channel profit",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Marketing campaigns for ad spend",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI KPIs for net profit per channel",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:07:09.977066"
+    },
+    {
+      "test_id": "US-BI-148",
+      "title": "Zero-Result \u2192 Top 50 Dead End Terms",
+      "modules": "BI, AI Search",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Zero-result search event ingested",
+          "pass": true,
+          "details": "HTTP 201"
+        },
+        {
+          "label": "BI KPIs for dead end reporting",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "Search analytics for zero-result list",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 58,
+      "timestamp": "2026-03-05T11:07:10.159949"
+    },
+    {
+      "test_id": "US-BI-149",
+      "title": "Delete SKU \u2192 BI Keeps Historical Revenue",
+      "modules": "BI, Sync",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "Product deletion sync accepted",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI reports retain historical data",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 70,
+      "timestamp": "2026-03-05T11:07:10.294688"
+    },
+    {
+      "test_id": "US-BI-150",
+      "title": "API Usage \u2192 90% Plan Limit Alert",
+      "modules": "BI",
+      "status": "PASS",
+      "checks": [
+        {
+          "label": "BI KPIs for system load",
+          "pass": true,
+          "details": "HTTP 200"
+        },
+        {
+          "label": "BI alerts for 90% usage threshold",
+          "pass": true,
+          "details": "HTTP 200"
+        }
+      ],
+      "elapsed_ms": 56,
+      "timestamp": "2026-03-05T11:07:10.408938"
+    }
+  ],
+  "summary": {
+    "total": 50,
+    "pass": 50,
+    "warn": 0,
+    "fail": 0,
+    "pass_rate": 100.0,
+    "execution_time_s": 21.48,
+    "timestamp": "2026-03-05T11:07:10.409559"
+  }
+}

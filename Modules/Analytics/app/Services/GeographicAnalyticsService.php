@@ -95,11 +95,15 @@ final class GeographicAnalyticsService
 
         $results = iterator_to_array($collection->aggregate($pipeline));
 
-        return array_map(fn ($row) => [
-            'city'     => $row['_id']['city'] ?? 'Unknown',
-            'country'  => $row['_id']['country'] ?? 'Unknown',
-            'sessions' => (int) ($row['sessions'] ?? 0),
-        ], $results);
+        return array_map(function ($row) {
+            $city = $row['_id']['city'] ?? 'Unknown';
+            $country = $row['_id']['country'] ?? 'Unknown';
+            return [
+                'city'     => is_array($city) || $city instanceof \MongoDB\Model\BSONArray ? 'Unknown' : (string) $city,
+                'country'  => is_array($country) || $country instanceof \MongoDB\Model\BSONArray ? 'Unknown' : (string) $country,
+                'sessions' => (int) ($row['sessions'] ?? 0),
+            ];
+        }, $results);
     }
 
     /**
@@ -119,9 +123,11 @@ final class GeographicAnalyticsService
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
             ]],
+            ['$sort' => ['created_at' => 1]],
             ['$group' => [
                 '_id'        => '$session_id',
                 'user_agent' => ['$first' => '$user_agent'],
+                'metadata'   => ['$first' => '$metadata'],
             ]],
         ];
 
@@ -129,6 +135,8 @@ final class GeographicAnalyticsService
 
         $devices  = ['desktop' => 0, 'mobile' => 0, 'tablet' => 0, 'other' => 0];
         $browsers = [];
+        $operatingSystems = [];
+        $resolutions = [];
 
         foreach ($results as $row) {
             $ua = strtolower($row['user_agent'] ?? '');
@@ -161,13 +169,42 @@ final class GeographicAnalyticsService
             }
 
             $browsers[$browser] = ($browsers[$browser] ?? 0) + 1;
+
+            // OS detection
+            $os = 'Other';
+            if (str_contains($ua, 'windows nt 10')) {
+                $os = 'Windows 10/11';
+            } elseif (str_contains($ua, 'windows nt')) {
+                $os = 'Windows';
+            } elseif (str_contains($ua, 'macintosh') || str_contains($ua, 'mac os')) {
+                $os = 'macOS';
+            } elseif (str_contains($ua, 'iphone') || str_contains($ua, 'ipad')) {
+                $os = 'iOS';
+            } elseif (str_contains($ua, 'android')) {
+                $os = 'Android';
+            } elseif (str_contains($ua, 'linux')) {
+                $os = 'Linux';
+            } elseif (str_contains($ua, 'cros')) {
+                $os = 'ChromeOS';
+            }
+            $operatingSystems[$os] = ($operatingSystems[$os] ?? 0) + 1;
+
+            // Screen resolution from metadata (if tracked)
+            $res = $row['metadata']['screen_resolution'] ?? $row['metadata']['resolution'] ?? null;
+            if ($res) {
+                $resolutions[$res] = ($resolutions[$res] ?? 0) + 1;
+            }
         }
 
         arsort($browsers);
+        arsort($operatingSystems);
+        arsort($resolutions);
 
         return [
             'devices'  => $devices,
             'browsers' => $browsers,
+            'operating_systems' => $operatingSystems,
+            'resolutions' => $resolutions,
             'total_sessions' => array_sum($devices),
         ];
     }
@@ -191,7 +228,7 @@ final class GeographicAnalyticsService
                 ],
             ]],
             ['$group' => [
-                '_id'   => ['$hour' => '$created_at'],
+                '_id'   => ['$hour' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
                 'views' => ['$sum' => 1],
             ]],
             ['$sort' => ['_id' => 1]],

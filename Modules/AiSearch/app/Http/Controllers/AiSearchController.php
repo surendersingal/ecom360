@@ -71,6 +71,12 @@ class AiSearchController extends Controller
             if (!empty($params['max_price'])) {
                 $filters['max_price'] = $params['max_price'];
             }
+            if (!empty($params['brands'])) {
+                $filters['brand'] = $params['brands'];
+            }
+            if (!empty($params['brand'])) {
+                $filters['brand'] = $params['brand'];
+            }
             if (!empty($filters)) {
                 $params['filters'] = $filters;
             }
@@ -100,9 +106,33 @@ class AiSearchController extends Controller
 
     /**
      * POST /api/v1/search/visual — Visual/image-based search.
+     *
+     * Accepts image in three ways:
+     *   1. image_base64 — raw base64 string
+     *   2. image_url    — URL to an image
+     *   3. image        — multipart file upload (from storefront widget)
      */
     public function visualSearch(Request $request): JsonResponse
     {
+        // If a file upload is provided, convert it to base64 so the
+        // downstream service always receives `image_base64`.
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            if (!$file->isValid()) {
+                return $this->errorResponse('Invalid image upload.', 422);
+            }
+            // Max 10 MB
+            if ($file->getSize() > 10 * 1024 * 1024) {
+                return $this->errorResponse('Image too large. Max 10 MB.', 422);
+            }
+            $mime = $file->getMimeType();
+            if (!str_starts_with($mime, 'image/')) {
+                return $this->errorResponse('File must be an image.', 422);
+            }
+            $base64 = base64_encode(file_get_contents($file->getRealPath()));
+            $request->merge(['image_base64' => "data:{$mime};base64,{$base64}"]);
+        }
+
         $request->validate([
             'image_base64' => 'required_without:image_url|nullable|string',
             'image_url'    => 'required_without:image_base64|nullable|url',
@@ -129,6 +159,20 @@ class AiSearchController extends Controller
         return $result['success']
             ? response()->json($result)
             : $this->errorResponse($result['error'] ?? 'Not found', 404);
+    }
+
+    /**
+     * GET /api/v1/search/widget-config — Widget configuration flags.
+     *
+     * Returns feature flags (visual search, voice search, etc.) stored
+     * in the tenant_settings table so the Magento storefront can
+     * dynamically enable/disable UI elements without requiring local
+     * Magento admin config changes.
+     */
+    public function widgetConfig(Request $request): JsonResponse
+    {
+        $tenantId = $this->tenantId($request);
+        return $this->successResponse($this->searchService->getWidgetConfig($tenantId));
     }
 
     /**
