@@ -217,7 +217,7 @@ final class PredictionService
                         'orders' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['_id' => 1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $dailyRevenues = array_map(fn($d) => (float) ($d['revenue'] ?? 0), $historicalData);

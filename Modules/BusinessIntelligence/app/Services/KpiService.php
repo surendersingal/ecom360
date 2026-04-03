@@ -336,7 +336,7 @@ final class KpiService
                     ['$group' => ['_id' => '$session_id', 'count' => ['$sum' => 1]]],
                     ['$match' => ['count' => ['$gt' => 1]]],
                     ['$count' => 'engaged'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $engaged = $engagedSessions[0]['engaged'] ?? 0;

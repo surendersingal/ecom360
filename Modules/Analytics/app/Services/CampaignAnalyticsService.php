@@ -48,7 +48,7 @@ final class CampaignAnalyticsService
             ['$sort' => ['sessions' => -1]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'campaign'    => $row['_id'] ?? 'Unknown',
@@ -86,7 +86,7 @@ final class CampaignAnalyticsService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $sources = [];
         $mediums = [];
@@ -160,7 +160,7 @@ final class CampaignAnalyticsService
             ['$sort' => ['revenue' => -1]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $totalRevenue = 0;
         $channels = [];
@@ -221,7 +221,7 @@ final class CampaignAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'referrer' => $row['_id'] ?? 'direct',

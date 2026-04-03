@@ -63,7 +63,7 @@ final class SessionAnalyticsService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $facets  = $results[0] ?? [];
         $totals  = $facets['totals'][0] ?? [];
 
@@ -133,7 +133,7 @@ final class SessionAnalyticsService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $facets  = $results[0] ?? [];
 
         $total = (int) ($facets['total'][0]['count'] ?? 0);
@@ -170,7 +170,7 @@ final class SessionAnalyticsService
             ]],
             ['$group' => [
                 '_id' => [
-                    'date'    => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                    'date'    => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                     'session' => '$session_id',
                 ],
             ]],
@@ -181,7 +181,7 @@ final class SessionAnalyticsService
             ['$sort' => ['_id' => 1]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $dates    = [];
         $sessions = [];
@@ -228,7 +228,7 @@ final class SessionAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'url'      => $row['_id'] ?? '/',
@@ -267,7 +267,7 @@ final class SessionAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'url'      => $row['_id'] ?? '/',

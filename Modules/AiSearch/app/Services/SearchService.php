@@ -77,7 +77,7 @@ class SearchService
         $tenantId = (string) $tenantId;
         $settings = $this->loadSettings($tenantId);
 
-        $query = $params['query'] ?? '';
+        $query = strip_tags($params['query'] ?? '');
         $filters = $params['filters'] ?? [];
         $page = max(1, (int) ($params['page'] ?? 1));
         $defaultPerPage = (int) $this->setting($settings, 'search_results_per_page', 20);
@@ -236,13 +236,20 @@ class SearchService
                 'facets'           => $this->buildFacets($facetSource, $settings),
                 'response_time_ms' => $responseTimeMs,
             ];
-        } catch (\Exception $e) {
-            Log::error("SearchService::search error: {$e->getMessage()}", [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return ['success' => false, 'error' => $e->getMessage(), 'results' => []];
+        } catch (\Throwable $e) {
+            Log::warning('[AiSearch] SearchService::search failed (MongoDB may be offline): ' . $e->getMessage());
+            return [
+                'success'     => true,
+                'results'     => [],
+                'total'       => 0,
+                'facets'      => [],
+                'suggestions' => [],
+                'query'       => $query ?? '',
+                'query_info'  => ['error' => 'Search service temporarily unavailable'],
+                'page'        => $page ?? 1,
+                'per_page'    => $perPage ?? 20,
+                'has_more'    => false,
+            ];
         }
     }
 
@@ -289,7 +296,7 @@ class SearchService
                             ['$group' => ['_id' => '$query', 'count' => ['$sum' => 1]]],
                             ['$sort' => ['count' => -1]],
                             ['$limit' => 5],
-                        ]);
+                        ], ['maxTimeMS' => 30000]);
                     });
 
                 return [
@@ -308,8 +315,8 @@ class SearchService
                         'count' => is_object($t) ? ($t->count ?? 0) : ($t['count'] ?? 0),
                     ])->values()->toArray(),
                 ];
-            } catch (\Exception $e) {
-                Log::error("SearchService::suggest error: {$e->getMessage()}");
+            } catch (\Throwable $e) {
+                Log::warning('[AiSearch] SearchService::suggest failed: ' . $e->getMessage());
                 return ['products' => [], 'categories' => [], 'popular' => []];
             }
         });
@@ -338,7 +345,7 @@ class SearchService
                         ]],
                         ['$sort' => ['count' => -1]],
                         ['$limit' => $limit],
-                    ]);
+                    ], ['maxTimeMS' => 30000]);
                 });
 
             return [
@@ -348,8 +355,8 @@ class SearchService
                     'avg_results' => round($t->avg_results ?? ($t['avg_results'] ?? 0)),
                 ])->values()->toArray(),
             ];
-        } catch (\Exception $e) {
-            Log::error("SearchService::getTrending error: {$e->getMessage()}");
+        } catch (\Throwable $e) {
+            Log::warning('[AiSearch] SearchService::getTrending failed: ' . $e->getMessage());
             return ['trending' => []];
         }
     }
@@ -398,9 +405,18 @@ class SearchService
                 'top_queries'        => $topQueries->toArray(),
                 'zero_result_queries' => $zeroResultQueries->toArray(),
             ];
-        } catch (\Exception $e) {
-            Log::error("SearchService::getAnalytics error: {$e->getMessage()}");
-            return ['error' => $e->getMessage()];
+        } catch (\Throwable $e) {
+            Log::warning('[AiSearch] SearchService::getAnalytics failed: ' . $e->getMessage());
+            return [
+                'period_days'         => $days,
+                'total_searches'      => 0,
+                'click_through_rate'  => 0,
+                'conversion_rate'     => 0,
+                'zero_result_rate'    => 0,
+                'avg_response_time'   => 0,
+                'top_queries'         => [],
+                'zero_result_queries' => [],
+            ];
         }
     }
 

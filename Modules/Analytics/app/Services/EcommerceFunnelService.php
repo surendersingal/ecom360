@@ -94,7 +94,7 @@ final class EcommerceFunnelService
             ],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $facets  = $results[0] ?? [];
 
         // ------------------------------------------------------------------

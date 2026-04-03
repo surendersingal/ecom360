@@ -10,6 +10,7 @@ use Modules\BusinessIntelligence\Services\RevenueIntelService;
 use Modules\BusinessIntelligence\Services\ProductIntelService;
 use Modules\BusinessIntelligence\Services\CustomerIntelService;
 use Modules\BusinessIntelligence\Services\OperationsIntelService;
+use Carbon\Carbon;
 use Modules\BusinessIntelligence\Services\CrossModuleIntelService;
 
 /**
@@ -30,7 +31,47 @@ final class BiController extends Controller
 
     private function tid(Request $request): int
     {
-        return (int) $request->attributes->get('tenant')->id;
+        // Try request attributes first (set by API key middleware)
+        $tenant = $request->attributes->get('tenant');
+        if ($tenant !== null) {
+            return (int) $tenant->id;
+        }
+
+        // Fall back to authenticated user's tenant_id (Sanctum auth)
+        $user = $request->user();
+        if ($user !== null && isset($user->tenant_id)) {
+            return (int) $user->tenant_id;
+        }
+
+        abort(403, 'Unable to resolve tenant context.');
+    }
+
+    /**
+     * Safely parse a date string into a Carbon instance.
+     * Returns null when the value is empty or unparseable.
+     */
+    private function parseDate(?string $value): ?Carbon
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        try {
+            return Carbon::parse($value);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parse an integer query parameter with bounds.
+     */
+    private function parseIntParam(?string $value, int $default, int $min = 1, int $max = 500): int
+    {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+        $int = (int) $value;
+        return max($min, min($max, $int));
     }
 
     /* ═══════════════════════════════════════
@@ -120,8 +161,8 @@ final class BiController extends Controller
     public function apiRevenueByDay(Request $request): JsonResponse
     {
         $tid  = $this->tid($request);
-        $from = $request->query('from');
-        $to   = $request->query('to');
+        $from = $this->parseDate($request->query('from'));
+        $to   = $this->parseDate($request->query('to'));
         try {
             return response()->json([
                 'success' => true,
@@ -135,7 +176,7 @@ final class BiController extends Controller
     public function apiRevenueTrend(Request $request): JsonResponse
     {
         $tid  = $this->tid($request);
-        $days = (int) $request->query('days', 90);
+        $days = $this->parseIntParam($request->query('days'), 90, 1, 365);
         try {
             return response()->json([
                 'success' => true,
@@ -149,9 +190,12 @@ final class BiController extends Controller
     public function apiRevenueBreakdown(Request $request): JsonResponse
     {
         $tid       = $this->tid($request);
-        $dimension = $request->query('dimension', 'category');
-        $from      = $request->query('from');
-        $to        = $request->query('to');
+        $allowed   = ['category', 'brand', 'channel', 'source'];
+        $dimension = in_array($request->query('dimension'), $allowed, true)
+                     ? $request->query('dimension')
+                     : 'category';
+        $from      = $this->parseDate($request->query('from'));
+        $to        = $this->parseDate($request->query('to'));
         try {
             return response()->json([
                 'success' => true,
@@ -165,8 +209,8 @@ final class BiController extends Controller
     public function apiRevenueMargin(Request $request): JsonResponse
     {
         $tid  = $this->tid($request);
-        $from = $request->query('from');
-        $to   = $request->query('to');
+        $from = $this->parseDate($request->query('from'));
+        $to   = $this->parseDate($request->query('to'));
         try {
             return response()->json([
                 'success' => true,
@@ -180,9 +224,9 @@ final class BiController extends Controller
     public function apiRevenueTopPerformers(Request $request): JsonResponse
     {
         $tid   = $this->tid($request);
-        $from  = $request->query('from');
-        $to    = $request->query('to');
-        $limit = (int) $request->query('limit', 10);
+        $from  = $this->parseDate($request->query('from'));
+        $to    = $this->parseDate($request->query('to'));
+        $limit = $this->parseIntParam($request->query('limit'), 10, 1, 500);
         try {
             return response()->json([
                 'success' => true,
@@ -200,10 +244,13 @@ final class BiController extends Controller
     public function apiProductLeaderboard(Request $request): JsonResponse
     {
         $tid    = $this->tid($request);
-        $sortBy = $request->query('sort', 'revenue');
-        $from   = $request->query('from');
-        $to     = $request->query('to');
-        $limit  = (int) $request->query('limit', 25);
+        $allowedSorts = ['revenue', 'quantity', 'margin', 'orders'];
+        $sortBy = in_array($request->query('sort'), $allowedSorts, true)
+                  ? $request->query('sort')
+                  : 'revenue';
+        $from   = $this->parseDate($request->query('from'));
+        $to     = $this->parseDate($request->query('to'));
+        $limit  = $this->parseIntParam($request->query('limit'), 25, 1, 500);
         try {
             return response()->json([
                 'success' => true,
@@ -299,7 +346,7 @@ final class BiController extends Controller
     public function apiCohortRetention(Request $request): JsonResponse
     {
         $tid    = $this->tid($request);
-        $months = (int) $request->query('months', 6);
+        $months = $this->parseIntParam($request->query('months'), 6, 1, 24);
         try {
             return response()->json([
                 'success' => true,
@@ -452,8 +499,8 @@ final class BiController extends Controller
     {
         $tid   = $this->tid($request);
         $email = $request->query('email');
-        if (!$email) {
-            return response()->json(['success' => false, 'error' => 'Email is required'], 422);
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['success' => false, 'error' => 'A valid email is required'], 422);
         }
         try {
             return response()->json([

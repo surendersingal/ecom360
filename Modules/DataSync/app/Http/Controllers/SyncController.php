@@ -141,7 +141,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Products synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync failed.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync failed.', 503);
     }
 
     /**
@@ -154,7 +154,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Categories synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync failed.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync failed.', 503);
     }
 
     /**
@@ -167,7 +167,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Inventory synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync failed.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync failed.', 503);
     }
 
     /**
@@ -180,7 +180,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Sales data synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync failed.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync failed.', 503);
     }
 
     /*
@@ -201,7 +201,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Orders synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 503);
     }
 
     /**
@@ -216,7 +216,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Customers synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 503);
     }
 
     /**
@@ -231,7 +231,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Abandoned carts synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 503);
     }
 
     /**
@@ -246,7 +246,7 @@ final class SyncController extends Controller
 
         return $result['success'] !== false
             ? $this->successResponse($result, 'Popup captures synced.')
-            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 403);
+            : $this->errorResponse($result['message'] ?? 'Sync permission denied.', 503);
     }
 
     /*

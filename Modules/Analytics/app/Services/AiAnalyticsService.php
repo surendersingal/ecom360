@@ -70,7 +70,7 @@ final class AiAnalyticsService
                         'count' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['_id' => 1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $counts = collect($dailyCounts)->pluck('count')->toArray();
@@ -119,7 +119,7 @@ final class AiAnalyticsService
                         'purchases' => ['$sum' => ['$cond' => [['$eq' => ['$event_type', 'purchase']], 1, 0]]],
                     ]],
                     ['$sort' => ['_id' => 1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $convRates = collect($conversionByDay)->map(function ($day) {
@@ -183,7 +183,7 @@ final class AiAnalyticsService
                         'orders'  => ['$sum' => 1],
                     ]],
                     ['$sort' => ['_id' => 1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $historical = collect($dailyRevenue)->map(fn ($d) => [
@@ -285,7 +285,7 @@ final class AiAnalyticsService
                         '_id'   => '$event_type',
                         'count' => ['$sum' => 1],
                     ]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $funnelData = collect($funnelDropOff)->keyBy('_id');
@@ -349,7 +349,7 @@ final class AiAnalyticsService
                     ]],
                     ['$sort' => ['revenue' => -1]],
                     ['$limit' => 3],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         if (!empty($hourlyData)) {
@@ -377,7 +377,7 @@ final class AiAnalyticsService
                         '_id'       => ['device' => '$metadata.device.device_type', 'event' => '$event_type'],
                         'count'     => ['$sum' => 1],
                     ]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $deviceMap = collect($deviceConv)->groupBy(fn ($d) => $d['_id']['device']);
@@ -413,7 +413,7 @@ final class AiAnalyticsService
                     ]],
                     ['$sort' => ['revenue' => -1]],
                     ['$limit' => 3],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         if (count($topProducts) >= 2) {
@@ -444,7 +444,7 @@ final class AiAnalyticsService
                         '_id'      => null,
                         'avgDepth' => ['$avg' => '$depth'],
                     ]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $depth = $avgDepth[0]['avgDepth'] ?? 0;
@@ -508,7 +508,7 @@ final class AiAnalyticsService
                     ]],
                     ['$sort' => ['views' => -1]],
                     ['$limit' => 5],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         // Geo breakdown
@@ -530,7 +530,7 @@ final class AiAnalyticsService
                     ]],
                     ['$sort' => ['sessions' => -1]],
                     ['$limit' => 10],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return [
@@ -584,7 +584,7 @@ final class AiAnalyticsService
                         'revenue'      => 1,
                     ]],
                     ['$sort' => ['sessions' => -1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return [

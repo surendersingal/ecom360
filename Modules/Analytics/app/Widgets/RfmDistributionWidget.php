@@ -95,7 +95,7 @@ final class RfmDistributionWidget implements WidgetInterface
             ['$sort' => ['count' => -1]],
         ];
 
-        $results  = iterator_to_array($collection->aggregate($pipeline));
+        $results  = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $labels   = array_column($results, '_id');
         $counts   = array_column($results, 'count');
 

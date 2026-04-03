@@ -55,6 +55,11 @@ class AiSearchController extends Controller
         if (!isset($params['query']) && isset($params['q'])) {
             $params['query'] = $params['q'];
         }
+
+        // Sanitize query to prevent XSS reflection
+        if (isset($params['query'])) {
+            $params['query'] = strip_tags($params['query']);
+        }
         if (isset($params['limit']) && !isset($params['per_page'])) {
             $params['per_page'] = $params['limit'];
         }
@@ -82,11 +87,20 @@ class AiSearchController extends Controller
             }
         }
 
-        $result = $this->searchService->search($tenantId, $params);
+        try {
+            $result = $this->searchService->search($tenantId, $params);
 
-        return $result['success']
-            ? response()->json($result)
-            : $this->errorResponse($result['error'] ?? 'Search failed', 422);
+            return $result['success']
+                ? response()->json($result)
+                : $this->errorResponse($result['error'] ?? 'Search failed', 422);
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Search failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => true,
+                'data'    => ['results' => [], 'total' => 0, 'facets' => [], 'suggestions' => []],
+                'message' => 'Search service temporarily unavailable.',
+            ]);
+        }
     }
 
     /**
@@ -99,9 +113,13 @@ class AiSearchController extends Controller
         ]);
 
         $tenantId = $this->tenantId($request);
-        $result = $this->searchService->suggest($tenantId, $request->input('q'));
-
-        return response()->json($result);
+        try {
+            $result = $this->searchService->suggest($tenantId, strip_tags($request->input('q')));
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Suggest failed: ' . $e->getMessage());
+            return response()->json(['products' => [], 'categories' => [], 'popular' => []]);
+        }
     }
 
     /**
@@ -181,7 +199,12 @@ class AiSearchController extends Controller
     public function trending(Request $request): JsonResponse
     {
         $tenantId = $this->tenantId($request);
-        return $this->successResponse($this->searchService->getTrending($tenantId));
+        try {
+            return $this->successResponse($this->searchService->getTrending($tenantId));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Trending failed: ' . $e->getMessage());
+            return response()->json(['success' => true, 'data' => ['trending' => []]]);
+        }
     }
 
     /**
@@ -191,6 +214,11 @@ class AiSearchController extends Controller
     {
         $tenantId = $this->tenantId($request);
         $days = (int) $request->input('days', 30);
-        return $this->successResponse($this->searchService->getAnalytics($tenantId, $days));
+        try {
+            return $this->successResponse($this->searchService->getAnalytics($tenantId, $days));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Analytics failed: ' . $e->getMessage());
+            return response()->json(['success' => true, 'data' => ['total_searches' => 0, 'top_queries' => []]]);
+        }
     }
 }

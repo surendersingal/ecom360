@@ -113,7 +113,7 @@ final class SmartRecommendationService
                     ]],
                     ['$sort' => ['score' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -160,7 +160,7 @@ final class SmartRecommendationService
                     ]],
                     ['$sort' => ['co_purchases' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -206,7 +206,7 @@ final class SmartRecommendationService
                     ['$addFields' => ['score' => ['$size' => '$buyer_count']]],
                     ['$sort' => ['score' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -249,7 +249,7 @@ final class SmartRecommendationService
                     ]],
                     ['$sort' => ['interactions' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -291,7 +291,7 @@ final class SmartRecommendationService
                     ]],
                     ['$sort' => ['interactions' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [

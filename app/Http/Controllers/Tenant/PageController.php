@@ -1253,40 +1253,60 @@ final class PageController extends Controller
     public function datasyncProducts(Request $request, string $tenant): View
     {
         $tenantModel = $request->attributes->get('tenant');
-        $products = \Modules\DataSync\Models\SyncedProduct::where('tenant_id', (string) $tenantModel->id)
-            ->orderByDesc('synced_at')->paginate(25);
+        try {
+            $products = \Modules\DataSync\Models\SyncedProduct::where('tenant_id', (string) $tenantModel->id)
+                ->orderByDesc('synced_at')->paginate(25);
+        } catch (\Throwable $e) {
+            $products = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
         return view('tenant.pages.datasync.products', ['products' => $products]);
     }
 
     public function datasyncCategories(Request $request, string $tenant): View
     {
         $tenantModel = $request->attributes->get('tenant');
-        $categories = \Modules\DataSync\Models\SyncedCategory::where('tenant_id', (string) $tenantModel->id)
-            ->orderBy('level')->orderBy('name')->paginate(25);
+        try {
+            $categories = \Modules\DataSync\Models\SyncedCategory::where('tenant_id', (string) $tenantModel->id)
+                ->orderBy('level')->orderBy('name')->paginate(25);
+        } catch (\Throwable $e) {
+            $categories = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
         return view('tenant.pages.datasync.categories', ['categories' => $categories]);
     }
 
     public function datasyncOrders(Request $request, string $tenant): View
     {
         $tenantModel = $request->attributes->get('tenant');
-        $orders = \Modules\DataSync\Models\SyncedOrder::where('tenant_id', (string) $tenantModel->id)
-            ->orderByDesc('synced_at')->paginate(25);
+        try {
+            $orders = \Modules\DataSync\Models\SyncedOrder::where('tenant_id', (string) $tenantModel->id)
+                ->orderByDesc('synced_at')->paginate(25);
+        } catch (\Throwable $e) {
+            $orders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
         return view('tenant.pages.datasync.orders', ['orders' => $orders]);
     }
 
     public function datasyncCustomers(Request $request, string $tenant): View
     {
         $tenantModel = $request->attributes->get('tenant');
-        $customers = \Modules\DataSync\Models\SyncedCustomer::where('tenant_id', (string) $tenantModel->id)
-            ->orderByDesc('synced_at')->paginate(25);
+        try {
+            $customers = \Modules\DataSync\Models\SyncedCustomer::where('tenant_id', (string) $tenantModel->id)
+                ->orderByDesc('synced_at')->paginate(25);
+        } catch (\Throwable $e) {
+            $customers = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
         return view('tenant.pages.datasync.customers', ['customers' => $customers]);
     }
 
     public function datasyncInventory(Request $request, string $tenant): View
     {
         $tenantModel = $request->attributes->get('tenant');
-        $inventory = \Modules\DataSync\Models\SyncedInventory::where('tenant_id', (string) $tenantModel->id)
-            ->orderBy('sku')->paginate(25);
+        try {
+            $inventory = \Modules\DataSync\Models\SyncedInventory::where('tenant_id', (string) $tenantModel->id)
+                ->orderBy('sku')->paginate(25);
+        } catch (\Throwable $e) {
+            $inventory = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
         return view('tenant.pages.datasync.inventory', ['inventory' => $inventory]);
     }
 

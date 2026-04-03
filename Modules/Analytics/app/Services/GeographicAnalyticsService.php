@@ -52,7 +52,7 @@ final class GeographicAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'country'     => $row['_id'] ?? 'Unknown',
@@ -93,7 +93,7 @@ final class GeographicAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(function ($row) {
             $city = $row['_id']['city'] ?? 'Unknown';
@@ -131,7 +131,7 @@ final class GeographicAnalyticsService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $devices  = ['desktop' => 0, 'mobile' => 0, 'tablet' => 0, 'other' => 0];
         $browsers = [];
@@ -228,13 +228,13 @@ final class GeographicAnalyticsService
                 ],
             ]],
             ['$group' => [
-                '_id'   => ['$hour' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                '_id'   => ['$hour' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                 'views' => ['$sum' => 1],
             ]],
             ['$sort' => ['_id' => 1]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $hours = array_fill(0, 24, 0);
 

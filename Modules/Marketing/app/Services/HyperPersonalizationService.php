@@ -114,7 +114,7 @@ class HyperPersonalizationService
                         ['$match' => ['order_count' => ['$gte' => 3]]],
                         ['$sort' => ['avg_order_value' => -1]],
                         ['$limit' => 500],
-                    ]);
+                    ], ['maxTimeMS' => 30000]);
                 });
 
             $campaigns = [];

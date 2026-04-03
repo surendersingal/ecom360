@@ -24,20 +24,22 @@ class CdpAdvancedService
     public function offlineOnlineStitching(int|string $tenantId): array
     {
         try {
-            // Get POS/offline data
+            // SAFETY: bounded query
             $offlineOrders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
                 ->where('channel', 'pos')
                 ->where('created_at', '>=', now()->subDays(90)->toDateTimeString())
+                ->take(10000)
                 ->get();
 
-            // Get online visitors with email
+            // SAFETY: bounded query
             $onlineVisitors = DB::connection('mongodb')
                 ->table('events')
                 ->where('tenant_id', $tenantId)
                 ->whereNotNull('customer_email')
                 ->where('created_at', '>=', now()->subDays(90)->toDateTimeString())
+                ->take(10000)
                 ->get()
                 ->groupBy('customer_email');
 
@@ -104,40 +106,48 @@ class CdpAdvancedService
             $sixMonthsAgo = now()->subMonths(6)->toDateTimeString();
             $oneYearAgo = now()->subMonths(12)->toDateTimeString();
 
-            // Find customers with no orders in 6+ months
+            // SAFETY: bounded query
             $allCustomers = DB::connection('mongodb')
                 ->table('synced_customers')
                 ->where('tenant_id', $tenantId)
+                ->take(10000)
                 ->get();
+
+            // Pre-fetch all order stats in one aggregation instead of N+1 queries per customer
+            $orderStats = DB::connection('mongodb')
+                ->table('synced_orders')
+                ->raw(function ($collection) use ($tenantId) {
+                    return $collection->aggregate([
+                        ['$match' => ['tenant_id' => $tenantId]],
+                        ['$group' => [
+                            '_id' => '$customer_email',
+                            'last_order_date' => ['$max' => '$created_at'],
+                            'total_spent' => ['$sum' => '$total'],
+                            'order_count' => ['$sum' => 1],
+                        ]],
+                    ], ['maxTimeMS' => 30000]);
+                });
+
+            // Index order stats by email for O(1) lookup
+            $orderStatsByEmail = [];
+            foreach ($orderStats as $stat) {
+                $stat = (array) $stat;
+                $orderStatsByEmail[$stat['_id']] = $stat;
+            }
 
             $zombies = [];
             foreach ($allCustomers as $customer) {
                 $email = $customer['email'] ?? null;
                 if (!$email) continue;
 
-                $lastOrder = DB::connection('mongodb')
-                    ->table('synced_orders')
-                    ->where('tenant_id', $tenantId)
-                    ->where('customer_email', $email)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+                $stats = $orderStatsByEmail[$email] ?? null;
+                if (!$stats) continue;
 
-                if (!$lastOrder) continue;
-
-                $lastOrderDate = $lastOrder['created_at'] ?? null;
+                $lastOrderDate = $stats['last_order_date'] ?? null;
                 if (!$lastOrderDate || $lastOrderDate >= $sixMonthsAgo) continue;
 
-                $totalSpent = DB::connection('mongodb')
-                    ->table('synced_orders')
-                    ->where('tenant_id', $tenantId)
-                    ->where('customer_email', $email)
-                    ->sum('total');
-
-                $orderCount = DB::connection('mongodb')
-                    ->table('synced_orders')
-                    ->where('tenant_id', $tenantId)
-                    ->where('customer_email', $email)
-                    ->count();
+                $totalSpent = $stats['total_spent'] ?? 0;
+                $orderCount = $stats['order_count'] ?? 0;
 
                 $daysSilent = now()->diffInDays($lastOrderDate);
                 $tier = $totalSpent >= 1000 ? 'high_value' : ($totalSpent >= 300 ? 'medium_value' : 'low_value');
@@ -191,7 +201,8 @@ class CdpAdvancedService
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subDays(180)->toDateTimeString());
 
-            $orders = $query->get();
+            // SAFETY: bounded query
+            $orders = $query->take(50000)->get();
 
             // Build co-purchase matrix
             $coPurchase = [];
@@ -343,10 +354,12 @@ class CdpAdvancedService
         try {
             $days = (int) filter_var($dateRange, FILTER_SANITIZE_NUMBER_INT) ?: 90;
 
+            // SAFETY: bounded query
             $orders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subDays($days)->toDateTimeString())
+                ->take(50000)
                 ->get();
 
             $totalRevenue = 0;
@@ -367,16 +380,35 @@ class CdpAdvancedService
                 }
             }
 
-            // Compare post-refund behavior
+            // Pre-fetch post-refund order counts in one batch query instead of N+1
+            $refunderEmails = array_keys($refundedCustomers);
             $postRefundOrders = [];
-            foreach (array_keys($refundedCustomers) as $email) {
-                $subsequentOrders = DB::connection('mongodb')
+            if (!empty($refunderEmails)) {
+                $postRefundCounts = DB::connection('mongodb')
                     ->table('synced_orders')
-                    ->where('tenant_id', $tenantId)
-                    ->where('customer_email', $email)
-                    ->whereNotIn('status', ['refunded', 'returned'])
-                    ->count();
-                $postRefundOrders[$email] = $subsequentOrders;
+                    ->raw(function ($collection) use ($tenantId, $refunderEmails) {
+                        return $collection->aggregate([
+                            ['$match' => [
+                                'tenant_id' => $tenantId,
+                                'customer_email' => ['$in' => $refunderEmails],
+                                'status' => ['$nin' => ['refunded', 'returned']],
+                            ]],
+                            ['$group' => [
+                                '_id' => '$customer_email',
+                                'count' => ['$sum' => 1],
+                            ]],
+                        ], ['maxTimeMS' => 30000]);
+                    });
+                foreach ($postRefundCounts as $row) {
+                    $row = (array) $row;
+                    $postRefundOrders[$row['_id']] = $row['count'];
+                }
+                // Fill in zeros for refunders with no post-refund orders
+                foreach ($refunderEmails as $email) {
+                    if (!isset($postRefundOrders[$email])) {
+                        $postRefundOrders[$email] = 0;
+                    }
+                }
             }
 
             $refunderReturnRate = count($refundedCustomers) > 0

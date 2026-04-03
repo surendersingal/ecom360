@@ -22,7 +22,7 @@ final class RegisterConnectionRequest extends FormRequest
         return [
             'platform'         => 'required|string|in:magento2,woocommerce,shopify,custom',
             'store_url'        => 'required|url|max:500',
-            'store_name'       => 'nullable|string|max:255',
+            'store_name'       => 'nullable|string|max:255|regex:/^[^<>]*$/',
             'store_id'         => 'nullable|integer|min:0',
             'platform_version' => 'nullable|string|max:50',
             'module_version'   => 'nullable|string|max:50',

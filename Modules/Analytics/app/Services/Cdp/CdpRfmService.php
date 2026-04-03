@@ -176,7 +176,7 @@ final class CdpRfmService
                         'avg_aov'     => ['$avg' => '$transactional.avg_order_value'],
                     ]],
                     ['$sort' => ['count' => -1]],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
 
         $result = collect(iterator_to_array($segments))->map(fn($r) => [

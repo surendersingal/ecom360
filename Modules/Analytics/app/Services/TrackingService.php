@@ -137,7 +137,12 @@ final class TrackingService
             $eventData['created_at'] = \Carbon\Carbon::parse($validated['timestamp']);
         }
 
-        $event = TrackingEvent::create($eventData);
+        try {
+            $event = TrackingEvent::create($eventData);
+        } catch (\Throwable $e) {
+            Log::error('[Analytics] Failed to persist tracking event: ' . $e->getMessage());
+            throw $e; // Re-throw — event ingestion failure should be reported to the caller
+        }
 
         Log::debug("[Analytics] Tracked {$validated['event_type']} for tenant {$tenantId}");
 
@@ -180,63 +185,75 @@ final class TrackingService
      */
     public function aggregateTraffic(int|string $tenantId, string $dateRange = '30d'): array
     {
-        [$dateFrom, $dateTo] = $this->parseDateRange($dateRange);
+        try {
+            [$dateFrom, $dateTo] = $this->parseDateRange($dateRange);
 
-        /** @var Connection $mongo */
-        $mongo = app('db')->connection('mongodb');
+            /** @var Connection $mongo */
+            $mongo = app('db')->connection('mongodb');
 
-        $collection = $mongo->getCollection('tracking_events');
+            $collection = $mongo->getCollection('tracking_events');
 
-        // ------------------------------------------------------------------
-        // Pipeline: filter → facet (unique sessions + event breakdown)
-        // ------------------------------------------------------------------
-        $pipeline = [
-            // Stage 1: Match tenant + date window.
-            [
-                '$match' => [
-                    'tenant_id'  => $tenantId,
-                    'created_at' => [
-                        '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
-                        '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
+            // ------------------------------------------------------------------
+            // Pipeline: filter → facet (unique sessions + event breakdown)
+            // ------------------------------------------------------------------
+            $pipeline = [
+                // Stage 1: Match tenant + date window.
+                [
+                    '$match' => [
+                        'tenant_id'  => $tenantId,
+                        'created_at' => [
+                            '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
+                            '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
+                        ],
                     ],
                 ],
-            ],
 
-            // Stage 2: Facet — run two aggregations in parallel.
-            [
-                '$facet' => [
-                    'unique_sessions' => [
-                        ['$group' => ['_id' => '$session_id']],
-                        ['$count' => 'count'],
-                    ],
-                    'event_breakdown' => [
-                        ['$group' => ['_id' => '$event_type', 'count' => ['$sum' => 1]]],
-                    ],
-                    'total' => [
-                        ['$count' => 'count'],
+                // Stage 2: Facet — run two aggregations in parallel.
+                [
+                    '$facet' => [
+                        'unique_sessions' => [
+                            ['$group' => ['_id' => '$session_id']],
+                            ['$count' => 'count'],
+                        ],
+                        'event_breakdown' => [
+                            ['$group' => ['_id' => '$event_type', 'count' => ['$sum' => 1]]],
+                        ],
+                        'total' => [
+                            ['$count' => 'count'],
+                        ],
                     ],
                 ],
-            ],
-        ];
+            ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
-        $facets  = $results[0] ?? [];
+            $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
+            $facets  = $results[0] ?? [];
 
-        $uniqueSessions = $facets['unique_sessions'][0]['count'] ?? 0;
-        $totalEvents    = $facets['total'][0]['count'] ?? 0;
+            $uniqueSessions = $facets['unique_sessions'][0]['count'] ?? 0;
+            $totalEvents    = $facets['total'][0]['count'] ?? 0;
 
-        $breakdown = [];
-        foreach (($facets['event_breakdown'] ?? []) as $row) {
-            $breakdown[$row['_id']] = $row['count'];
+            $breakdown = [];
+            foreach (($facets['event_breakdown'] ?? []) as $row) {
+                $breakdown[$row['_id']] = $row['count'];
+            }
+
+            return [
+                'unique_sessions'     => (int) $uniqueSessions,
+                'total_events'        => (int) $totalEvents,
+                'event_type_breakdown' => $breakdown,
+                'date_from'           => $dateFrom->toDateString(),
+                'date_to'             => $dateTo->toDateString(),
+            ];
+        } catch (\Throwable $e) {
+            [$dateFrom, $dateTo] = $this->parseDateRange($dateRange);
+            Log::warning('[Analytics] aggregateTraffic failed: ' . $e->getMessage());
+            return [
+                'unique_sessions'      => 0,
+                'total_events'         => 0,
+                'event_type_breakdown' => [],
+                'date_from'            => $dateFrom->toDateString(),
+                'date_to'              => $dateTo->toDateString(),
+            ];
         }
-
-        return [
-            'unique_sessions'     => (int) $uniqueSessions,
-            'total_events'        => (int) $totalEvents,
-            'event_type_breakdown' => $breakdown,
-            'date_from'           => $dateFrom->toDateString(),
-            'date_to'             => $dateTo->toDateString(),
-        ];
     }
 
     // ------------------------------------------------------------------
@@ -262,40 +279,45 @@ final class TrackingService
      */
     public function getCustomerJourney(int|string $tenantId, string $identifierValue): array
     {
-        // Step A: Locate the profile.
-        $profile = CustomerProfile::query()
-            ->where('tenant_id', $tenantId)
-            ->where('identifier_value', $identifierValue)
-            ->first();
+        try {
+            // Step A: Locate the profile.
+            $profile = CustomerProfile::query()
+                ->where('tenant_id', $tenantId)
+                ->where('identifier_value', $identifierValue)
+                ->first();
 
-        if ($profile === null) {
-            return [
-                'profile' => null,
-                'journey' => [],
-            ];
-        }
+            if ($profile === null) {
+                return [
+                    'profile' => null,
+                    'journey' => [],
+                ];
+            }
 
-        $knownSessions = $profile->known_sessions ?? [];
+            $knownSessions = $profile->known_sessions ?? [];
 
-        if ($knownSessions === []) {
+            if ($knownSessions === []) {
+                return [
+                    'profile' => $profile->toArray(),
+                    'journey' => [],
+                ];
+            }
+
+            // Step C: Pull every event across all linked sessions.
+            $events = TrackingEvent::query()
+                ->where('tenant_id', $tenantId)
+                ->whereIn('session_id', $knownSessions)
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->toArray();
+
             return [
                 'profile' => $profile->toArray(),
-                'journey' => [],
+                'journey' => $events,
             ];
+        } catch (\Throwable $e) {
+            Log::warning('[Analytics] getCustomerJourney failed: ' . $e->getMessage());
+            return ['profile' => null, 'journey' => []];
         }
-
-        // Step C: Pull every event across all linked sessions.
-        $events = TrackingEvent::query()
-            ->where('tenant_id', $tenantId)
-            ->whereIn('session_id', $knownSessions)
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->toArray();
-
-        return [
-            'profile' => $profile->toArray(),
-            'journey' => $events,
-        ];
     }
 
     // ------------------------------------------------------------------

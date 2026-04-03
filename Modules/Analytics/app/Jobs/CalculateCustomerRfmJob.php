@@ -100,7 +100,7 @@ final class CalculateCustomerRfmJob implements ShouldQueue
             ],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $data    = $results[0] ?? null;
 
         if ($data === null) {

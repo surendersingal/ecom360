@@ -151,7 +151,7 @@ final class CompetitiveBenchmarkService
                         ['$group' => ['_id' => '$session_id', 'count' => ['$sum' => 1]]],
                         ['$match' => ['count' => 1]],
                         ['$count' => 'total'],
-                    ])->toArray();
+                    ], ['maxTimeMS' => 30000])->toArray();
                 });
             $bounces = $bounceSessions[0]['total'] ?? 0;
 

@@ -24,11 +24,37 @@ class AutonomousOpsService
     public function staleInventoryPricing(int $tenantId): array
     {
         try {
+            // SAFETY: bounded query
             $products = DB::connection('mongodb')
                 ->table('synced_products')
                 ->where('tenant_id', $tenantId)
                 ->where('stock_qty', '>', 0)
+                ->take(10000)
                 ->get();
+
+            // Pre-fetch all recent sales counts grouped by product_id in one aggregation
+            // instead of querying per product (N+1 elimination)
+            $thirtyDaysAgo = now()->subDays(30)->toDateTimeString();
+            $salesByProduct = [];
+            $salesAgg = DB::connection('mongodb')
+                ->table('synced_orders')
+                ->raw(function ($collection) use ($tenantId, $thirtyDaysAgo) {
+                    return $collection->aggregate([
+                        ['$match' => [
+                            'tenant_id' => $tenantId,
+                            'created_at' => ['$gte' => $thirtyDaysAgo],
+                        ]],
+                        ['$unwind' => '$items'],
+                        ['$group' => [
+                            '_id' => '$items.product_id',
+                            'sales_count' => ['$sum' => 1],
+                        ]],
+                    ], ['maxTimeMS' => 30000]);
+                });
+            foreach ($salesAgg as $row) {
+                $row = (array) $row;
+                $salesByProduct[$row['_id']] = $row['sales_count'];
+            }
 
             $staleItems = [];
             $totalPotentialRecovery = 0;
@@ -40,13 +66,8 @@ class AutonomousOpsService
 
                 $daysInInventory = now()->diffInDays($createdAt);
 
-                // Get recent sales velocity
-                $recentSales = DB::connection('mongodb')
-                    ->table('synced_orders')
-                    ->where('tenant_id', $tenantId)
-                    ->where('items.product_id', $product['external_id'] ?? '')
-                    ->where('created_at', '>=', now()->subDays(30)->toDateTimeString())
-                    ->count();
+                // Look up pre-fetched sales count instead of per-product query
+                $recentSales = $salesByProduct[$product['external_id'] ?? ''] ?? 0;
 
                 $velocity = $recentSales / 30; // sales per day
                 $daysToSellOut = $velocity > 0 ? ($product['stock_qty'] ?? 0) / $velocity : 999;
@@ -223,10 +244,12 @@ class AutonomousOpsService
     public function demandForecasting(int $tenantId): array
     {
         try {
+            // SAFETY: bounded query
             $products = DB::connection('mongodb')
                 ->table('synced_products')
                 ->where('tenant_id', $tenantId)
                 ->where('stock_qty', '>', 0)
+                ->take(10000)
                 ->get();
 
             $forecasts = [];
@@ -306,10 +329,12 @@ class AutonomousOpsService
     public function shippingCostAnalyzer(int $tenantId): array
     {
         try {
+            // SAFETY: bounded query
             $orders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subDays(90)->toDateTimeString())
+                ->take(50000)
                 ->get();
 
             $routeData = [];
@@ -383,10 +408,12 @@ class AutonomousOpsService
     public function returnRateAnomaly(int $tenantId): array
     {
         try {
+            // SAFETY: bounded query
             $orders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subDays(90)->toDateTimeString())
+                ->take(50000)
                 ->get();
 
             $productReturns = [];

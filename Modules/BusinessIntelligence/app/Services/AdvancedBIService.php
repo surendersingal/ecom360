@@ -32,11 +32,13 @@ class AdvancedBIService
             $midpointStr = $midpoint->toDateTimeString();
 
             $salesByProduct = function ($start, $end) use ($tenantId) {
+                // SAFETY: bounded query — ideally use MongoDB aggregation pipeline
                 $orders = DB::connection('mongodb')
                     ->table('synced_orders')
                     ->where('tenant_id', $tenantId)
                     ->where('created_at', '>=', $start)
                     ->where('created_at', '<', $end)
+                    ->take(50000)
                     ->get();
 
                 $sales = [];
@@ -108,23 +110,26 @@ class AdvancedBIService
     public function ltvVsCacHealth(int $tenantId): array
     {
         try {
-            // Get customer acquisition data
+            // SAFETY: bounded query
             $customers = DB::connection('mongodb')
                 ->table('synced_customers')
                 ->where('tenant_id', $tenantId)
+                ->take(50000)
                 ->get();
 
-            // Get all orders
+            // SAFETY: bounded query
             $orders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
+                ->take(50000)
                 ->get()
                 ->groupBy('customer_email');
 
-            // Get marketing spend by channel (from events or campaign data)
+            // SAFETY: bounded query
             $channelSpend = DB::connection('mongodb')
                 ->table('marketing_campaigns')
                 ->where('tenant_id', $tenantId)
+                ->take(10000)
                 ->get()
                 ->groupBy('channel');
 
@@ -190,11 +195,12 @@ class AdvancedBIService
     public function conversionProbability(int $tenantId): array
     {
         try {
-            // Get active sessions (last 30 minutes)
+            // SAFETY: bounded query
             $activeSessions = DB::connection('mongodb')
                 ->table('events')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subMinutes(30)->toDateTimeString())
+                ->take(10000)
                 ->get()
                 ->groupBy('session_id');
 
@@ -271,11 +277,13 @@ class AdvancedBIService
         try {
             $days = (int) filter_var($dateRange, FILTER_SANITIZE_NUMBER_INT) ?: 30;
 
+            // SAFETY: bounded query
             $events = DB::connection('mongodb')
                 ->table('events')
                 ->where('tenant_id', $tenantId)
                 ->where('event_type', 'purchase')
                 ->where('created_at', '>=', now()->subDays($days))
+                ->take(50000)
                 ->get();
 
             $deviceData = [];
@@ -340,16 +348,20 @@ class AdvancedBIService
         try {
             $months = (int) filter_var($dateRange, FILTER_SANITIZE_NUMBER_INT) ?: 6;
 
+            // SAFETY: bounded query
             $customers = DB::connection('mongodb')
                 ->table('synced_customers')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subMonths($months)->toDateTimeString())
+                ->take(50000)
                 ->get();
 
+            // SAFETY: bounded query
             $orders = DB::connection('mongodb')
                 ->table('synced_orders')
                 ->where('tenant_id', $tenantId)
                 ->where('created_at', '>=', now()->subMonths($months)->toDateTimeString())
+                ->take(50000)
                 ->get()
                 ->groupBy('customer_email');
 

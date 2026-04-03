@@ -245,7 +245,7 @@ final class NaturalLanguageQueryService
                     ['$group' => $group],
                     ['$sort' => ['value' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $data = array_map(fn($r) => [$dimension => $r['_id'] ?? 'unknown', $metric => round((float) ($r['value'] ?? 0), 2)], $results);
@@ -308,7 +308,7 @@ final class NaturalLanguageQueryService
                     ]],
                     ['$sort' => ['revenue' => -1]],
                     ['$limit' => $limit],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $data = array_map(fn($r) => [

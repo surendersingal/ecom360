@@ -19,7 +19,7 @@ final class SyncSalesRequest extends FormRequest
         return [
             'sales_data'               => 'required|array|min:1|max:365',
             'sales_data.*.date'        => 'required|date',
-            'sales_data.*.total_revenue' => 'nullable|numeric',
+            'sales_data.*.total_revenue' => 'nullable|numeric|min:0',
             'platform'                  => 'nullable|string|in:magento2,woocommerce,shopify,custom',
             'store_id'                  => 'nullable|integer|min:0',
             'currency'                  => 'nullable|string|max:3',

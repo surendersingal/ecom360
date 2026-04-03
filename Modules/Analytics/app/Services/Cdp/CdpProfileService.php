@@ -210,7 +210,7 @@ final class CdpProfileService
                         'count' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['count' => -1]],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
 
         // Revenue summary
@@ -226,7 +226,7 @@ final class CdpProfileService
                         'avg_orders'   => ['$avg' => '$transactional.total_orders'],
                         'avg_aov'      => ['$avg' => '$transactional.avg_order_value'],
                     ]],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
 
         $rev = iterator_to_array($revenueSummary);
@@ -242,7 +242,7 @@ final class CdpProfileService
                         '_id'   => '$computed.churn_risk_level',
                         'count' => ['$sum' => 1],
                     ]],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
 
         // Data quality summary
@@ -509,7 +509,7 @@ final class CdpProfileService
                         'last_seen'    => ['$max' => '$created_at'],
                         'devices'      => ['$addToSet' => '$metadata.device_type'],
                     ]],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
 
         $agg = iterator_to_array($stats);
@@ -535,12 +535,12 @@ final class CdpProfileService
                         'session_id' => ['$in' => array_values($sessions)],
                     ]],
                     ['$group' => [
-                        '_id'   => ['$hour' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                        '_id'   => ['$hour' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                         'count' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['count' => -1]],
                     ['$limit' => 1],
-                ]);
+                ], ['maxTimeMS' => 30000]);
             });
         $peakHour = iterator_to_array($hourData);
         $peakHour = $peakHour[0]['_id'] ?? null;

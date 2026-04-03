@@ -244,7 +244,7 @@ final class QueryBuilderService
             $pipeline[] = ['$limit' => min((int) ($config['limit'] ?? 1000), 10000)];
 
             $results = DB::connection('mongodb')->table($collection)->raw(function ($col) use ($pipeline) {
-                return $col->aggregate($pipeline)->toArray();
+                return $col->aggregate($pipeline, ['maxTimeMS' => 30000])->toArray();
             });
 
             $rows = array_map(fn($r) => (array) $r, $results);

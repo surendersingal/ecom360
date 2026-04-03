@@ -153,7 +153,7 @@ final class WhyExplanationService
                         'created_at' => ['$gte' => $start, '$lte' => $end],
                     ]],
                     ['$group' => $group],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $grouped = [];

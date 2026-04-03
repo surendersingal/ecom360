@@ -35,7 +35,7 @@ final class RevenueAnalyticsService
                 ],
             ]],
             ['$group' => [
-                '_id'     => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                '_id'     => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                 'revenue' => ['$sum' => '$metadata.order_total'],
                 'orders'  => ['$sum' => 1],
             ]],
@@ -43,7 +43,7 @@ final class RevenueAnalyticsService
         ];
 
         /** @var array $results */
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $dates    = [];
         $revenues = [];
@@ -101,7 +101,7 @@ final class RevenueAnalyticsService
         ];
 
         /** @var array $results */
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'source'  => $row['_id'] ?? 'direct',
@@ -137,7 +137,7 @@ final class RevenueAnalyticsService
         ];
 
         /** @var array $results */
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         $hours   = array_fill(0, 24, 0.0);
         $counts  = array_fill(0, 24, 0);
@@ -206,7 +206,7 @@ final class RevenueAnalyticsService
         ];
 
         /** @var array $results */
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return [
             'revenue' => round((float) ($results[0]['revenue'] ?? 0), 2),

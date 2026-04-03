@@ -159,7 +159,7 @@ final class BehavioralTriggerService
                         'products' => ['$addToSet' => '$metadata.product_id'],
                     ]],
                     ['$match' => ['view_count' => ['$gte' => 2]]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $count = 0;
@@ -224,7 +224,7 @@ final class BehavioralTriggerService
                         '_id' => '$visitor_id',
                         'max_score' => ['$max' => '$metadata.score'],
                     ]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $count = 0;

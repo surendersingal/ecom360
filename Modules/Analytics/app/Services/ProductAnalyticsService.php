@@ -59,7 +59,7 @@ final class ProductAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'product_id'   => $row['_id'] ?? 'unknown',
@@ -119,7 +119,7 @@ final class ProductAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'product_id'   => $row['_id'] ?? 'unknown',
@@ -342,7 +342,7 @@ final class ProductAnalyticsService
             ['$limit' => $limit],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         return array_map(fn ($row) => [
             'product_id'   => $row['_id'] ?? 'unknown',

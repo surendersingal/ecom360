@@ -140,7 +140,7 @@ class AdvancedMarketingService
                         ]],
                         ['$sort' => ['ltv' => -1]],
                         ['$limit' => 100],
-                    ]);
+                    ], ['maxTimeMS' => 30000]);
                 });
 
             $vips = collect(iterator_to_array($topCustomers))

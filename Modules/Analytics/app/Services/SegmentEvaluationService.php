@@ -96,7 +96,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$match' => ['event_count' => ['$lte' => 3]]],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -121,7 +121,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$match' => ['event_count' => ['$gte' => 5]]],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -146,7 +146,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$match' => ['event_count' => 1]],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -221,7 +221,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -246,7 +246,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -271,7 +271,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -296,7 +296,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([
@@ -318,7 +318,7 @@ final class SegmentEvaluationService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$count' => 'total'],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $segments->push([

@@ -257,7 +257,7 @@ final class AnalyticsApiController extends Controller
                 'created_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime($now->subMinutes(5)->getTimestamp() * 1000)],
             ]],
             ['$group' => ['_id' => '$session_id']],
-        ])));
+        ], ['maxTimeMS' => 30000])));
 
         $active15min = count(iterator_to_array($collection->aggregate([
             ['$match' => [
@@ -265,7 +265,7 @@ final class AnalyticsApiController extends Controller
                 'created_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime($now->subMinutes(15)->getTimestamp() * 1000)],
             ]],
             ['$group' => ['_id' => '$session_id']],
-        ])));
+        ], ['maxTimeMS' => 30000])));
 
         $eventsLastHour = $collection->countDocuments([
             'tenant_id' => $tenantId,
@@ -286,7 +286,7 @@ final class AnalyticsApiController extends Controller
             ]],
             ['$group' => ['_id' => '$event_type', 'count' => ['$sum' => 1]]],
             ['$sort' => ['count' => -1]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         return $this->successResponse([
             'active_sessions_5min' => $active5min,
@@ -347,7 +347,7 @@ final class AnalyticsApiController extends Controller
                 'user_agent' => 1,
                 'created_at' => 1,
             ]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         return $this->successResponse([
             'events' => array_values($events),
@@ -559,7 +559,7 @@ final class AnalyticsApiController extends Controller
             ]],
             ['$sort' => ['views' => -1]],
             ['$limit' => 30],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         $categoryPurchases = iterator_to_array($collection->aggregate([
             ['$match' => [
@@ -574,7 +574,7 @@ final class AnalyticsApiController extends Controller
                 'revenue' => ['$sum' => '$metadata.order_total'],
             ]],
             ['$sort' => ['purchases' => -1]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         return $this->successResponse([
             'category_views' => $categoryViews,
@@ -606,7 +606,7 @@ final class AnalyticsApiController extends Controller
                 'last_time' => ['$last' => '$created_at'],
                 'event_count' => ['$sum' => 1],
             ]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         // Build per-URL bounce/exit/time maps
         $urlBounce = [];
@@ -660,7 +660,7 @@ final class AnalyticsApiController extends Controller
             ]],
             ['$sort' => ['pageviews' => -1]],
             ['$limit' => 100],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         // Merge bounce/exit/time into page rows
         foreach ($pages as &$p) {
@@ -703,7 +703,7 @@ final class AnalyticsApiController extends Controller
             ]],
             ['$sort' => ['searches' => -1]],
             ['$limit' => 50],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         $totalSearches = $collection->countDocuments([
             'tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch,
@@ -758,7 +758,7 @@ final class AnalyticsApiController extends Controller
             ]],
             ['$sort' => ['count' => -1]],
             ['$limit' => 100],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         // Summary by category only
         $categories = iterator_to_array($collection->aggregate([
@@ -775,7 +775,7 @@ final class AnalyticsApiController extends Controller
                 'unique' => ['$size' => '$unique_sessions'],
             ]],
             ['$sort' => ['count' => -1]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         return $this->successResponse([
             'breakdown' => $breakdown,
@@ -806,7 +806,7 @@ final class AnalyticsApiController extends Controller
                 '_id' => 0,
                 'visit_count' => ['$size' => '$sessions'],
             ]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         $buckets = ['1 visit' => 0, '2 visits' => 0, '3-5 visits' => 0, '6-10 visits' => 0, '11+ visits' => 0];
         foreach ($perVisitor as $v) {
@@ -846,11 +846,11 @@ final class AnalyticsApiController extends Controller
         $byDay = iterator_to_array($collection->aggregate([
             ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
             ['$group' => [
-                '_id' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                '_id' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                 'count' => ['$sum' => 1],
             ]],
             ['$sort' => ['_id' => 1]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         $dayNames = [1 => 'Sun', 2 => 'Mon', 3 => 'Tue', 4 => 'Wed', 5 => 'Thu', 6 => 'Fri', 7 => 'Sat'];
         $dayOfWeekData = [];
@@ -870,12 +870,12 @@ final class AnalyticsApiController extends Controller
             ['$match' => ['tenant_id' => $tenantId, 'created_at' => $dateMatch]],
             ['$group' => [
                 '_id' => [
-                    'dow' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
-                    'hour' => ['$hour' => ['date' => '$created_at', 'timezone' => 'Asia/Kolkata']],
+                    'dow' => ['$dayOfWeek' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
+                    'hour' => ['$hour' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
                 ],
                 'count' => ['$sum' => 1],
             ]],
-        ]));
+        ], ['maxTimeMS' => 30000]));
 
         $heatmapData = [];
         foreach ($heatmap as $h) {

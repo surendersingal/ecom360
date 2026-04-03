@@ -163,7 +163,7 @@ final class RevenueWaterfallService
                         'orders' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['revenue' => -1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -190,7 +190,7 @@ final class RevenueWaterfallService
                     ]],
                     ['$sort' => ['revenue' => -1]],
                     ['$limit' => 10],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -217,7 +217,7 @@ final class RevenueWaterfallService
                     ]],
                     ['$sort' => ['revenue' => -1]],
                     ['$limit' => 10],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [
@@ -243,7 +243,7 @@ final class RevenueWaterfallService
                         'orders' => ['$sum' => 1],
                     ]],
                     ['$sort' => ['revenue' => -1]],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         return array_map(fn($r) => [

@@ -58,7 +58,7 @@ final class CohortAnalysisService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
 
         // Build cohort map
         $months = [];
@@ -156,7 +156,7 @@ final class CohortAnalysisService
             ]],
         ];
 
-        $results = iterator_to_array($collection->aggregate($pipeline));
+        $results = iterator_to_array($collection->aggregate($pipeline, ['maxTimeMS' => 30000]));
         $facets  = $results[0] ?? [];
 
         $total  = (int) ($facets['all'][0]['count'] ?? 0);

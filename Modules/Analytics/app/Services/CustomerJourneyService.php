@@ -28,10 +28,12 @@ final class CustomerJourneyService
      */
     public function getJourney(int|string $tenantId, string $visitorId): array
     {
+        // SAFETY: bounded query
         $events = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tenantId)
             ->where('visitor_id', $visitorId)
             ->orderBy('created_at', 'asc')
+            ->take(10000)
             ->get()
             ->map(fn($e) => (array) $e)
             ->all();
@@ -74,7 +76,7 @@ final class CustomerJourneyService
      */
     public function getJourneyPatterns(int|string $tenantId, int $limit = 100): array
     {
-        // Sample recent converting customers
+        // SAFETY: bounded query — sample recent converting customers
         $converters = DB::connection('mongodb')->table('tracking_events')
             ->where('tenant_id', $tenantId)
             ->where('event_type', 'purchase')
@@ -94,6 +96,17 @@ final class CustomerJourneyService
 
         if (empty($converters)) return $patterns;
 
+        // Batch fetch all events for all converters at once instead of N+1
+        // SAFETY: bounded query
+        $allEvents = DB::connection('mongodb')->table('tracking_events')
+            ->where('tenant_id', $tenantId)
+            ->whereIn('visitor_id', $converters)
+            ->orderBy('created_at', 'asc')
+            ->take(50000)
+            ->get()
+            ->map(fn($e) => (array) $e)
+            ->groupBy('visitor_id');
+
         $totalSessions = 0;
         $totalTimeHours = 0;
         $totalEvents = 0;
@@ -101,13 +114,7 @@ final class CustomerJourneyService
         $lastTouchpoints = [];
 
         foreach ($converters as $vid) {
-            $events = DB::connection('mongodb')->table('tracking_events')
-                ->where('tenant_id', $tenantId)
-                ->where('visitor_id', $vid)
-                ->orderBy('created_at', 'asc')
-                ->get()
-                ->map(fn($e) => (array) $e)
-                ->all();
+            $events = ($allEvents[$vid] ?? collect())->values()->all();
 
             if (empty($events)) continue;
 
@@ -166,7 +173,7 @@ final class CustomerJourneyService
                     ]],
                     ['$group' => ['_id' => '$session_id']],
                     ['$limit' => 500],
-                ])->toArray();
+                ], ['maxTimeMS' => 30000])->toArray();
             });
 
         $cartSessionIds = array_column($cartSessions, '_id');
@@ -184,16 +191,29 @@ final class CustomerJourneyService
         $abandonedIds = array_diff($cartSessionIds, $purchaseSessions);
         if (empty($abandonedIds)) return ['drop_off_points' => []];
 
-        // Find last event type for abandoned sessions
+        // Batch fetch last event type for abandoned sessions using aggregation
+        // instead of querying per session (N+1 elimination)
+        $sampleIds = array_slice($abandonedIds, 0, 100);
         $lastEvents = [];
-        foreach (array_slice($abandonedIds, 0, 100) as $sid) {
-            $lastEvent = DB::connection('mongodb')->table('tracking_events')
-                ->where('tenant_id', $tenantId)
-                ->where('session_id', $sid)
-                ->orderBy('created_at', 'desc')
-                ->first();
-            if ($lastEvent) {
-                $type = ((array) $lastEvent)['event_type'] ?? 'unknown';
+        if (!empty($sampleIds)) {
+            $lastEventAgg = DB::connection('mongodb')->table('tracking_events')
+                ->raw(function ($col) use ($tenantId, $sampleIds) {
+                    return $col->aggregate([
+                        ['$match' => [
+                            'tenant_id' => $tenantId,
+                            'session_id' => ['$in' => array_values($sampleIds)],
+                        ]],
+                        ['$sort' => ['created_at' => -1]],
+                        ['$group' => [
+                            '_id' => '$session_id',
+                            'last_event_type' => ['$first' => '$event_type'],
+                        ]],
+                    ], ['maxTimeMS' => 30000])->toArray();
+                });
+
+            foreach ($lastEventAgg as $row) {
+                $row = (array) $row;
+                $type = $row['last_event_type'] ?? 'unknown';
                 $lastEvents[$type] = ($lastEvents[$type] ?? 0) + 1;
             }
         }
