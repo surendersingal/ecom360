@@ -66,7 +66,7 @@ final class InsightsController extends Controller
     public function query(Request $request): JsonResponse
     {
         $request->validate([
-            'data_source' => 'required|in:events,customers,sessions,campaigns,contacts',
+            'data_source' => 'required|in:events,customers,sessions,campaigns,contacts,orders',
             'filters' => 'nullable|array',
             'group_by' => 'nullable|string',
             'aggregations' => 'nullable|array',

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Marketing\Services\FlowExecutionService;
+use Modules\Marketing\Models\Contact;
 use Modules\Marketing\Models\Flow;
 use Modules\Marketing\Models\FlowNode;
 use Modules\Marketing\Models\FlowEdge;
@@ -157,8 +158,11 @@ final class FlowController extends Controller
     {
         $request->validate(['contact_id' => 'required|integer']);
 
+        $flow = Flow::where('tenant_id', $this->tenantId())->findOrFail($id);
+        $contact = Contact::where('tenant_id', $this->tenantId())->findOrFail($request->input('contact_id'));
+
         $service = app(FlowExecutionService::class);
-        $enrollment = $service->enroll($id, $request->input('contact_id'));
+        $enrollment = $service->enroll($flow, $contact);
 
         return $this->successResponse($enrollment, 201);
     }
