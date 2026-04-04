@@ -632,9 +632,21 @@ final class AnalyticsApiController extends Controller
             $avgTimePerPage = count($pages) > 0 ? ($durMs / 1000) / count($pages) : 0;
 
             foreach ($pages as $url) {
+                if ($url instanceof \MongoDB\Model\BSONArray) {
+                    $url = $url[0] ?? '';
+                }
+                if (!is_string($url)) {
+                    $url = is_scalar($url) ? (string) $url : '';
+                }
+                if ($url === '') continue;
                 $urlTotal[$url] = ($urlTotal[$url] ?? 0) + 1;
                 $urlTime[$url] = ($urlTime[$url] ?? 0) + $avgTimePerPage;
             }
+
+            if ($landing instanceof \MongoDB\Model\BSONArray) { $landing = $landing[0] ?? ''; }
+            if (!is_string($landing)) { $landing = is_scalar($landing) ? (string) $landing : ''; }
+            if ($exit instanceof \MongoDB\Model\BSONArray) { $exit = $exit[0] ?? ''; }
+            if (!is_string($exit)) { $exit = is_scalar($exit) ? (string) $exit : ''; }
 
             if ($isBounce && $landing) {
                 $urlBounce[$landing] = ($urlBounce[$landing] ?? 0) + 1;
@@ -665,6 +677,9 @@ final class AnalyticsApiController extends Controller
         // Merge bounce/exit/time into page rows
         foreach ($pages as &$p) {
             $url = $p['url'] ?? '';
+            if ($url instanceof \MongoDB\Model\BSONArray) { $url = $url[0] ?? ''; }
+            if (!is_string($url)) { $url = is_scalar($url) ? (string) $url : ''; }
+            $p['url'] = $url;
             $total = $urlTotal[$url] ?? 0;
             $p['avg_time'] = $total > 0 ? round(($urlTime[$url] ?? 0) / $total) : 0;
             $p['bounce_rate'] = $p['pageviews'] > 0 ? round((($urlBounce[$url] ?? 0) / $p['pageviews']) * 100, 1) : 0;
