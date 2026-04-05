@@ -459,8 +459,8 @@ final class Ecom360_DataSync {
             $batch[] = [
                 'id'        => (string) $user->ID,
                 'email'     => $user->user_email,
-                'firstname' => get_user_meta( $user->ID, 'first_name', true ),
-                'lastname'  => get_user_meta( $user->ID, 'last_name', true ),
+                'first_name' => get_user_meta( $user->ID, 'first_name', true ),
+                'last_name'  => get_user_meta( $user->ID, 'last_name', true ),
                 'name'      => $user->display_name,
             ];
         }

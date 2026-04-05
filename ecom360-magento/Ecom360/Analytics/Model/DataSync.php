@@ -79,14 +79,20 @@ class DataSync
 
     /* ══════════════════════════ Products ══════════════════════════════ */
 
-    public function syncProducts(?int $storeId = null, ?\Closure $progressCallback = null): array
+    public function syncProducts(
+        ?int $storeId = null,
+        ?\Closure $progressCallback = null,
+        ?int $batchSizeOverride = null,
+        int $delaySec = 0,
+        ?int $limit = null,
+    ): array
     {
         if (!$this->config->isEnabled($storeId) || !$this->config->isSyncProducts($storeId)) {
             return ['synced' => 0, 'failed' => 0, 'message' => 'Product sync disabled'];
         }
 
         $log = $this->createLog(SyncLog::ENTITY_TYPE_PRODUCT, $storeId);
-        $batchSize = $this->config->getSyncBatchSize($storeId);
+        $batchSize = $batchSizeOverride ?? $this->config->getSyncBatchSize($storeId);
         $brandAttrCode = $this->config->getBrandAttribute($storeId);
         $synced = 0;
         $failed = 0;
@@ -103,7 +109,8 @@ class DataSync
 
             $collection->addAttributeToSelect($selectAttrs);
             $collection->addStoreFilter($storeId ?? 0);
-            $collection->setPageSize($batchSize);
+            $effectiveBatch = $limit ? min($batchSize, $limit) : $batchSize;
+            $collection->setPageSize($effectiveBatch);
 
             $lastPage = $collection->getLastPageNumber();
             if ($limit) {
@@ -381,7 +388,11 @@ class DataSync
 
     /* ══════════════════════════ Customers ═════════════════════════════ */
 
-    public function syncCustomers(?int $storeId = null, ?\Closure $progressCallback = null): array
+    public function syncCustomers(
+        ?int $storeId = null,
+        ?\Closure $progressCallback = null,
+        ?int $limit = null,
+    ): array
     {
         if (!$this->config->isEnabled($storeId) || !$this->config->isSyncCustomers($storeId)) {
             return ['synced' => 0, 'failed' => 0, 'message' => 'Customer sync disabled'];
@@ -399,7 +410,8 @@ class DataSync
             if ($storeId) {
                 $collection->addFieldToFilter('store_id', $storeId);
             }
-            $collection->setPageSize($batchSize);
+            $effectiveBatch = $limit ? min($batchSize, $limit) : $batchSize;
+            $collection->setPageSize($effectiveBatch);
 
             $lastPage = $collection->getLastPageNumber();
             if ($limit) {
