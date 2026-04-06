@@ -1,0 +1,1954 @@
+{
+  "simulation_time": "2026-04-06T12:02:16.705171",
+  "target": "https://ecom.buildnetic.com",
+  "duration_seconds": 265,
+  "total_pass": 150,
+  "total_fail": 0,
+  "total_skip": 0,
+  "pass_rate": "100.0%",
+  "modules": {
+    "DataSync": {
+      "pass": 11,
+      "fail": 0,
+      "skip": 0,
+      "tests": [
+        {
+          "label": "Sync Status",
+          "method": "GET",
+          "path": "/api/v1/sync/status",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Heartbeat",
+          "method": "POST",
+          "path": "/api/v1/sync/heartbeat",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Update Permissions",
+          "method": "POST",
+          "path": "/api/v1/sync/permissions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Permissions updated successfully."
+        },
+        {
+          "label": "Sync Products (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/products",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Products synced."
+        },
+        {
+          "label": "Sync Categories (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/categories",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Categories synced."
+        },
+        {
+          "label": "Sync Inventory (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/inventory",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Inventory synced."
+        },
+        {
+          "label": "Sync Orders (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/orders",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Orders synced."
+        },
+        {
+          "label": "Sync Customers (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/customers",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Customers synced."
+        },
+        {
+          "label": "Sync Abandoned Carts (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/abandoned-carts",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Abandoned carts synced."
+        },
+        {
+          "label": "Sync Popup Captures (1 item)",
+          "method": "POST",
+          "path": "/api/v1/sync/popup-captures",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Popup captures synced."
+        },
+        {
+          "label": "Webhook (order.created)",
+          "method": "POST",
+          "path": "/api/v1/sync/webhook",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        }
+      ]
+    },
+    "Analytics": {
+      "pass": 50,
+      "fail": 0,
+      "skip": 0,
+      "tests": [
+        {
+          "label": "Collect single event",
+          "method": "POST",
+          "path": "/api/v1/collect",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "OK"
+        },
+        {
+          "label": "Collect batch (3 events)",
+          "method": "POST",
+          "path": "/api/v1/collect/batch",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "3/3 events ingested."
+        },
+        {
+          "label": "Intervention poll",
+          "method": "GET",
+          "path": "/api/v1/interventions/poll?session_id=module_test_sess_002&fingerprint=fp_002",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Overview KPIs",
+          "method": "GET",
+          "path": "/api/v1/analytics/overview",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Traffic stats",
+          "method": "GET",
+          "path": "/api/v1/analytics/traffic",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Realtime metrics",
+          "method": "GET",
+          "path": "/api/v1/analytics/realtime",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Revenue analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/revenue",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Product analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/products",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Category analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/categories",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Session analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/sessions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Page visits",
+          "method": "GET",
+          "path": "/api/v1/analytics/page-visits",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Conversion funnel",
+          "method": "GET",
+          "path": "/api/v1/analytics/funnel",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Customer analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/customers",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Cohort retention",
+          "method": "GET",
+          "path": "/api/v1/analytics/cohorts",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Geographic analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/geographic",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Campaign analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/campaigns",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "All pages",
+          "method": "GET",
+          "path": "/api/v1/analytics/all-pages",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Search analytics",
+          "method": "GET",
+          "path": "/api/v1/analytics/search-analytics",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Events breakdown",
+          "method": "GET",
+          "path": "/api/v1/analytics/events-breakdown",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Visitor frequency",
+          "method": "GET",
+          "path": "/api/v1/analytics/visitor-frequency",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Day of week",
+          "method": "GET",
+          "path": "/api/v1/analytics/day-of-week",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Recent events",
+          "method": "GET",
+          "path": "/api/v1/analytics/recent-events",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Export (JSON, 5 rows)",
+          "method": "GET",
+          "path": "/api/v1/analytics/export?format=json&limit=5",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Custom event definitions",
+          "method": "GET",
+          "path": "/api/v1/analytics/events/custom/definitions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create custom event definition",
+          "method": "POST",
+          "path": "/api/v1/analytics/events/custom/definitions",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Custom event definition created."
+        },
+        {
+          "label": "Track custom event",
+          "method": "POST",
+          "path": "/api/v1/analytics/events/custom",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Custom event tracked successfully."
+        },
+        {
+          "label": "CLV prediction",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/clv",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "CLV what-if",
+          "method": "POST",
+          "path": "/api/v1/analytics/advanced/clv/what-if",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Revenue waterfall",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/revenue-waterfall",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Why explain",
+          "method": "POST",
+          "path": "/api/v1/analytics/advanced/why",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Behavioral triggers",
+          "method": "POST",
+          "path": "/api/v1/analytics/advanced/triggers/evaluate",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Customer journey",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/journey",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Journey drop-offs",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/journey/drop-offs",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Smart recommendations",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/recommendations",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Audience segments",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/audience/segments",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Audience destinations",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/audience/destinations",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Realtime pulse",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/pulse",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Realtime alerts",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/alerts",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Alert rules list",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/alerts/rules",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "NLQ suggestions",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/ask/suggest",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "NLQ query",
+          "method": "POST",
+          "path": "/api/v1/analytics/advanced/ask",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Competitive benchmarks",
+          "method": "GET",
+          "path": "/api/v1/analytics/advanced/benchmarks",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "CDP dashboard",
+          "method": "GET",
+          "path": "/api/v1/cdp/dashboard",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "CDP profiles (5)",
+          "method": "GET",
+          "path": "/api/v1/cdp/profiles?limit=5",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Build profiles",
+          "method": "POST",
+          "path": "/api/v1/cdp/profiles/build",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "CDP segments",
+          "method": "GET",
+          "path": "/api/v1/cdp/segments",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "RFM analysis",
+          "method": "GET",
+          "path": "/api/v1/cdp/rfm",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "CDP predictions",
+          "method": "GET",
+          "path": "/api/v1/cdp/predictions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Data health",
+          "method": "GET",
+          "path": "/api/v1/cdp/data-health",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Dimensions",
+          "method": "GET",
+          "path": "/api/v1/cdp/dimensions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        }
+      ]
+    },
+    "BusinessIntelligence": {
+      "pass": 58,
+      "fail": 0,
+      "skip": 0,
+      "tests": [
+        {
+          "label": "List reports",
+          "method": "GET",
+          "path": "/api/v1/bi/reports",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Report templates",
+          "method": "GET",
+          "path": "/api/v1/bi/reports/meta/templates",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create report",
+          "method": "POST",
+          "path": "/api/v1/bi/reports",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get report 53",
+          "method": "GET",
+          "path": "/api/v1/bi/reports/53",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Execute report 53",
+          "method": "POST",
+          "path": "/api/v1/bi/reports/53/execute",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Delete report 53",
+          "method": "DELETE",
+          "path": "/api/v1/bi/reports/53",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List dashboards",
+          "method": "GET",
+          "path": "/api/v1/bi/dashboards",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create dashboard",
+          "method": "POST",
+          "path": "/api/v1/bi/dashboards",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get dashboard 50",
+          "method": "GET",
+          "path": "/api/v1/bi/dashboards/50",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Duplicate dashboard",
+          "method": "POST",
+          "path": "/api/v1/bi/dashboards/50/duplicate",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Delete dashboard 50",
+          "method": "DELETE",
+          "path": "/api/v1/bi/dashboards/50",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List KPIs",
+          "method": "GET",
+          "path": "/api/v1/bi/kpis",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Default KPIs",
+          "method": "POST",
+          "path": "/api/v1/bi/kpis/defaults",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Refresh KPIs",
+          "method": "POST",
+          "path": "/api/v1/bi/kpis/refresh",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create KPI",
+          "method": "POST",
+          "path": "/api/v1/bi/kpis",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get KPI 59",
+          "method": "GET",
+          "path": "/api/v1/bi/kpis/59",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Delete KPI 59",
+          "method": "DELETE",
+          "path": "/api/v1/bi/kpis/59",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List alerts",
+          "method": "GET",
+          "path": "/api/v1/bi/alerts",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create alert",
+          "method": "POST",
+          "path": "/api/v1/bi/alerts",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get alert 40",
+          "method": "GET",
+          "path": "/api/v1/bi/alerts/40",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Alert history",
+          "method": "GET",
+          "path": "/api/v1/bi/alerts/40/history",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Delete alert 40",
+          "method": "DELETE",
+          "path": "/api/v1/bi/alerts/40",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Evaluate alerts",
+          "method": "POST",
+          "path": "/api/v1/bi/alerts/evaluate",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List exports",
+          "method": "GET",
+          "path": "/api/v1/bi/exports",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create temp report for export",
+          "method": "POST",
+          "path": "/api/v1/bi/reports",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create export",
+          "method": "POST",
+          "path": "/api/v1/bi/exports",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get export 20",
+          "method": "GET",
+          "path": "/api/v1/bi/exports/20",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Predictions",
+          "method": "GET",
+          "path": "/api/v1/bi/insights/predictions",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Generate predictions",
+          "method": "POST",
+          "path": "/api/v1/bi/insights/predictions/generate",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Benchmarks",
+          "method": "GET",
+          "path": "/api/v1/bi/insights/benchmarks",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Ad-hoc query",
+          "method": "POST",
+          "path": "/api/v1/bi/insights/query",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Available fields (orders)",
+          "method": "GET",
+          "path": "/api/v1/bi/insights/fields/orders",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Revenue command center",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/command-center",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Revenue by hour",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/by-hour",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Revenue by day",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/by-day",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Revenue trend",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/trend",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Revenue breakdown",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/breakdown",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Revenue margin",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/margin",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Top performers",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/revenue/top-performers",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Product leaderboard",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/products/leaderboard",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Product stars",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/products/stars",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Category matrix",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/products/category-matrix",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Pareto analysis",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/products/pareto",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Customer overview",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/overview",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Customer acquisition",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/acquisition",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Customer geo",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/geo",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Cohort retention",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/cohort",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Value distribution",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/value-dist",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "New vs returning",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/customers/new-vs-returning",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Order pipeline",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/operations/pipeline",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Daily order volume",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/operations/daily-volume",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Order heatmap",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/operations/heatmap",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Coupon intelligence",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/operations/coupons",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Payment analysis",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/operations/payments",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Marketing attribution",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/cross/marketing-attribution",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Search revenue impact",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/cross/search-revenue",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Chatbot impact",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/cross/chatbot-impact",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        },
+        {
+          "label": "Customer 360",
+          "method": "GET",
+          "path": "/api/v1/bi/intel/cross/customer-360?email=moduletest@example.com",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "data"
+          ],
+          "message": ""
+        }
+      ]
+    },
+    "Marketing": {
+      "pass": 31,
+      "fail": 0,
+      "skip": 0,
+      "tests": [
+        {
+          "label": "List channels",
+          "method": "GET",
+          "path": "/api/v1/marketing/channels",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Email providers",
+          "method": "GET",
+          "path": "/api/v1/marketing/channels/providers/email",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "SMS providers",
+          "method": "GET",
+          "path": "/api/v1/marketing/channels/providers/sms",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create email channel",
+          "method": "POST",
+          "path": "/api/v1/marketing/channels",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get channel 28",
+          "method": "GET",
+          "path": "/api/v1/marketing/channels/28",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Delete channel",
+          "method": "DELETE",
+          "path": "/api/v1/marketing/channels/28",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List contacts",
+          "method": "GET",
+          "path": "/api/v1/marketing/contacts",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create contact",
+          "method": "POST",
+          "path": "/api/v1/marketing/contacts",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get contact 129",
+          "method": "GET",
+          "path": "/api/v1/marketing/contacts/129",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Update contact",
+          "method": "PUT",
+          "path": "/api/v1/marketing/contacts/129",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Unsubscribe contact",
+          "method": "POST",
+          "path": "/api/v1/marketing/contacts/129/unsubscribe",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Bulk import (3 contacts)",
+          "method": "POST",
+          "path": "/api/v1/marketing/contacts/bulk-import",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List all lists",
+          "method": "GET",
+          "path": "/api/v1/marketing/lists",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create list",
+          "method": "POST",
+          "path": "/api/v1/marketing/lists",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Add contact to list",
+          "method": "POST",
+          "path": "/api/v1/marketing/lists/28/members",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List templates",
+          "method": "GET",
+          "path": "/api/v1/marketing/templates",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create email template",
+          "method": "POST",
+          "path": "/api/v1/marketing/templates",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get template 57",
+          "method": "GET",
+          "path": "/api/v1/marketing/templates/57",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Preview template",
+          "method": "GET",
+          "path": "/api/v1/marketing/templates/57/preview",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Duplicate template",
+          "method": "POST",
+          "path": "/api/v1/marketing/templates/57/duplicate",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List campaigns",
+          "method": "GET",
+          "path": "/api/v1/marketing/campaigns",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create campaign",
+          "method": "POST",
+          "path": "/api/v1/marketing/campaigns",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get campaign 51",
+          "method": "GET",
+          "path": "/api/v1/marketing/campaigns/51",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Campaign stats",
+          "method": "GET",
+          "path": "/api/v1/marketing/campaigns/51/stats",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Duplicate campaign",
+          "method": "POST",
+          "path": "/api/v1/marketing/campaigns/51/duplicate",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "List flows",
+          "method": "GET",
+          "path": "/api/v1/marketing/flows",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Create flow",
+          "method": "POST",
+          "path": "/api/v1/marketing/flows",
+          "status": 201,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Get flow 50",
+          "method": "GET",
+          "path": "/api/v1/marketing/flows/50",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Save flow canvas",
+          "method": "PUT",
+          "path": "/api/v1/marketing/flows/50/canvas",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Flow stats",
+          "method": "GET",
+          "path": "/api/v1/marketing/flows/50/stats",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        },
+        {
+          "label": "Cleanup: delete contact",
+          "method": "DELETE",
+          "path": "/api/v1/marketing/contacts/129",
+          "status": 200,
+          "passed": true,
+          "response_keys": [
+            "success",
+            "message",
+            "data"
+          ],
+          "message": "Request successful"
+        }
+      ]
+    }
+  }
+}

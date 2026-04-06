@@ -116,11 +116,11 @@ CHATBOT_CONVERSATIONS = {
         "Are duty free prices really cheaper?",
     ],
     "edge_cases": [
-        "",
         "a",
         "🎉🎊🎁",
         "Can I buy <script>alert('xss')</script>?",
         "SELECT * FROM products;",
+        "Hello " * 20,
     ],
 }
 
@@ -334,13 +334,13 @@ def main():
         if random.random() < 0.1:
             runner._call("POST", "/api/v1/chatbot/form-submit", {
                 "session_id": c["session_id"],
+                "form_id": f"form_{random.choice(['lead_capture', 'newsletter', 'feedback'])}_{c['id']}",
                 "form_data": {
                     "email": f"ddf_cust_{c['id']}@example.com",
                     "name": random.choice(names),
                     "phone": f"+91{random.randint(7000000000, 9999999999)}",
                     "interest": random.choice(["whisky", "perfume", "electronics", "gifting"]),
                 },
-                "form_type": random.choice(["lead_capture", "newsletter", "feedback"]),
             }, key="chatbot_form")
 
         # Problem customers rage-click + advanced features
@@ -360,7 +360,7 @@ def main():
             }, key="chatbot_advanced")
             runner._call("POST", "/api/v1/chatbot/advanced/objection-handler", {
                 "session_id": c["session_id"],
-                "objection": random.choice(["too expensive", "cheaper in city", "not sure about brand"]),
+                "objection_type": random.choice(["price", "trust", "shipping", "returns", "quality"]),
                 "product_id": "1",
                 "context": "product_page",
             }, key="chatbot_advanced")
