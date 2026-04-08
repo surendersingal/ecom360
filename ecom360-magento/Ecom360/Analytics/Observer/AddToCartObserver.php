@@ -5,7 +5,7 @@ namespace Ecom360\Analytics\Observer;
 
 use Ecom360\Analytics\Helper\Config;
 use Ecom360\Analytics\Model\EventQueuePublisher;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -19,20 +19,23 @@ class AddToCartObserver implements ObserverInterface
 {
     private Config $config;
     private EventQueuePublisher $queue;
-    private CategoryRepositoryInterface $categoryRepository;
+    private CategoryCollectionFactory $categoryCollectionFactory;
     private CustomerSession $customerSession;
     private LoggerInterface $logger;
+
+    /** @var array<int,string> In-process category name cache to avoid repeated DB lookups */
+    private static array $categoryNameCache = [];
 
     public function __construct(
         Config $config,
         EventQueuePublisher $queue,
-        CategoryRepositoryInterface $categoryRepository,
+        CategoryCollectionFactory $categoryCollectionFactory,
         CustomerSession $customerSession,
         LoggerInterface $logger
     ) {
         $this->config = $config;
         $this->queue = $queue;
-        $this->categoryRepository = $categoryRepository;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->customerSession = $customerSession;
         $this->logger = $logger;
     }
@@ -67,8 +70,32 @@ class AddToCartObserver implements ObserverInterface
         if (empty($categoryIds)) {
             return 'Uncategorized';
         }
+
+        $firstId = (int) $categoryIds[0];
+
+        // Return from in-process cache if already loaded
+        if (isset(self::$categoryNameCache[$firstId])) {
+            return self::$categoryNameCache[$firstId];
+        }
+
         try {
-            return $this->categoryRepository->get($categoryIds[0])->getName();
+            // Load only uncached IDs via collection (single query, no N+1)
+            $uncached = array_filter(
+                array_map('intval', $categoryIds),
+                fn($id) => !isset(self::$categoryNameCache[$id])
+            );
+
+            if (!empty($uncached)) {
+                $collection = $this->categoryCollectionFactory->create();
+                $collection->addAttributeToSelect('name')
+                    ->addFieldToFilter('entity_id', ['in' => $uncached]);
+
+                foreach ($collection as $cat) {
+                    self::$categoryNameCache[(int) $cat->getId()] = (string) $cat->getName();
+                }
+            }
+
+            return self::$categoryNameCache[$firstId] ?? 'Uncategorized';
         } catch (\Exception $e) {
             return 'Uncategorized';
         }

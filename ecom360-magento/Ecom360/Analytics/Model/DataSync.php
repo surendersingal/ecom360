@@ -122,15 +122,31 @@ class DataSync
                 $collection->setCurPage($page);
                 $batch = [];
 
+                // ── Batch-load all category names for this page in ONE query ──
+                $allCategoryIds = [];
+                foreach ($collection as $product) {
+                    foreach ($product->getCategoryIds() as $catId) {
+                        $allCategoryIds[(int) $catId] = true;
+                    }
+                }
+                $categoryNameMap = [];
+                if (!empty($allCategoryIds)) {
+                    $catCollection = $this->categoryCollectionFactory->create();
+                    $catCollection->addAttributeToSelect('name')
+                        ->addFieldToFilter('entity_id', ['in' => array_keys($allCategoryIds)]);
+                    foreach ($catCollection as $cat) {
+                        $categoryNameMap[(int) $cat->getId()] = $cat->getName();
+                    }
+                }
+                $collection->rewind();
+                // ─────────────────────────────────────────────────────────────
+
                 foreach ($collection as $product) {
                     $categoryIds = $product->getCategoryIds();
                     $categoryNames = [];
                     foreach ($categoryIds as $catId) {
-                        try {
-                            $cat = $this->categoryRepository->get($catId, $storeId ?? 0);
-                            $categoryNames[] = $cat->getName();
-                        } catch (\Exception $e) {
-                            // skip
+                        if (isset($categoryNameMap[(int) $catId])) {
+                            $categoryNames[] = $categoryNameMap[(int) $catId];
                         }
                     }
 
