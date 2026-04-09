@@ -1,0 +1,352 @@
+{
+  "timestamp": "2026-04-09T11:45:22.460563",
+  "total_pass": 62,
+  "total_fail": 0,
+  "pass_rate": 100.0,
+  "verdict": "\u2705 ALL CHANNELS & FLOWS OPERATIONAL",
+  "sections": {
+    "PART A \u2014 CHANNEL SETUP (Email, SMS, Push, WhatsApp)": {
+      "pass": 9,
+      "fail": 0,
+      "tests": [
+        {
+          "label": "Register channel: DDF Email (SendGrid SMTP)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Register channel: DDF SMS (MSG91 India)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Register channel: DDF Web Push (OneSignal)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Register channel: DDF WhatsApp (Gupshup India)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "List all 4 registered channels",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Email providers available",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "SMS providers available (msg91, twilio, vonage)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Push providers available (fcm, onesignal, expo)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "WhatsApp providers (meta, gupshup, twilio)",
+          "passed": true,
+          "detail": ""
+        }
+      ]
+    },
+    "PART B \u2014 MESSAGE TEMPLATES (10 templates across all channels)": {
+      "pass": 12,
+      "fail": 0,
+      "tests": [
+        {
+          "label": "Template: Abandoned Cart \u2014 Email (1hr)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Abandoned Cart \u2014 SMS (3hr)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Abandoned Cart \u2014 WhatsApp (24hr)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Welcome \u2014 Email",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Post-Purchase \u2014 Thank You Email",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Price Drop \u2014 Push Notification",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Pre-flight Reminder \u2014 SMS",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: VIP Customer \u2014 WhatsApp Personal",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Win-back \u2014 Email (30-day idle)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Flash Sale \u2014 Push Notification",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Template: Review Request \u2014 Email (3 days post-purchase)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "List all templates",
+          "passed": true,
+          "detail": ""
+        }
+      ]
+    },
+    "PART C \u2014 AUTOMATION WORKFLOWS (8 Duty-Free Flows)": {
+      "pass": 17,
+      "fail": 0,
+      "tests": [
+        {
+          "label": "Create: Abandoned Cart Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 1 canvas: trigger\u2192email(1h)\u2192sms(3h)\u2192whatsapp(24h)\u2192end",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Welcome Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 2 canvas: registration\u2192welcome email\u2192whatsapp",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Post-Purchase Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 3 canvas: purchase\u2192thank you email\u21923 day wait\u2192review request",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Price Drop Alert Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 4 canvas: price drop\u2192push notification\u2192email",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Pre-flight Reminder Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 5 canvas: session start\u2192push\u2192sms",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: VIP WhatsApp Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 6 canvas: vip trigger\u2192whatsapp",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Win-back Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 7 canvas: idle\u2192email\u21927days\u2192sms\u21923days\u2192push",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Create: Flash Sale Alert Flow",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "Flow 8 canvas: flash sale trigger\u2192push\u2192sms simultaneously",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "List all 8 automation flows",
+          "passed": true,
+          "detail": ""
+        }
+      ]
+    },
+    "PART D \u2014 CUSTOMER JOURNEY SIMULATION (5 profiles)": {
+      "pass": 24,
+      "fail": 0,
+      "tests": [
+        {
+          "label": "[Rahul Sharma] 1. Page view (default store)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Rahul Sharma] 2. Search: 'johnnie walker gift'",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Rahul Sharma] 3. Product view: Johnnie Walker Black Label",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Rahul Sharma] 4. Add to cart \u00d7 2",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Rahul Sharma] 5. Purchase \u2014 ORDER PLACED \u2713",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Priya Mehta] 1. Page view (departure store)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Priya Mehta] 2. Search: 'chanel no 5 perfume'",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Priya Mehta] 3. Product view: Chanel No. 5 EDP 50ml",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Priya Mehta] 4. Add to cart \u00d7 1",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[James Wilson] 1. Page view (departure store)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[James Wilson] 2. Search: 'single malt whisky'",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[James Wilson] 3. Product view: Glenlivet 18 Year Old",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[James Wilson] 4. Add to cart \u00d7 2",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[James Wilson] 5. Purchase \u2014 ORDER PLACED \u2713",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Sunita Verma] 1. Page view (default store)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Sunita Verma] 2. Search: 'chocolate gift under 50'",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Sunita Verma] 3. Product view: Ferrero Rocher T16",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Sunita Verma] 4. Add to cart \u00d7 3",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Sunita Verma] 5. Purchase \u2014 ORDER PLACED \u2713",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Ahmed Al-Farsi] 1. Page view (default store)",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Ahmed Al-Farsi] 2. Search: 'cohiba cigars'",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Ahmed Al-Farsi] 3. Product view: Cohiba Siglo I",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Ahmed Al-Farsi] 4. Add to cart \u00d7 1",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "label": "[Ahmed Al-Farsi] 5. Purchase \u2014 ORDER PLACED \u2713",
+          "passed": true,
+          "detail": ""
+        }
+      ]
+    }
+  },
+  "journeys_simulated": 5,
+  "revenue_captured": 495.98,
+  "channels_configured": [
+    "email",
+    "sms",
+    "push",
+    "whatsapp"
+  ],
+  "flows_created": 8
+}
