@@ -138,7 +138,6 @@ class DataSync
                         $categoryNameMap[(int) $cat->getId()] = $cat->getName();
                     }
                 }
-                $collection->rewind();
                 // ─────────────────────────────────────────────────────────────
 
                 foreach ($collection as $product) {
