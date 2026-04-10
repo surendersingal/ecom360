@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 final class TenantController extends Controller
 {
@@ -46,15 +47,22 @@ final class TenantController extends Controller
 
         $tenant = Tenant::create($validated);
 
-        // Optionally create a default user for the tenant
+        // Provision the three tenant roles (scoped to this tenant via team_id)
+        $this->provisionTenantRoles($tenant->id);
+
+        // Optionally create a default admin user for the tenant
         if ($request->filled('user_name') && $request->filled('user_email')) {
-            User::create([
+            $user = User::create([
                 'tenant_id'      => $tenant->id,
                 'name'           => $request->input('user_name'),
                 'email'          => $request->input('user_email'),
                 'password'       => bcrypt($request->input('user_password', 'password')),
                 'is_super_admin' => false,
             ]);
+
+            // Assign Admin role to the default user
+            setPermissionsTeamId($tenant->id);
+            $user->assignRole('Admin');
         }
 
         return redirect()->route('admin.tenants.index')->with('success', "Store '{$tenant->name}' created successfully.");
@@ -124,5 +132,22 @@ final class TenantController extends Controller
     {
         $tenant->update(['api_key' => 'ek_' . Str::random(32)]);
         return back()->with('success', 'API key regenerated.');
+    }
+
+    /**
+     * Provision the three standard roles (Admin / Editor / Viewer) for a new tenant.
+     * Uses Spatie's team feature — each role is scoped to this tenant's ID.
+     */
+    private function provisionTenantRoles(int $tenantId): void
+    {
+        setPermissionsTeamId($tenantId);
+
+        foreach (['Admin', 'Editor', 'Viewer'] as $roleName) {
+            Role::firstOrCreate([
+                'name'       => $roleName,
+                'guard_name' => 'sanctum',
+                'tenant_id'  => $tenantId,
+            ]);
+        }
     }
 }

@@ -10,11 +10,16 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Modules\AiSearch\Models\SearchLog;
 
 /**
  * Records a search event originating from the AiSearch module.
  *
- * Placeholder — replace the handle() body with real metric-recording logic.
+ * Dispatched by EventBusRouter when AiSearch fires AiSearch::search.completed.
+ *
+ * Expected payload keys (all optional except tenant_id and query):
+ *   tenant_id, query, query_type, session_id, visitor_id, customer_email,
+ *   results_count, language, filters_applied, response_time_ms, metadata
  */
 final class RecordSearchEvent implements ShouldQueue
 {
@@ -32,8 +37,38 @@ final class RecordSearchEvent implements ShouldQueue
 
     public function handle(): void
     {
-        Log::info('[Analytics] Recording search event from AiSearch.', $this->payload);
+        $tenantId = $this->payload['tenant_id'] ?? null;
+        $query    = $this->payload['query'] ?? '';
 
-        // TODO: Persist search metrics to the analytics data store.
+        if (! $tenantId || $query === '') {
+            Log::warning('[Analytics] RecordSearchEvent skipped — missing tenant_id or query.', $this->payload);
+            return;
+        }
+
+        try {
+            SearchLog::create([
+                'tenant_id'        => $tenantId,
+                'query'            => $query,
+                'query_type'       => $this->payload['query_type'] ?? 'text',
+                'session_id'       => $this->payload['session_id'] ?? null,
+                'visitor_id'       => $this->payload['visitor_id'] ?? null,
+                'customer_email'   => $this->payload['customer_email'] ?? null,
+                'results_count'    => (int) ($this->payload['results_count'] ?? 0),
+                'language'         => $this->payload['language'] ?? 'en',
+                'filters_applied'  => $this->payload['filters_applied'] ?? [],
+                'response_time_ms' => (int) ($this->payload['response_time_ms'] ?? 0),
+                'metadata'         => $this->payload['metadata'] ?? null,
+            ]);
+
+            Log::info("[Analytics] Search event recorded for tenant {$tenantId}: \"{$query}\"");
+        } catch (\Throwable $e) {
+            Log::error('[Analytics] RecordSearchEvent failed to persist: ' . $e->getMessage(), [
+                'tenant_id' => $tenantId,
+                'query'     => $query,
+            ]);
+
+            // Re-throw so the queue will retry
+            throw $e;
+        }
     }
 }

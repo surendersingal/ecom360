@@ -163,7 +163,33 @@ final class FlowExecutionService
     }
 
     /**
+     * Prune enrollments stuck in waiting state for more than 7 days.
+     * Called by the scheduler every 5 minutes.
+     */
+    public function pruneStaleEnrollments(): int
+    {
+        $cutoff = now()->subDays(7);
+
+        $stale = FlowEnrollment::where('status', 'waiting')
+            ->where('updated_at', '<', $cutoff)
+            ->get();
+
+        $pruned = 0;
+        foreach ($stale as $enrollment) {
+            $this->completeEnrollment($enrollment, 'expired');
+            $pruned++;
+        }
+
+        if ($pruned > 0) {
+            Log::info("[FlowEngine] Pruned {$pruned} stale enrollments older than 7 days.");
+        }
+
+        return $pruned;
+    }
+
+    /**
      * Check if a contact has reached a goal in any active flow.
+     * Event-driven — called when a qualifying event fires (e.g. purchase, signup).
      */
     public function checkGoals(Contact $contact, string $goalEvent, array $eventData = []): void
     {

@@ -52,18 +52,24 @@ final class ContactController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $service = app(ContactService::class);
-        $contact = $service->update($this->tenantId(), $id, $request->all());
-
-        return $this->successResponse($contact);
+        try {
+            $service = app(ContactService::class);
+            $contact = $service->update($this->tenantId(), $id, $request->all());
+            return $this->successResponse($contact);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Contact not found', 404);
+        }
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(ContactService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(ContactService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Contact not found', 404);
+        }
     }
 
     public function bulkImport(Request $request): JsonResponse

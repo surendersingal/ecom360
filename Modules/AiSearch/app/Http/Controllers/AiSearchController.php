@@ -95,11 +95,7 @@ class AiSearchController extends Controller
                 : $this->errorResponse($result['error'] ?? 'Search failed', 422);
         } catch (\Throwable $e) {
             \Log::warning('[AiSearch] Search failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => true,
-                'data'    => ['results' => [], 'total' => 0, 'facets' => [], 'suggestions' => []],
-                'message' => 'Search service temporarily unavailable.',
-            ]);
+            return response()->json(['success' => false, 'error' => 'Search service temporarily unavailable'], 503);
         }
     }
 
@@ -203,7 +199,7 @@ class AiSearchController extends Controller
             return $this->successResponse($this->searchService->getTrending($tenantId));
         } catch (\Throwable $e) {
             \Log::warning('[AiSearch] Trending failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['trending' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
         }
     }
 
@@ -218,7 +214,7 @@ class AiSearchController extends Controller
             return $this->successResponse($this->searchService->getAnalytics($tenantId, $days));
         } catch (\Throwable $e) {
             \Log::warning('[AiSearch] Analytics failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['total_searches' => 0, 'top_queries' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
         }
     }
 }

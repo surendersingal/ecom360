@@ -250,9 +250,13 @@ final class AdvancedAnalyticsController extends Controller
         $data['enabled'] = $data['enabled'] ?? true;
         $data['created_at'] = now();
 
-        $id = \DB::connection('mongodb')->getCollection('alert_rules')->insertOne($data)->getInsertedId();
-
-        return $this->successResponse(['id' => (string) $id, 'rule' => $data], 201);
+        try {
+            $id = \DB::connection('mongodb')->getCollection('alert_rules')->insertOne($data)->getInsertedId();
+            return $this->successResponse(['id' => (string) $id, 'rule' => $data], 201);
+        } catch (\Throwable $e) {
+            \Log::error('[Analytics] createAlertRule failed: ' . $e->getMessage());
+            return $this->errorResponse('Failed to create alert rule', 500);
+        }
     }
 
     /**

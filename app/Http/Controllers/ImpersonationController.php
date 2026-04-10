@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Handles admin impersonation of tenant users.
@@ -44,6 +45,16 @@ final class ImpersonationController extends Controller
         $request->session()->put('impersonating_from_admin_id', $currentUser->id);
         $request->session()->put('impersonating_tenant_name', $tenant->name);
 
+        Log::channel('single')->info('[Impersonation] Admin started impersonation', [
+            'admin_id'    => $currentUser->id,
+            'admin_email' => $currentUser->email,
+            'tenant_id'   => $tenant->id,
+            'tenant_name' => $tenant->name,
+            'tenant_user' => $tenantUser->email,
+            'ip'          => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
         // Switch authentication to the tenant user
         Auth::login($tenantUser);
 
@@ -67,6 +78,12 @@ final class ImpersonationController extends Controller
         if ($adminUser && $adminUser->is_super_admin) {
             Auth::login($adminUser);
         }
+
+        Log::channel('single')->info('[Impersonation] Admin stopped impersonation', [
+            'admin_id'  => $adminUser?->id,
+            'tenant'    => $request->session()->get('impersonating_tenant_name'),
+            'ip'        => $request->ip(),
+        ]);
 
         // Clean up session
         $request->session()->forget('impersonating_from_admin_id');

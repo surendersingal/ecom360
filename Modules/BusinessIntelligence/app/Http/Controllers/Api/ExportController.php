@@ -66,10 +66,13 @@ final class ExportController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(ExportService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(ExportService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Export not found', 404);
+        }
     }
 
     private function tenantId(): int

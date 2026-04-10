@@ -109,7 +109,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $stats]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiDashboard failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['total_profiles' => 0, 'total_segments' => 0, 'data_health' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -132,7 +132,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $result]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiProfiles failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['profiles' => [], 'total' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -148,7 +148,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $profile]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiProfileDetail failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => null]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -165,7 +165,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $timeline]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiProfileTimeline failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['events' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -178,7 +178,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $result]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiBuildProfiles failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['message' => 'Build service temporarily unavailable']]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -191,7 +191,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $segments]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiSegments failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['segments' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -209,7 +209,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $segment], 201);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiCreateSegment failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => null, 'message' => 'Segment creation temporarily unavailable']);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -223,7 +223,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $result]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiSegmentDetail failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['segment' => null, 'members' => [], 'total' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -236,7 +236,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $segment]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiUpdateSegment failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => null, 'message' => 'Update temporarily unavailable']);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -249,7 +249,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiDeleteSegment failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'message' => 'Delete temporarily unavailable']);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -264,7 +264,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => ['member_count' => $count]]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiPreviewSegment failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['member_count' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -278,7 +278,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => ['member_count' => $count]]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiEvaluateSegment failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['member_count' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -300,7 +300,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $result]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiSegmentOverlap failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['overlap_count' => 0, 'overlap_percentage' => 0]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -313,7 +313,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $summary]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiRfm failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['segments' => [], 'grid' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -326,7 +326,7 @@ final class CdpController extends Controller
             return response()->json(['success' => true, 'data' => $result]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiRfmRecalculate failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['message' => 'RFM recalculation temporarily unavailable']]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -398,7 +398,7 @@ final class CdpController extends Controller
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiPredictions failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['churn_risk' => [], 'ltv_distribution' => [], 'likely_to_buy' => 0, 'high_churn' => 0, 'discount_seekers' => 0, 'full_price_buyers' => 0, 'propensity_distribution' => [], 'churn_distribution' => [], 'top_ltv_customers' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 
@@ -459,7 +459,7 @@ final class CdpController extends Controller
             ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('[CDP] apiDataHealth failed: ' . $e->getMessage());
-            return response()->json(['success' => true, 'data' => ['completeness' => 0, 'quality_score' => 0, 'total_profiles' => 0, 'avg_completeness' => 0, 'profiles_with_issues' => 0, 'perfect_profiles' => 0, 'completeness_distribution' => [], 'missing_fields' => [], 'quality_issues' => []]]);
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 500);
         }
     }
 

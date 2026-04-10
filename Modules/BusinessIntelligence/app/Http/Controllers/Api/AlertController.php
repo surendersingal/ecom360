@@ -67,18 +67,24 @@ final class AlertController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $service = app(AlertService::class);
-        $alert = $service->update($this->tenantId(), $id, $request->all());
-
-        return $this->successResponse($alert);
+        try {
+            $service = app(AlertService::class);
+            $alert = $service->update($this->tenantId(), $id, $request->all());
+            return $this->successResponse($alert);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Alert not found', 404);
+        }
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(AlertService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(AlertService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Alert not found', 404);
+        }
     }
 
     public function history(int $id): JsonResponse

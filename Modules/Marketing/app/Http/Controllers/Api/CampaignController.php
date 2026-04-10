@@ -67,18 +67,24 @@ final class CampaignController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $service = app(CampaignService::class);
-        $campaign = $service->update($this->tenantId(), $id, $request->all());
-
-        return $this->successResponse($campaign);
+        try {
+            $service = app(CampaignService::class);
+            $campaign = $service->update($this->tenantId(), $id, $request->all());
+            return $this->successResponse($campaign);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Campaign not found', 404);
+        }
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(CampaignService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(CampaignService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Campaign not found', 404);
+        }
     }
 
     public function send(int $id): JsonResponse
@@ -93,6 +99,8 @@ final class CampaignController extends Controller
         $service = app(CampaignService::class);
         $service->refreshStats($this->tenantId(), $id);
         $campaign = $service->find($this->tenantId(), $id);
+
+        if (!$campaign) return $this->errorResponse('Campaign not found', 404);
 
         return $this->successResponse([
             'campaign_id' => $id,

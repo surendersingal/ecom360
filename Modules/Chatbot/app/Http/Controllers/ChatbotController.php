@@ -33,7 +33,11 @@ class ChatbotController extends Controller
         }
 
         // Sanctum auth (dashboard / admin)
-        return (string) $request->user()->tenant_id;
+        $user = $request->user();
+        if ($user === null || !isset($user->tenant_id)) {
+            abort(403, 'Tenant context required.');
+        }
+        return (string) $user->tenant_id;
     }
 
     /**
@@ -78,9 +82,10 @@ class ChatbotController extends Controller
     /**
      * GET /api/v1/chatbot/history/{conversationId}
      */
-    public function history(string $conversationId): JsonResponse
+    public function history(Request $request, string $conversationId): JsonResponse
     {
-        $result = $this->chatService->getHistory($conversationId);
+        $tenantId = $this->tenantId($request);
+        $result = $this->chatService->getHistory($tenantId, $conversationId);
 
         return $result['success']
             ? $this->success($result)
@@ -107,7 +112,9 @@ class ChatbotController extends Controller
             'satisfaction_score' => 'nullable|integer|min:1|max:5',
         ]);
 
+        $tenantId = $this->tenantId($request);
         $result = $this->chatService->resolveConversation(
+            $tenantId,
             $conversationId,
             $request->input('satisfaction_score')
         );

@@ -43,8 +43,14 @@
                                     <td>
                                         @if($user->is_super_admin)
                                             <span class="badge bg-danger">Super Admin</span>
+                                        @elseif($user->role_name === 'Admin')
+                                            <span class="badge bg-success">Admin</span>
+                                        @elseif($user->role_name === 'Editor')
+                                            <span class="badge bg-info">Editor</span>
+                                        @elseif($user->role_name === 'Viewer')
+                                            <span class="badge bg-secondary">Viewer</span>
                                         @else
-                                            <span class="badge bg-primary">Tenant User</span>
+                                            <span class="badge bg-warning text-dark">No Role</span>
                                         @endif
                                     </td>
                                     <td>{{ $user->created_at->format('M d, Y') }}</td>

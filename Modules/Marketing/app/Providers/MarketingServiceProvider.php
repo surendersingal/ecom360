@@ -91,10 +91,10 @@ class MarketingServiceProvider extends ServiceProvider
                 app(FlowExecutionService::class)->processDueEnrollments();
             })->everyMinute()->name('marketing:process-flows')->withoutOverlapping();
 
-            // Check flow goals every 5 minutes
+            // Expire enrollments that have been waiting too long (e.g. stuck > 7 days)
             $schedule->call(function () {
-                app(FlowExecutionService::class)->checkGoals();
-            })->everyFiveMinutes()->name('marketing:check-goals')->withoutOverlapping();
+                app(FlowExecutionService::class)->pruneStaleEnrollments();
+            })->everyFiveMinutes()->name('marketing:prune-enrollments')->withoutOverlapping();
         });
     }
 

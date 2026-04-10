@@ -111,7 +111,7 @@ class ChatService
 
             // Get or create conversation
             $conversation = $conversationId
-                ? Conversation::find($conversationId)
+                ? Conversation::where('tenant_id', $tenantId)->find($conversationId)
                 : $this->createConversation($tenantId, $sessionId, $params);
 
             if (!$conversation) {
@@ -237,10 +237,10 @@ class ChatService
     /**
      * Get conversation history.
      */
-    public function getHistory(string $conversationId): array
+    public function getHistory(int|string $tenantId, string $conversationId): array
     {
         try {
-            $conversation = Conversation::find($conversationId);
+            $conversation = Conversation::where('tenant_id', $tenantId)->find($conversationId);
             if (!$conversation) {
                 return ['success' => false, 'error' => 'Conversation not found.'];
             }
@@ -317,10 +317,10 @@ class ChatService
     /**
      * Resolve a conversation.
      */
-    public function resolveConversation(string $conversationId, ?int $satisfactionScore = null): array
+    public function resolveConversation(int|string $tenantId, string $conversationId, ?int $satisfactionScore = null): array
     {
         try {
-            $conversation = Conversation::find($conversationId);
+            $conversation = Conversation::where('tenant_id', $tenantId)->find($conversationId);
             if (!$conversation) {
                 return ['success' => false, 'error' => 'Conversation not found.'];
             }

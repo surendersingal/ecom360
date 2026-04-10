@@ -52,18 +52,24 @@ final class ReportController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $service = app(ReportService::class);
-        $report = $service->update($this->tenantId(), $id, $request->all());
-
-        return $this->successResponse($report);
+        try {
+            $service = app(ReportService::class);
+            $report = $service->update($this->tenantId(), $id, $request->all());
+            return $this->successResponse($report);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Report not found', 404);
+        }
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(ReportService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(ReportService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('Report not found', 404);
+        }
     }
 
     public function execute(Request $request, int $id): JsonResponse

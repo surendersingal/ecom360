@@ -63,18 +63,24 @@ final class KpiController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $service = app(KpiService::class);
-        $kpi = $service->update($this->tenantId(), $id, $request->all());
-
-        return $this->successResponse($kpi);
+        try {
+            $service = app(KpiService::class);
+            $kpi = $service->update($this->tenantId(), $id, $request->all());
+            return $this->successResponse($kpi);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('KPI not found', 404);
+        }
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $service = app(KpiService::class);
-        $service->delete($this->tenantId(), $id);
-
-        return $this->successResponse(['deleted' => true]);
+        try {
+            $service = app(KpiService::class);
+            $service->delete($this->tenantId(), $id);
+            return $this->successResponse(['deleted' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return $this->errorResponse('KPI not found', 404);
+        }
     }
 
     public function refresh(): JsonResponse
