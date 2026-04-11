@@ -49,15 +49,37 @@ final class RevenueChartWidget implements WidgetInterface
         $service = app(RevenueAnalyticsService::class);
 
         $dailyRevenue = $service->getDailyRevenue($tenantId, $dateRange);
-        $comparison = $service->getRevenueComparison($tenantId, $dateRange);
+        $comparison   = $service->getRevenueComparison($tenantId, $dateRange);
 
-        $chartData = array_map(fn (array $day) => [
-            'date' => $day['date'] ?? $day['_id'] ?? '',
-            'revenue' => (float) ($day['revenue'] ?? 0),
-            'orders' => (int) ($day['orders'] ?? 0),
-        ], $dailyRevenue);
+        // getDailyRevenue returns columnar arrays: dates[], revenues[], orders[]
+        // Re-shape into row-per-day format for the chart.
+        $chartData = [];
+        if (isset($dailyRevenue['dates']) && is_array($dailyRevenue['dates'])) {
+            $dates    = $dailyRevenue['dates'];
+            $revenues = $dailyRevenue['revenues'] ?? [];
+            $orders   = $dailyRevenue['orders']   ?? [];
+            foreach ($dates as $i => $date) {
+                $chartData[] = [
+                    'date'    => $date,
+                    'revenue' => (float) ($revenues[$i] ?? 0),
+                    'orders'  => (int)   ($orders[$i]   ?? 0),
+                ];
+            }
+        } elseif (is_array($dailyRevenue)) {
+            // Fallback: if it's already row-per-day format
+            foreach ($dailyRevenue as $day) {
+                if (!is_array($day)) {
+                    continue;
+                }
+                $chartData[] = [
+                    'date'    => $day['date'] ?? $day['_id'] ?? '',
+                    'revenue' => (float) ($day['revenue'] ?? 0),
+                    'orders'  => (int)   ($day['orders']  ?? 0),
+                ];
+            }
+        }
 
-        $totalRevenue = array_sum(array_column($chartData, 'revenue'));
+        $totalRevenue = (float) ($dailyRevenue['total_revenue'] ?? array_sum(array_column($chartData, 'revenue')));
 
         return [
             'total_revenue' => round($totalRevenue, 2),
