@@ -71,6 +71,20 @@ final class BenchmarkService
             ->get()
             ->unique('metric');
 
+        // Auto-generate benchmarks on first access if none exist
+        if ($benchmarks->isEmpty()) {
+            try {
+                $this->calculate($tenantId);
+                $benchmarks = Benchmark::where('tenant_id', $tenantId)
+                    ->orderBy('calculated_at', 'desc')
+                    ->get()
+                    ->unique('metric');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[BI] BenchmarkService auto-generate failed: ' . $e->getMessage());
+                return [];
+            }
+        }
+
         return $benchmarks->map(fn(Benchmark $b) => [
             'metric' => $b->metric,
             'tenant_value' => $b->tenant_value,
@@ -105,7 +119,7 @@ final class BenchmarkService
         foreach ($allMetrics as $metric => $values) {
             sort($values);
             $n = count($values);
-            if ($n < 3) continue; // Need at least 3 tenants for meaningful benchmarks
+            if ($n < 1) continue; // Need at least 1 tenant for benchmarks
 
             $result[$metric] = [
                 'p25' => $this->percentile($values, 25),
@@ -125,18 +139,24 @@ final class BenchmarkService
      */
     private function gatherTenantData(int $tenantId, string $period): array
     {
-        $tid = (string) $tenantId;
+        $tids = [(int) $tenantId, (string) $tenantId];
         $days = $period === 'weekly' ? 7 : 30;
-        $since = now()->subDays($days)->toIso8601String();
+        $since = new \MongoDB\BSON\UTCDateTime(now()->subDays($days)->startOfDay()->getTimestampMs());
 
         try {
-            $orders = DB::connection('mongodb')->table('tracking_events')
-                ->where('tenant_id', $tid)->where('event_type', 'purchase')
-                ->where('created_at', '>=', $since)->count();
+            $orders = DB::connection('mongodb')->table('synced_orders')
+                ->whereIn('tenant_id', $tids)
+                ->where('created_at', '>=', $since)
+                ->whereNotIn('status', ['cancelled', 'canceled'])
+                ->count();
 
-            $revenue = (float) DB::connection('mongodb')->table('tracking_events')
-                ->where('tenant_id', $tid)->where('event_type', 'purchase')
-                ->where('created_at', '>=', $since)->sum('metadata.revenue');
+            $revenue = (float) DB::connection('mongodb')->table('synced_orders')
+                ->whereIn('tenant_id', $tids)
+                ->where('created_at', '>=', $since)
+                ->whereNotIn('status', ['cancelled', 'canceled'])
+                ->sum('grand_total');
+
+            $tid = (string) $tenantId;
 
             $sessions = DB::connection('mongodb')->table('tracking_events')
                 ->where('tenant_id', $tid)->where('event_type', 'page_view')

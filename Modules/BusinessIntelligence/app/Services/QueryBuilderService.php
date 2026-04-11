@@ -55,10 +55,12 @@ final class QueryBuilderService
         }
 
         return match ($source) {
-            'events' => $this->queryMongoDB('tracking_events', $queryConfig),
+            'events'    => $this->queryMongoDB('tracking_events', $queryConfig),
             'customers' => $this->queryMongoDB('customer_profiles', $queryConfig),
-            'sessions' => $this->queryMongoDB('tracking_events', $this->addSessionConfig($queryConfig)),
-            'orders', 'campaigns', 'contacts' => $this->queryMySQL($source, $queryConfig),
+            'sessions'  => $this->queryMongoDB('tracking_events', $this->addSessionConfig($queryConfig)),
+            // Orders are in MongoDB (synced from Magento), not MySQL
+            'orders'    => $this->queryMongoDB('synced_orders', $queryConfig),
+            'campaigns', 'contacts' => $this->queryMySQL($source, $queryConfig),
             default => ['columns' => [], 'rows' => [], 'total' => 0],
         };
     }
@@ -131,8 +133,8 @@ final class QueryBuilderService
                 $query = $this->applyFilter($query, $filter);
             }
 
-            // Apply date range if present
-            if (!empty($config['date_range'])) {
+            // Apply date range if present (must be array with start/end; ignore string shorthands like '30d')
+            if (!empty($config['date_range']) && is_array($config['date_range'])) {
                 $query->where('created_at', '>=', $config['date_range']['start'])
                     ->where('created_at', '<=', $config['date_range']['end']);
             }
@@ -186,7 +188,8 @@ final class QueryBuilderService
                 }
             }
 
-            if (!empty($config['date_range'])) {
+            // Apply date range (only if array with start/end; ignore string shorthands)
+            if (!empty($config['date_range']) && is_array($config['date_range'])) {
                 $matchStage['created_at'] = [
                     '$gte' => $config['date_range']['start'],
                     '$lte' => $config['date_range']['end'],

@@ -244,10 +244,12 @@ final class BiController extends Controller
     public function apiProductLeaderboard(Request $request): JsonResponse
     {
         $tid    = $this->tid($request);
-        $allowedSorts = ['revenue', 'quantity', 'margin', 'orders'];
-        $sortBy = in_array($request->query('sort'), $allowedSorts, true)
-                  ? $request->query('sort')
-                  : 'revenue';
+        $allowedSorts = ['revenue', 'qty', 'quantity', 'margin', 'orders', 'growth'];
+        $sortRaw = $request->query('sort', 'revenue');
+        // Map external param names to internal product array keys
+        $sortMap = ['quantity' => 'qty'];
+        $sortBy = isset($sortMap[$sortRaw]) ? $sortMap[$sortRaw]
+                  : (in_array($sortRaw, $allowedSorts, true) ? $sortRaw : 'revenue');
         $from   = $this->parseDate($request->query('from'));
         $to     = $this->parseDate($request->query('to'));
         $limit  = $this->parseIntParam($request->query('limit'), 25, 1, 500);

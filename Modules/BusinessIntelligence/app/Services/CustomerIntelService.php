@@ -61,8 +61,8 @@ class CustomerIntelService
                 return Carbon::instance($ts)->gte($now->copy()->subDays(30));
             })->count();
 
-            // New this month
-            $monthStart = $now->copy()->startOfMonth()->utc();
+            // New this month (use UTCDateTime — Carbon objects don't match BSON dates in Eloquent)
+            $monthStart = new \MongoDB\BSON\UTCDateTime($now->copy()->startOfMonth()->utc()->getTimestampMs());
             $newThisMonth = DB::connection('mongodb')->table('synced_customers')
                 ->whereIn('tenant_id', $tids)
                 ->where('created_at', '>=', $monthStart)
@@ -202,20 +202,22 @@ class CustomerIntelService
             $tids = $this->tid($tenantId);
             $from = Carbon::now(config('ecom360.default_timezone', 'Asia/Kolkata'))->subMonths($months)->startOfMonth();
 
-            // Get all orders
+            // Get all orders (use UTCDateTime — Carbon objects don't match BSON dates in Eloquent)
             $orders = DB::connection('mongodb')->table('synced_orders')
                 ->whereIn('tenant_id', $tids)
-                ->where('created_at', '>=', $from->copy()->utc())
+                ->where('created_at', '>=', new \MongoDB\BSON\UTCDateTime($from->copy()->utc()->getTimestampMs()))
                 ->whereNotIn('status', ['cancelled', 'canceled'])
                 ->get(['customer_email', 'created_at']);
 
             // Build customer order timeline
+            // MongoDB returns stdClass objects — normalize to array access
             $customerOrders = [];
             foreach ($orders as $o) {
-                $email = $o['customer_email'] ?? null;
+                $oa    = is_object($o) ? (array) $o : $o;
+                $email = $oa['customer_email'] ?? null;
                 if (!$email) continue;
 
-                $dt = $o['created_at'];
+                $dt = $oa['created_at'] ?? null;
                 if ($dt instanceof \MongoDB\BSON\UTCDateTime) {
                     $dt = Carbon::instance($dt->toDateTime())->setTimezone(config('ecom360.default_timezone', 'Asia/Kolkata'));
                 } else {
@@ -339,7 +341,7 @@ class CustomerIntelService
 
             $orders = DB::connection('mongodb')->table('synced_orders')
                 ->whereIn('tenant_id', $tids)
-                ->where('created_at', '>=', $from->copy()->utc())
+                ->where('created_at', '>=', new \MongoDB\BSON\UTCDateTime($from->copy()->utc()->getTimestampMs()))
                 ->whereNotIn('status', ['cancelled', 'canceled'])
                 ->orderBy('created_at')
                 ->get(['customer_email', 'created_at']);
@@ -348,10 +350,12 @@ class CustomerIntelService
             $monthly = [];
 
             foreach ($orders as $o) {
-                $email = $o['customer_email'] ?? null;
+                // MongoDB returns stdClass objects — normalize
+                $oa    = is_object($o) ? (array) $o : $o;
+                $email = $oa['customer_email'] ?? null;
                 if (!$email) continue;
 
-                $dt = $o['created_at'];
+                $dt = $oa['created_at'] ?? null;
                 if ($dt instanceof \MongoDB\BSON\UTCDateTime) {
                     $dt = Carbon::instance($dt->toDateTime())->setTimezone(config('ecom360.default_timezone', 'Asia/Kolkata'));
                 } else {

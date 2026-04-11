@@ -72,8 +72,22 @@ final class InsightsController extends Controller
             'aggregations' => 'nullable|array',
         ]);
 
+        $params = $request->all();
+
+        // Normalize group_by: the service expects an array of {field, granularity} objects.
+        // Accept both a flat string ("rfm_segment") and a proper array.
+        if (isset($params['group_by']) && is_string($params['group_by'])) {
+            $params['group_by'] = [['field' => $params['group_by']]];
+        } elseif (isset($params['group_by']) && is_array($params['group_by'])) {
+            // Allow both [['field'=>'x']] and ['x'] shorthand arrays
+            $params['group_by'] = array_map(
+                fn ($g) => is_string($g) ? ['field' => $g] : $g,
+                $params['group_by']
+            );
+        }
+
         $service = app(QueryBuilderService::class);
-        $result = $service->execute($this->tenantId(), $request->all());
+        $result = $service->execute($this->tenantId(), $params);
 
         return $this->successResponse($result);
     }

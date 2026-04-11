@@ -213,25 +213,29 @@ final class KpiService
         };
     }
 
-    private function calcRevenue(string $tid, string $start, string $end): float
+    private function calcRevenue(string $tid, mixed $start, mixed $end): float
     {
-        $result = DB::connection('mongodb')->table('tracking_events')
-            ->where('tenant_id', $tid)
-            ->where('event_type', 'purchase')
+        // Use synced_orders (Magento orders) — tracking_events stores revenue in custom_data.revenue
+        // but synced_orders.grand_total is the authoritative source (used by RevenueIntelService)
+        $tids = [(int) $tid, (string) $tid];
+        $result = DB::connection('mongodb')->table('synced_orders')
+            ->whereIn('tenant_id', $tids)
             ->where('created_at', '>=', $start)
             ->where('created_at', '<=', $end)
-            ->sum('metadata.revenue');
+            ->whereNotIn('status', ['cancelled', 'canceled'])
+            ->sum('grand_total');
 
         return round((float) $result, 2);
     }
 
-    private function calcOrders(string $tid, string $start, string $end): int
+    private function calcOrders(string $tid, mixed $start, mixed $end): int
     {
-        return DB::connection('mongodb')->table('tracking_events')
-            ->where('tenant_id', $tid)
-            ->where('event_type', 'purchase')
+        $tids = [(int) $tid, (string) $tid];
+        return DB::connection('mongodb')->table('synced_orders')
+            ->whereIn('tenant_id', $tids)
             ->where('created_at', '>=', $start)
             ->where('created_at', '<=', $end)
+            ->whereNotIn('status', ['cancelled', 'canceled'])
             ->count();
     }
 
@@ -355,16 +359,18 @@ final class KpiService
 
     private function getPeriodRange(int $days, string $period): array
     {
+        // Return MongoDB\BSON\UTCDateTime objects so date comparisons work
+        // correctly against BSON-stored dates in MongoDB collections.
         if ($period === 'current') {
             return [
-                now()->subDays($days)->startOfDay()->toIso8601String(),
-                now()->endOfDay()->toIso8601String(),
+                new \MongoDB\BSON\UTCDateTime(now()->subDays($days)->startOfDay()->getTimestampMs()),
+                new \MongoDB\BSON\UTCDateTime(now()->endOfDay()->getTimestampMs()),
             ];
         }
 
         return [
-            now()->subDays($days * 2)->startOfDay()->toIso8601String(),
-            now()->subDays($days)->endOfDay()->toIso8601String(),
+            new \MongoDB\BSON\UTCDateTime(now()->subDays($days * 2)->startOfDay()->getTimestampMs()),
+            new \MongoDB\BSON\UTCDateTime(now()->subDays($days)->endOfDay()->getTimestampMs()),
         ];
     }
 }

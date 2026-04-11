@@ -51,16 +51,22 @@ class ProductIntelService
                 $p = $previous[$name] ?? ['revenue' => 0, 'qty' => 0, 'orders' => 0, 'discount' => 0];
                 $growth = $p['revenue'] > 0 ? round(($c['revenue'] - $p['revenue']) / $p['revenue'] * 100, 1) : ($c['revenue'] > 0 ? 100 : 0);
 
+                // Margin estimate: revenue minus discounts as a proxy (cost data often unavailable)
+                $marginAmt = max(0, $c['revenue'] - abs($c['discount']));
+                $marginPct = $c['revenue'] > 0 ? round($marginAmt / $c['revenue'] * 100, 1) : 0;
+
                 $products[] = [
-                    'name'      => $name,
-                    'revenue'   => round($c['revenue'], 2),
-                    'qty'       => $c['qty'],
-                    'orders'    => $c['orders'],
-                    'aov'       => $c['orders'] > 0 ? round($c['revenue'] / $c['orders'], 2) : 0,
-                    'discount'  => round($c['discount'], 2),
-                    'growth'    => $growth,
+                    'name'         => $name,
+                    'revenue'      => round($c['revenue'], 2),
+                    'qty'          => $c['qty'],
+                    'orders'       => $c['orders'],
+                    'aov'          => $c['orders'] > 0 ? round($c['revenue'] / $c['orders'], 2) : 0,
+                    'discount'     => round(abs($c['discount']), 2),
+                    'margin'       => $marginAmt,
+                    'margin_pct'   => $marginPct,
+                    'growth'       => $growth,
                     'prev_revenue' => round($p['revenue'], 2),
-                    'trend'     => $growth > 20 ? '↑↑' : ($growth > 5 ? '↑' : ($growth < -10 ? '↓' : '→')),
+                    'trend'        => $growth > 20 ? '↑↑' : ($growth > 5 ? '↑' : ($growth < -10 ? '↓' : '→')),
                 ];
             }
 

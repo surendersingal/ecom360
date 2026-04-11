@@ -108,7 +108,8 @@ final class AlertController extends Controller
         $service = app(AlertService::class);
         $results = $service->evaluateAll($this->tenantId());
 
-        return $this->successResponse(['evaluated' => count($results), 'triggered' => $results]);
+        // $results is already {evaluated: int, triggered: int} from AlertService::evaluateAll()
+        return $this->successResponse($results);
     }
 
     private function tenantId(): int

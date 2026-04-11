@@ -46,18 +46,29 @@ class RevenueIntelService
             $agg = function (Carbon $from, Carbon $to) use ($tids) {
                 $rows = DB::connection('mongodb')->table('synced_orders')
                     ->whereIn('tenant_id', $tids)
-                    ->whereBetween('created_at', [$from->utc(), $to->utc()])
+                    // Use UTCDateTime — Eloquent whereBetween with Carbon doesn't match BSON dates
+                    ->where('created_at', '>=', new \MongoDB\BSON\UTCDateTime($from->utc()->getTimestampMs()))
+                    ->where('created_at', '<=', new \MongoDB\BSON\UTCDateTime($to->utc()->getTimestampMs()))
                     ->get(['grand_total', 'discount_amount', 'status']);
 
                 $orders   = $rows->whereNotIn('status', ['cancelled', 'canceled', 'closed']);
                 $refunded = $rows->whereIn('status', ['closed']);
+
+                // Magento stores discount_amount as negative float (e.g. -1000) — use abs()
+                // MongoDB results are stdClass objects, so use -> not []
+                $discounts = $orders->sum(function ($o) {
+                    $val = is_object($o) ? ($o->discount_amount ?? 0) : ($o['discount_amount'] ?? 0);
+                    return abs((float) $val);
+                });
+                $revenue   = $orders->sum('grand_total');
+
                 return [
-                    'revenue'   => round($orders->sum('grand_total'), 2),
-                    'net'       => round($orders->sum('grand_total') - $orders->sum('discount_amount'), 2),
+                    'revenue'   => round($revenue, 2),
+                    'net'       => round($revenue - $discounts, 2),
                     'orders'    => $orders->count(),
-                    'aov'       => $orders->count() ? round($orders->sum('grand_total') / $orders->count(), 2) : 0,
+                    'aov'       => $orders->count() ? round($revenue / $orders->count(), 2) : 0,
                     'refunds'   => round($refunded->sum('grand_total'), 2),
-                    'discounts' => round($orders->sum('discount_amount'), 2),
+                    'discounts' => round($discounts, 2),
                 ];
             };
 
@@ -323,10 +334,33 @@ class RevenueIntelService
                     ['$group' => ['_id' => ['$hour' => ['date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]], 'revenue' => ['$sum' => '$grand_total'], 'orders' => ['$sum' => 1]]],
                     ['$sort' => ['_id' => 1]],
                 ],
+                'brand' => [
+                    // Brand is stored on order items
+                    ['$match' => $match],
+                    ['$unwind' => '$items'],
+                    ['$group' => ['_id' => ['$ifNull' => ['$items.brand', 'Unknown']], 'revenue' => ['$sum' => '$items.row_total'], 'qty' => ['$sum' => '$items.qty'], 'orders' => ['$addToSet' => '$_id']]],
+                    ['$addFields' => ['orders' => ['$size' => '$orders']]],
+                    ['$sort' => ['revenue' => -1]],
+                    ['$limit' => 30],
+                ],
+                'channel' => [
+                    // Map payment_method as the channel proxy (most common channel signal in Magento)
+                    ['$match' => $match],
+                    ['$group' => ['_id' => ['$ifNull' => ['$payment_method', 'Unknown']], 'revenue' => ['$sum' => '$grand_total'], 'orders' => ['$sum' => 1]]],
+                    ['$sort' => ['revenue' => -1]],
+                ],
+                'source' => [
+                    // UTM source or coupon code as acquisition source proxy
+                    ['$match' => $match],
+                    ['$group' => ['_id' => ['$ifNull' => ['$coupon_code', ['$ifNull' => ['$utm_source', 'Direct']]]], 'revenue' => ['$sum' => '$grand_total'], 'orders' => ['$sum' => 1]]],
+                    ['$sort' => ['revenue' => -1]],
+                    ['$limit' => 20],
+                ],
                 'new_vs_returning' => $this->newVsReturningPipeline($match),
                 default => [
                     ['$match' => $match],
-                    ['$group' => ['_id' => null, 'revenue' => ['$sum' => '$grand_total'], 'orders' => ['$sum' => 1]]],
+                    ['$group' => ['_id' => '$payment_method', 'revenue' => ['$sum' => '$grand_total'], 'orders' => ['$sum' => 1]]],
+                    ['$sort' => ['revenue' => -1]],
                 ],
             };
 
@@ -386,37 +420,46 @@ class RevenueIntelService
                 ->whereIn('tenant_id', $tids)
                 ->get(['external_id', 'name', 'price', 'categories']);
 
+            // MongoDB returns stdClass objects — helper to normalize
+            $toArr = fn ($o) => is_object($o) ? (array) $o : (is_array($o) ? $o : []);
+
             $costMap = [];
             foreach ($products as $p) {
-                $costMap[$p['external_id'] ?? ''] = [
-                    'name'       => $p['name'] ?? 'Unknown',
-                    'price'      => $p['price'] ?? 0,
-                    'categories' => $p['categories'] ?? [],
+                $pa = $toArr($p);
+                $costMap[$pa['external_id'] ?? ''] = [
+                    'name'       => $pa['name'] ?? 'Unknown',
+                    'price'      => $pa['price'] ?? 0,
+                    'categories' => $pa['categories'] ?? [],
                 ];
             }
 
-            // Get order items
+            // Get order items (use UTCDateTime — Carbon not auto-converted in MongoDB queries)
             $orders = DB::connection('mongodb')->table('synced_orders')
                 ->whereIn('tenant_id', $tids)
-                ->whereBetween('created_at', [$from->copy()->utc(), $to->copy()->utc()])
+                ->where('created_at', '>=', new \MongoDB\BSON\UTCDateTime($from->copy()->utc()->getTimestampMs()))
+                ->where('created_at', '<=', new \MongoDB\BSON\UTCDateTime($to->copy()->utc()->getTimestampMs()))
                 ->whereNotIn('status', ['cancelled', 'canceled'])
                 ->get(['items']);
 
             $productStats = [];
             foreach ($orders as $o) {
-                foreach ($o['items'] ?? [] as $item) {
-                    $pid = $item['product_id'] ?? $item['sku'] ?? 'unknown';
+                $oa = $toArr($o);
+                $items = $oa['items'] ?? [];
+                if ($items instanceof \MongoDB\Model\BSONArray) $items = (array) $items;
+                foreach ($items as $item) {
+                    $ia = $toArr($item);
+                    $pid = $ia['product_id'] ?? $ia['sku'] ?? 'unknown';
                     if (!isset($productStats[$pid])) {
                         $productStats[$pid] = [
-                            'name'     => $item['name'] ?? $costMap[$pid]['name'] ?? 'Unknown',
+                            'name'     => $ia['name'] ?? $costMap[$pid]['name'] ?? 'Unknown',
                             'revenue'  => 0,
                             'qty'      => 0,
                             'discount' => 0,
                         ];
                     }
-                    $productStats[$pid]['revenue']  += ($item['row_total'] ?? 0);
-                    $productStats[$pid]['qty']      += ($item['qty'] ?? 0);
-                    $productStats[$pid]['discount'] += ($item['discount'] ?? 0);
+                    $productStats[$pid]['revenue']  += ($ia['row_total'] ?? 0);
+                    $productStats[$pid]['qty']      += ($ia['qty'] ?? 0);
+                    $productStats[$pid]['discount'] += ($ia['discount'] ?? 0);
                 }
             }
 
