@@ -470,7 +470,7 @@ class ChatService
             'subscription'      => $this->handleSubscription($tenantId, $message, $context, $settings),
             'greeting'          => $this->handleGreeting($tenantId, $settings),
             'farewell'          => $this->handleFarewell($conversation, $settings),
-            'help',
+            'help'              => $this->handleHelp($tenantId, $settings),
             'store_hours'       => $this->handleGeneral($tenantId, $message, $context, $settings),
             default             => $this->handleGeneral($tenantId, $message, $context, $settings),
         };
@@ -798,6 +798,39 @@ class ChatService
 
     private function handleProductInquiry(int $tenantId, string $message, array $context, array $settings = []): array
     {
+        // ── Button-triggered product search: no real query present ──
+        // When the user clicked a quick-reply button (e.g. "find_product", "product_help",
+        // "browse_categories") the message is just the button value — not a product query.
+        // Show a category prompt instead of searching for the button label.
+        $buttonOnlyTriggers = [
+            'find_product', 'product_help', 'browse_categories', 'browse_all_categories',
+        ];
+        if (in_array(strtolower(trim($message)), $buttonOnlyTriggers, true)) {
+            return [
+                'message'       => "Sure! What are you looking for? You can type a product name, brand, or category — or pick one below:",
+                'content_type'  => 'text',
+                'quick_replies' => [
+                    ['label' => 'Liquor & Spirits', 'value' => 'liquor'],
+                    ['label' => 'Perfumes',          'value' => 'perfume'],
+                    ['label' => 'Chocolates',        'value' => 'chocolate'],
+                    ['label' => 'Best sellers',      'value' => 'best_sellers'],
+                    ['label' => 'New arrivals',      'value' => 'new_arrivals'],
+                ],
+            ];
+        }
+
+        // Button triggers that DO imply a real search query
+        $buttonQueryMap = [
+            'best_sellers' => 'best sellers popular',
+            'new_arrivals' => 'new arrivals',
+            'liquor'       => 'liquor',
+            'perfume'      => 'perfume',
+            'chocolate'    => 'chocolate',
+        ];
+        if (isset($buttonQueryMap[strtolower(trim($message))])) {
+            $message = $buttonQueryMap[strtolower(trim($message))];
+        }
+
         // Extract search keywords — strip common chatbot phrases
         $query = preg_replace(
             '/\b(show|find|search|looking for|i want|i need|can you|please|get me|me|any|some|do you have|have you got)\b/i',
@@ -1066,6 +1099,29 @@ class ChatService
             'content_type'  => 'text',
             'quick_replies' => [
                 ['label' => 'Rate this chat', 'value' => 'rate_chat'],
+            ],
+        ];
+    }
+
+    /**
+     * Handle 'help' intent — show a clear menu of what the chatbot can do.
+     * Triggered by "I need help", "help me", or the 'need_help' quick-reply button.
+     */
+    private function handleHelp(int $tenantId, array $settings = []): array
+    {
+        $msg = $this->s($settings, 'tpl_help',
+            "Of course! Here's what I can help you with today 👇"
+        );
+
+        return [
+            'message'       => $msg,
+            'content_type'  => 'text',
+            'quick_replies' => [
+                ['label' => 'Find a product',     'value' => 'find_product'],
+                ['label' => 'Track my order',     'value' => 'track_order'],
+                ['label' => 'Returns & refunds',  'value' => 'return_help'],
+                ['label' => 'Deals & coupons',    'value' => 'browse_deals'],
+                ['label' => 'Talk to a human',    'value' => 'escalate'],
             ],
         ];
     }

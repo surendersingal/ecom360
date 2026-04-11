@@ -173,7 +173,7 @@ class IntentService
                 'samsung', 'apple', 'sony', 'bose', 'jbl',
                 'ray ban', 'oakley', 'michael kors', 'coach', 'kate spade',
                 'whisky', 'whiskey', 'vodka', 'rum', 'gin', 'tequila', 'wine',
-                'beer', 'champagne', 'cognac', 'brandy', 'liqueur', 'scotch',
+                'beer', 'champagne', 'cognac', 'brandy', 'liqueur', 'liquor', 'scotch',
                 'bourbon', 'perfume', 'fragrance', 'cologne', 'lipstick', 'skincare',
                 'chocolate', 'candy', 'sweets', 'snacks', 'cigarette', 'tobacco',
                 'sunglasses', 'watch', 'handbag', 'wallet', 'luggage',
@@ -268,6 +268,40 @@ class IntentService
     public function detect(string $message, array $context = [], array $settings = []): array
     {
         $messageLower = strtolower(trim($message));
+
+        // ── Quick-reply button value detection ──────────────────────────
+        // Button values are slug-formatted (underscored). Map them to intents
+        // directly so they are never treated as free-text product queries.
+        $buttonIntentMap = [
+            'need_help'          => 'help',
+            'find_product'       => 'product_search',
+            'product_help'       => 'product_search',
+            'browse_categories'  => 'product_search',
+            'best_sellers'       => 'product_search',
+            'new_arrivals'       => 'product_search',
+            'browse_sale'        => 'coupon',
+            'browse_deals'       => 'coupon',
+            'track_order'        => 'order_tracking',
+            'return_help'        => 'return_request',
+            'escalate'           => 'escalation',
+            'contact_support'    => 'escalation',
+            'size_guide'         => 'size_help',
+            'shipping_options'   => 'shipping',
+            'payment_help'       => 'payment_info',
+            'rate_chat'          => 'farewell',
+            'start_return'       => 'return_request',
+            'exchange_item'      => 'return_request',
+            'return_policy'      => 'return_policy',
+            'apply_coupon'       => 'coupon',
+            'subscribe_offers'   => 'coupon',
+        ];
+        if (isset($buttonIntentMap[$messageLower])) {
+            return [
+                'intent'          => $buttonIntentMap[$messageLower],
+                'confidence'      => 0.99,
+                'matched_pattern' => 'quick_reply_button:' . $messageLower,
+            ];
+        }
 
         // Build runtime intents with custom keywords merged
         $runtimeIntents = $this->intents;
