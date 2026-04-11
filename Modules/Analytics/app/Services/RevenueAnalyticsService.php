@@ -36,7 +36,10 @@ final class RevenueAnalyticsService
             ]],
             ['$group' => [
                 '_id'     => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at', 'timezone' => config('ecom360.default_timezone', 'Asia/Kolkata')]],
-                'revenue' => ['$sum' => '$metadata.order_total'],
+                'revenue' => ['$sum' => ['$ifNull' => [
+                    '$custom_data.order_total',
+                    ['$ifNull' => ['$metadata.order_total', ['$ifNull' => ['$custom_data.revenue', 0]]]],
+                ]]],
                 'orders'  => ['$sum' => 1],
             ]],
             ['$sort' => ['_id' => 1]],
@@ -93,8 +96,11 @@ final class RevenueAnalyticsService
                 ],
             ]],
             ['$group' => [
-                '_id'     => ['$ifNull' => ['$metadata.attribution.source', 'direct']],
-                'revenue' => ['$sum' => '$metadata.order_total'],
+                '_id'     => ['$ifNull' => ['$custom_data.utm_source', ['$ifNull' => ['$metadata.attribution.source', 'direct']]]],
+                'revenue' => ['$sum' => ['$ifNull' => [
+                    '$custom_data.order_total',
+                    ['$ifNull' => ['$metadata.order_total', ['$ifNull' => ['$custom_data.revenue', 0]]]],
+                ]]],
                 'orders'  => ['$sum' => 1],
             ]],
             ['$sort' => ['revenue' => -1]],
@@ -130,7 +136,10 @@ final class RevenueAnalyticsService
             ]],
             ['$group' => [
                 '_id'     => ['$hour' => '$created_at'],
-                'revenue' => ['$sum' => '$metadata.order_total'],
+                'revenue' => ['$sum' => ['$ifNull' => [
+                    '$custom_data.order_total',
+                    ['$ifNull' => ['$metadata.order_total', ['$ifNull' => ['$custom_data.revenue', 0]]]],
+                ]]],
                 'orders'  => ['$sum' => 1],
             ]],
             ['$sort' => ['_id' => 1]],
@@ -200,7 +209,10 @@ final class RevenueAnalyticsService
             ]],
             ['$group' => [
                 '_id'     => null,
-                'revenue' => ['$sum' => '$metadata.order_total'],
+                'revenue' => ['$sum' => ['$ifNull' => [
+                    '$custom_data.order_total',
+                    ['$ifNull' => ['$metadata.order_total', ['$ifNull' => ['$custom_data.revenue', 0]]]],
+                ]]],
                 'orders'  => ['$sum' => 1],
             ]],
         ];

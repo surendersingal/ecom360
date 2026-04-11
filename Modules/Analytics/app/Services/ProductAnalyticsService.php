@@ -40,20 +40,24 @@ final class ProductAnalyticsService
             return $this->getTopProductsByPurchase($tenantId, $dateFilter, $limit);
         }
 
-        // product_view / add_to_cart — each event has metadata.product_id
+        // product_view / add_to_cart — each event has custom_data.product_id (Magento tracker)
+        // or metadata.product_id (legacy SDK) — check both.
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
                 'event_type' => $metric,
                 'created_at' => $dateFilter,
-                'metadata.product_id' => ['$exists' => true],
+                '$or' => [
+                    ['custom_data.product_id' => ['$exists' => true]],
+                    ['metadata.product_id'    => ['$exists' => true]],
+                ],
             ]],
             ['$group' => [
-                '_id'   => '$metadata.product_id',
-                'name'  => ['$first' => '$metadata.product_name'],
-                'sku'   => ['$first' => '$metadata.sku'],
+                '_id'   => ['$ifNull' => ['$custom_data.product_id', '$metadata.product_id']],
+                'name'  => ['$first' => ['$ifNull' => ['$custom_data.product_name', '$metadata.product_name']]],
+                'sku'   => ['$first' => ['$ifNull' => ['$custom_data.sku', '$metadata.sku']]],
                 'count' => ['$sum' => 1],
-                'revenue' => ['$sum' => ['$ifNull' => ['$metadata.price', 0]]],
+                'revenue' => ['$sum' => ['$ifNull' => ['$custom_data.price', ['$ifNull' => ['$metadata.price', 0]]]]],
             ]],
             ['$sort' => ['count' => -1]],
             ['$limit' => $limit],
@@ -78,22 +82,26 @@ final class ProductAnalyticsService
     {
         $collection = $this->collection();
 
-        // Magento tracker uses "items", SDK / test scripts may use "products"
-        // Merge both into a single "_items" array.
+        // Magento tracker uses custom_data.items, SDK may use metadata.items or metadata.products
+        // Merge all four sources into a single "_items" array.
         $pipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
                 'event_type' => 'purchase',
                 'created_at' => $dateFilter,
                 '$or' => [
-                    ['metadata.items'    => ['$exists' => true]],
-                    ['metadata.products' => ['$exists' => true]],
+                    ['custom_data.items'    => ['$exists' => true]],
+                    ['custom_data.products' => ['$exists' => true]],
+                    ['metadata.items'       => ['$exists' => true]],
+                    ['metadata.products'    => ['$exists' => true]],
                 ],
             ]],
-            // Normalise: combine items + products into _items
+            // Normalise: combine all item sources into _items
             ['$addFields' => [
                 '_items' => [
                     '$concatArrays' => [
+                        ['$ifNull' => ['$custom_data.items', []]],
+                        ['$ifNull' => ['$custom_data.products', []]],
                         ['$ifNull' => ['$metadata.items', []]],
                         ['$ifNull' => ['$metadata.products', []]],
                     ],
@@ -144,41 +152,48 @@ final class ProductAnalyticsService
             '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
         ];
 
-        // ── 1) Views & cart adds (each event has metadata.product_id) ──
+        // ── 1) Views & cart adds — check custom_data (Magento) and metadata (legacy SDK) ──
         $viewCartPipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
                 'event_type' => ['$in' => ['product_view', 'add_to_cart']],
                 'created_at' => $dateFilter,
-                'metadata.product_id' => ['$exists' => true],
+                '$or' => [
+                    ['custom_data.product_id' => ['$exists' => true]],
+                    ['metadata.product_id'    => ['$exists' => true]],
+                ],
             ]],
             ['$group' => [
                 '_id'       => [
-                    'product_id' => '$metadata.product_id',
+                    'product_id' => ['$ifNull' => ['$custom_data.product_id', '$metadata.product_id']],
                     'event_type' => '$event_type',
                 ],
-                'name'  => ['$first' => '$metadata.product_name'],
-                'sku'   => ['$first' => '$metadata.sku'],
+                'name'  => ['$first' => ['$ifNull' => ['$custom_data.product_name', '$metadata.product_name']]],
+                'sku'   => ['$first' => ['$ifNull' => ['$custom_data.sku', '$metadata.sku']]],
                 'count' => ['$sum' => 1],
             ]],
         ];
 
         $viewCartResults = iterator_to_array($collection->aggregate($viewCartPipeline));
 
-        // ── 2) Purchases — unwind items/products array from orders ──
+        // ── 2) Purchases — unwind items from custom_data (Magento) or metadata (legacy) ──
         $purchasePipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
                 'event_type' => 'purchase',
                 'created_at' => $dateFilter,
                 '$or' => [
-                    ['metadata.items'    => ['$exists' => true]],
-                    ['metadata.products' => ['$exists' => true]],
+                    ['custom_data.items'    => ['$exists' => true]],
+                    ['custom_data.products' => ['$exists' => true]],
+                    ['metadata.items'       => ['$exists' => true]],
+                    ['metadata.products'    => ['$exists' => true]],
                 ],
             ]],
             ['$addFields' => [
                 '_items' => [
                     '$concatArrays' => [
+                        ['$ifNull' => ['$custom_data.items', []]],
+                        ['$ifNull' => ['$custom_data.products', []]],
                         ['$ifNull' => ['$metadata.items', []]],
                         ['$ifNull' => ['$metadata.products', []]],
                     ],
@@ -318,13 +333,17 @@ final class ProductAnalyticsService
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
                 '$or' => [
-                    ['metadata.items'    => ['$exists' => true]],
-                    ['metadata.products' => ['$exists' => true]],
+                    ['custom_data.items'    => ['$exists' => true]],
+                    ['custom_data.products' => ['$exists' => true]],
+                    ['metadata.items'       => ['$exists' => true]],
+                    ['metadata.products'    => ['$exists' => true]],
                 ],
             ]],
             ['$addFields' => [
                 '_items' => [
                     '$concatArrays' => [
+                        ['$ifNull' => ['$custom_data.items', []]],
+                        ['$ifNull' => ['$custom_data.products', []]],
                         ['$ifNull' => ['$metadata.items', []]],
                         ['$ifNull' => ['$metadata.products', []]],
                     ],
@@ -369,11 +388,14 @@ final class ProductAnalyticsService
                     '$gte' => new \MongoDB\BSON\UTCDateTime($dateFrom->getTimestamp() * 1000),
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
-                'metadata.product_id' => ['$exists' => true],
+                '$or' => [
+                    ['custom_data.product_id' => ['$exists' => true]],
+                    ['metadata.product_id'    => ['$exists' => true]],
+                ],
             ]],
             ['$group' => [
-                '_id'       => '$metadata.product_id',
-                'name'      => ['$first' => '$metadata.product_name'],
+                '_id'       => ['$ifNull' => ['$custom_data.product_id', '$metadata.product_id']],
+                'name'      => ['$first' => ['$ifNull' => ['$custom_data.product_name', '$metadata.product_name']]],
                 'cart_adds' => ['$sum' => 1],
                 'sessions'  => ['$addToSet' => '$session_id'],
             ]],
@@ -381,7 +403,7 @@ final class ProductAnalyticsService
 
         $cartResults = iterator_to_array($collection->aggregate($cartPipeline));
 
-        // Get products purchased — unwind items/products from purchase events
+        // Get products purchased — unwind items from custom_data (Magento) or metadata (legacy)
         $purchasePipeline = [
             ['$match' => [
                 'tenant_id'  => $tenantId,
@@ -391,13 +413,17 @@ final class ProductAnalyticsService
                     '$lte' => new \MongoDB\BSON\UTCDateTime($dateTo->getTimestamp() * 1000),
                 ],
                 '$or' => [
-                    ['metadata.items'    => ['$exists' => true]],
-                    ['metadata.products' => ['$exists' => true]],
+                    ['custom_data.items'    => ['$exists' => true]],
+                    ['custom_data.products' => ['$exists' => true]],
+                    ['metadata.items'       => ['$exists' => true]],
+                    ['metadata.products'    => ['$exists' => true]],
                 ],
             ]],
             ['$addFields' => [
                 '_items' => [
                     '$concatArrays' => [
+                        ['$ifNull' => ['$custom_data.items', []]],
+                        ['$ifNull' => ['$custom_data.products', []]],
                         ['$ifNull' => ['$metadata.items', []]],
                         ['$ifNull' => ['$metadata.products', []]],
                     ],

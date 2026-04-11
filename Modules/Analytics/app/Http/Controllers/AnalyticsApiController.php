@@ -544,11 +544,15 @@ final class AnalyticsApiController extends Controller
             ['$match' => [
                 'tenant_id' => $tenantId,
                 'event_type' => ['$in' => ['product_view', 'page_view']],
-                'metadata.category' => ['$exists' => true, '$ne' => null],
+                // Magento tracker stores category in custom_data.category; legacy SDK uses metadata.category
+                '$or' => [
+                    ['custom_data.category' => ['$exists' => true, '$ne' => null]],
+                    ['metadata.category'    => ['$exists' => true, '$ne' => null]],
+                ],
                 'created_at' => $dateMatch,
             ]],
             ['$group' => [
-                '_id' => '$metadata.category',
+                '_id' => ['$ifNull' => ['$custom_data.category', '$metadata.category']],
                 'views' => ['$sum' => 1],
                 'unique_sessions' => ['$addToSet' => '$session_id'],
             ]],
@@ -565,13 +569,19 @@ final class AnalyticsApiController extends Controller
             ['$match' => [
                 'tenant_id' => $tenantId,
                 'event_type' => 'purchase',
-                'metadata.category' => ['$exists' => true, '$ne' => null],
+                '$or' => [
+                    ['custom_data.category' => ['$exists' => true, '$ne' => null]],
+                    ['metadata.category'    => ['$exists' => true, '$ne' => null]],
+                ],
                 'created_at' => $dateMatch,
             ]],
             ['$group' => [
-                '_id' => '$metadata.category',
+                '_id' => ['$ifNull' => ['$custom_data.category', '$metadata.category']],
                 'purchases' => ['$sum' => 1],
-                'revenue' => ['$sum' => '$metadata.order_total'],
+                'revenue' => ['$sum' => ['$ifNull' => [
+                    '$custom_data.order_total',
+                    ['$ifNull' => ['$metadata.order_total', ['$ifNull' => ['$custom_data.revenue', 0]]]],
+                ]]],
             ]],
             ['$sort' => ['purchases' => -1]],
         ], ['maxTimeMS' => 30000]));
@@ -704,10 +714,14 @@ final class AnalyticsApiController extends Controller
         $keywords = iterator_to_array($collection->aggregate([
             ['$match' => ['tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch]],
             ['$group' => [
-                '_id' => '$metadata.query',
+                // Magento tracker stores query in custom_data.query; legacy SDK uses metadata.query
+                '_id' => ['$ifNull' => ['$custom_data.query', '$metadata.query']],
                 'searches' => ['$sum' => 1],
                 'unique_sessions' => ['$addToSet' => '$session_id'],
-                'avg_results' => ['$avg' => ['$ifNull' => ['$metadata.results_count', 0]]],
+                'avg_results' => ['$avg' => ['$ifNull' => [
+                    '$custom_data.results_count',
+                    ['$ifNull' => ['$metadata.results_count', 0]],
+                ]]],
             ]],
             ['$project' => [
                 '_id' => 0,
@@ -726,10 +740,13 @@ final class AnalyticsApiController extends Controller
 
         $uniqueKeywords = count($keywords);
 
-        // No-results searches
+        // No-results searches — check both custom_data and metadata
         $noResults = $collection->countDocuments([
             'tenant_id' => $tenantId, 'event_type' => 'search', 'created_at' => $dateMatch,
-            'metadata.results_count' => 0,
+            '$or' => [
+                ['custom_data.results_count' => 0],
+                ['metadata.results_count'    => 0],
+            ],
         ]);
 
         return $this->successResponse([
