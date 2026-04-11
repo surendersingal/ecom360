@@ -762,9 +762,13 @@ class ChatService
 
     private function handleOrderTracking(int $tenantId, string $message, array $context): array
     {
-        // Extract order ID from message
-        preg_match('/(?:order|#)\s*([A-Z0-9\-]+)/i', $message, $matches);
+        // Extract order ID from message — must contain at least one digit (not a plain word)
+        preg_match('/(?:order|ORD|#)\s*[#]?\s*([A-Z0-9][A-Z0-9\-]*\d[A-Z0-9\-]*|\d{4,})/i', $message, $matches);
         $orderId = $matches[1] ?? ($context['order_id'] ?? null);
+        // Reject extracted values that look like common English words (no digits)
+        if ($orderId && !preg_match('/\d/', $orderId)) {
+            $orderId = null;
+        }
 
         if (!$orderId) {
             return [
@@ -845,13 +849,16 @@ class ChatService
         $keywords = array_filter(explode(' ', $query), fn($w) => strlen($w) >= 2);
         $tenantStr = (string) $tenantId;
 
+        // Extract budget cap if present in the original message (before stripping)
+        $searchParams = ['query' => $query, 'per_page' => (int) ($settings['chatbot_max_products'] ?? 5)];
+        if (preg_match('/\b(?:i\s+)?(?:only\s+have|have\s+only|just\s+have|budget\s+(?:is|of)|i\s+have|under|below|max)\s+(?:₹|rs\.?|inr)?\s*(\d[\d,]+)/i', $message, $bm)) {
+            $searchParams["filters"]["max_price"] = (int) str_replace(',', '', $bm[1]);
+        }
+
         // Try SearchService first (has NLQ, fuzzy, relevance scoring)
         try {
             $searchService = app(\Modules\AiSearch\Services\SearchService::class);
-            $result = $searchService->search($tenantStr, [
-                'query'    => $query,
-                'per_page' => (int) ($settings['chatbot_max_products'] ?? 5),
-            ]);
+            $result = $searchService->search($tenantStr, $searchParams);
             if (!empty($result['success']) && !empty($result['results'])) {
                 $products = collect($result['results']);
                 return $this->formatProductResponse($products, $query, $settings);
@@ -1602,18 +1609,46 @@ class ChatService
         $query = preg_replace('/\b(is|it|in|out of|stock|available|availability|check|the|do you have)\b/i', '', $message);
         $query = trim(preg_replace('/\s+/', ' ', $query));
 
-        if (strlen($query) >= 2) {
+        // Extract the specific brand/product name for the exact-match check
+        $brandQuery = preg_replace('/\b(do you have|is|it|in|out of|stock|available|availability|check|the|any)\b/i', '', $message);
+        $brandQuery = trim(preg_replace('/\s+/', ' ', $brandQuery));
+
+        if (strlen($brandQuery) >= 2) {
             // Search for the product
-            $productResult = $this->handleProductInquiry($tenantId, $query, $context, $settings);
+            $productResult = $this->handleProductInquiry($tenantId, $brandQuery, $context, $settings);
             if (($productResult['content_type'] ?? '') === 'products' && !empty($productResult['products'])) {
                 $inStockProducts = array_filter($productResult['products'], fn($p) => !empty($p['in_stock']));
                 $total = count($productResult['products']);
                 $inStock = count($inStockProducts);
 
-                $stockMsg = "I found {$total} product(s) for \"{$query}\".\n\n";
+                // Check if results actually match the requested brand (not just similar)
+                $brandLower = strtolower($brandQuery);
+                $brandWords = array_filter(explode(' ', $brandLower), fn($w) => strlen($w) > 2);
+                $relevantMatch = array_filter($productResult['products'], function ($p) use ($brandWords) {
+                    $nameLower = strtolower($p['name'] ?? '');
+                    foreach ($brandWords as $word) {
+                        if (str_contains($nameLower, $word)) return true;
+                    }
+                    return false;
+                });
+
+                if (empty($relevantMatch)) {
+                    // Found products but none match the brand — tell user honestly
+                    return [
+                        'message'       => "I couldn't find **{$brandQuery}** in our current inventory. It may not be available at this time.",
+                        'content_type'  => 'text',
+                        'quick_replies' => [
+                            ['label' => 'Browse similar products', 'value' => 'find_product'],
+                            ['label' => 'Notify when available',   'value' => 'escalate'],
+                            ['label' => 'Best sellers',            'value' => 'best_sellers'],
+                        ],
+                    ];
+                }
+
+                $stockMsg = "I found {$total} product(s) for \"{$brandQuery}\".\n\n";
                 $stockMsg .= $inStock > 0
-                    ? "✅ **{$inStock} item(s) in stock** and ready to ship!"
-                    : "⚠️ Unfortunately, these items are currently out of stock.";
+                    ? "✅ **{$inStock} item(s) in stock** and ready!"
+                    : "⚠️ These items are currently out of stock. Check back soon or browse alternatives.";
 
                 $productResult['message'] = $stockMsg;
                 return $productResult;

@@ -180,6 +180,16 @@ class IntentService
                 'bourbon', 'perfume', 'fragrance', 'cologne', 'lipstick', 'skincare',
                 'chocolate', 'candy', 'sweets', 'snacks', 'cigarette', 'tobacco',
                 'sunglasses', 'watch', 'handbag', 'wallet', 'luggage',
+                // ── Common typos / misspellings ──
+                'wiskey', 'wisky', 'wiskies', 'whiskey', 'whisky',
+                'purfume', 'perfum', 'parfume', 'perume',
+                'vodca', 'wodka', 'vodkha',
+                'schotch', 'scotsch', 'scotchs',
+                'chocolat', 'choclate', 'chochlate', 'choklate',
+                'champange', 'champagen', 'champaign',
+                'cognac', 'cognak', 'conac',
+                'tequilla', 'tekila', 'tequilas',
+                'wisky', 'brandy',
             ],
             'confidence' => 0.85,
             'priority'   => 8,
@@ -314,6 +324,28 @@ class IntentService
             ];
         }
 
+        // ── Very short / non-meaningful messages → show help menu ────────
+        // Messages like "ok", "yes", "no", "?", "...", lone digits → general help
+        if (strlen(trim($message)) <= 3 && !preg_match('/\d{4,}/', $message)) {
+            return ['intent' => 'help', 'confidence' => 0.70, 'matched_pattern' => 'short_message'];
+        }
+
+        // ── Scam / fraud detection → always complaint ─────────────────────
+        if (preg_match('/\b(scam|fraud|rip.?off|cheated?|fraudulent|swindl)\b/i', $messageLower)) {
+            return ['intent' => 'complaint', 'confidence' => 0.96, 'matched_pattern' => 'scam_detected'];
+        }
+
+        // ── Pre-order / pre-purchase → checkout help (not order_tracking) ──
+        if (preg_match('/\bpre.?order\b|\bpre.?book\b|\bbefore\s+(?:my\s+)?flight\b/i', $messageLower)) {
+            return ['intent' => 'checkout_help', 'confidence' => 0.88, 'matched_pattern' => 'preorder_detected'];
+        }
+
+        // ── Budget-only product search ("I only have 2000 rupees") ───────
+        if (preg_match('/\b(?:i\s+)?(?:only\s+have|have\s+only|just\s+have|budget\s+(?:is|of)|i\s+have)\s+(?:₹|rs\.?|inr)?\s*(\d[\d,]+)/i', $messageLower) ||
+            preg_match('/\b(?:₹|rs\.?|inr)\s*(\d[\d,]+)\s+(?:to\s+spend|is\s+my\s+budget|budget|max)/i', $messageLower)) {
+            return ['intent' => 'product_search', 'confidence' => 0.91, 'matched_pattern' => 'budget_query'];
+        }
+
         // ── Promo / coupon code detection ────────────────────────────────
         // If message looks like a discount code (all-uppercase alphanum, 4-20 chars,
         // at least one digit), treat it as coupon intent so the handler can explain
@@ -382,7 +414,8 @@ class IntentService
         }
 
         // Check for order ID pattern — ONLY override if current intent is not high-priority
-        if (preg_match('/(?:order|ORD)\s*#?\s*[A-Z0-9\-]{4,}|#\d{4,}/i', $message)) {
+        // Require at least one digit in the order ID to avoid matching plain English words
+        if (preg_match('/(?:order|ORD)\s*#?\s*[A-Z0-9\-]*\d[A-Z0-9\-]{2,}|#\s*\d{4,}/i', $message)) {
             if (!in_array($bestMatch['intent'], $this->orderIdImmuneIntents) &&
                 $bestMatch['intent'] !== 'order_tracking') {
                 $bestMatch = [
