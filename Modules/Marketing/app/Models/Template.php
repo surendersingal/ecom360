@@ -38,7 +38,7 @@ final class Template extends Model
     {
         $content = ($this->subject ?? '') . ' ' . ($this->body_html ?? '') . ' ' . ($this->body_text ?? '');
         preg_match_all('/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/', $content, $matches);
-        return array_unique($matches[1] ?? []);
+        return array_values(array_unique($matches[1] ?? []));
     }
 
     /**
