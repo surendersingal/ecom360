@@ -1,8 +1,8 @@
 {
-    "Analytics": true,
     "AiSearch": true,
-    "Chatbot": true,
+    "Analytics": true,
     "BusinessIntelligence": true,
-    "Marketing": true,
-    "DataSync": true
+    "Chatbot": true,
+    "DataSync": true,
+    "Marketing": true
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\Tenant\DashboardController as TenantDashboard;
 use App\Http\Controllers\Tenant\PageController as TenantPage;
 use App\Http\Controllers\Tenant\CdpController as TenantCdp;
 use App\Http\Controllers\Tenant\BiController as TenantBi;
+use App\Http\Controllers\Tenant\UserManagementController as TenantUserMgmt;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public ───
@@ -248,4 +249,15 @@ Route::middleware(['auth', 'resolve_tenant'])->prefix('app/{tenant}')->name('ten
 
     // ── Settings ──
     Route::get('settings', [TenantPage::class, 'settings'])->name('settings');
+
+    // ── Team & User Management ──
+    Route::get('users', [TenantUserMgmt::class, 'index'])->name('users.index');
+    Route::get('users/create', [TenantUserMgmt::class, 'create'])->name('users.create');
+    Route::post('users', [TenantUserMgmt::class, 'store'])->name('users.store');
+    Route::get('users/{user}/edit', [TenantUserMgmt::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [TenantUserMgmt::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [TenantUserMgmt::class, 'destroy'])->name('users.destroy');
+    Route::get('roles', [TenantUserMgmt::class, 'roles'])->name('users.roles');
+    Route::post('roles', [TenantUserMgmt::class, 'createRole'])->name('users.roles.create');
+    Route::delete('roles/{role}', [TenantUserMgmt::class, 'destroyRole'])->name('users.roles.destroy');
 });

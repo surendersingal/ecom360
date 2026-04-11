@@ -23,8 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
 
         $middleware->alias([
-            'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
-            'resolve_tenant' => \App\Http\Middleware\ResolveTenant::class,
+            'super_admin'       => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'resolve_tenant'    => \App\Http\Middleware\ResolveTenant::class,
+            'tenant.permission' => \App\Http\Middleware\RequireTenantPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -16,7 +16,7 @@ use App\Http\Middleware\AuthenticateApiKeyOrSanctum;
 */
 
 Route::prefix('v1/search')
-    ->middleware([AuthenticateApiKeyOrSanctum::class, 'throttle:120,1'])
+    ->middleware([AuthenticateApiKeyOrSanctum::class, 'tenant.permission:ai_search.query', 'throttle:120,1'])
     ->group(function () {
         // Main search — widget sends GET /search/search, dashboard sends POST /search
         Route::match(['get', 'post'], '/', [AiSearchController::class, 'search']);

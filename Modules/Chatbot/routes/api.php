@@ -16,7 +16,7 @@ use App\Http\Middleware\AuthenticateApiKeyOrSanctum;
 */
 
 Route::prefix('v1/chatbot')
-    ->middleware([AuthenticateApiKeyOrSanctum::class, 'throttle:60,1'])
+    ->middleware([AuthenticateApiKeyOrSanctum::class, 'tenant.permission:chatbot.view', 'throttle:60,1'])
     ->group(function () {
         Route::post('/send', [ChatbotController::class, 'send']);
         Route::post('/rage-click', [ChatbotController::class, 'rageClick']);

@@ -16,6 +16,7 @@
     $canChatbotManage   = $isSuperAdmin || $user?->can('chatbot.configure');
     $canManage          = $isSuperAdmin || $user?->can('analytics.manage'); // Data Sync, Developer, Settings
 
+    $canUsers = $isSuperAdmin || $user?->can('users.view') || $user?->can('users.manage');
     $initials = collect(explode(' ', $user->name ?? 'U'))->map(fn($w) => strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 <!-- ========== Left Sidebar Start ========== -->
@@ -536,6 +537,16 @@
                     </a>
                 </li>
 
+                @endif
+
+                @if($canUsers)
+                <li class="menu-title" key="t-team">Team</li>
+                <li>
+                    <a href="{{ route('tenant.users.index', $slug) }}" class="waves-effect {{ request()->routeIs('tenant.users.*') ? 'active' : '' }}">
+                        <i class="bx bx-group"></i>
+                        <span>Users &amp; Roles</span>
+                    </a>
+                </li>
                 @endif
 
                 {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

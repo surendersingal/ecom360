@@ -16,7 +16,7 @@ Route::prefix('v1/marketing/webhooks')->group(function () {
 });
 
 // ─── Authenticated Routes ────────────────────────────────────────────────
-Route::middleware(['auth:sanctum'])->prefix('v1/marketing')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.permission:marketing.view'])->prefix('v1/marketing')->group(function () {
 
     // Contacts
     Route::apiResource('contacts', ContactController::class)->names('marketing.contacts');

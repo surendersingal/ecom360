@@ -71,7 +71,7 @@ Route::options('v1/interventions/poll', [PublicIngestionController::class, 'pref
 
 // ─── Authenticated Routes (Sanctum) ──────────────────────────────────
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.permission:analytics.view'])->prefix('v1')->group(function () {
     // Legacy resource (kept for backwards compatibility)
     // Constrain to numeric IDs so it doesn't swallow named routes like /analytics/overview
     Route::apiResource('analytics', AnalyticsController::class)

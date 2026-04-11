@@ -11,7 +11,7 @@ use Modules\BusinessIntelligence\Http\Controllers\Api\ExportController;
 use Modules\BusinessIntelligence\Http\Controllers\Api\InsightsController;
 use App\Http\Controllers\Tenant\BiController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1/bi')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.permission:business_intelligence.view'])->prefix('v1/bi')->group(function () {
 
     // Reports
     Route::apiResource('reports', ReportController::class)->names('bi.reports');
