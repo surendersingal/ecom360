@@ -281,6 +281,9 @@ class IntentService
             'new_arrivals'       => 'product_search',
             'browse_sale'        => 'coupon',
             'browse_deals'       => 'coupon',
+            'show_deals'         => 'coupon',
+            'check_sale_items'   => 'coupon',
+            'subscribe_offers'   => 'coupon',
             'track_order'        => 'order_tracking',
             'return_help'        => 'return_request',
             'escalate'           => 'escalation',
@@ -300,6 +303,18 @@ class IntentService
                 'intent'          => $buttonIntentMap[$messageLower],
                 'confidence'      => 0.99,
                 'matched_pattern' => 'quick_reply_button:' . $messageLower,
+            ];
+        }
+
+        // ── Promo / coupon code detection ────────────────────────────────
+        // If message looks like a discount code (all-uppercase alphanum, 4-20 chars,
+        // at least one digit), treat it as coupon intent so the handler can explain
+        // how to apply it — e.g. "WELCOME15", "SAVE20", "DDF10OFF".
+        if (preg_match('/^[A-Z][A-Z0-9]{3,19}$/', $message) && preg_match('/\d/', $message)) {
+            return [
+                'intent'          => 'coupon',
+                'confidence'      => 0.97,
+                'matched_pattern' => 'promo_code_detected',
             ];
         }
 

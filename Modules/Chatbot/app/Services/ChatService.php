@@ -976,9 +976,43 @@ class ChatService
 
     private function handleCouponInquiry(int $tenantId, string $message, array $context): array
     {
-        // Check for active coupons in the context
+        $messageTrimmed = trim($message);
+        $messageLower   = strtolower($messageTrimmed);
+
+        // ── 1. User typed a specific coupon/promo code (e.g. WELCOME15, SAVE20) ──
+        // Pattern: starts with a letter, all uppercase alphanumeric, contains at least one digit
+        if (preg_match('/^[A-Z][A-Z0-9]{3,}$/', $messageTrimmed) && preg_match('/\d/', $messageTrimmed)) {
+            $code = $messageTrimmed;
+            return [
+                'message'        => "To redeem **{$code}**, add items to your cart and enter the code in the \"Coupon Code\" field at checkout — the discount applies automatically! 🎉",
+                'content_type'   => 'text',
+                'action'         => 'apply_coupon_hint',
+                'action_payload' => ['code' => $code],
+                'quick_replies'  => [
+                    ['label' => 'Browse products',    'value' => 'find_product'],
+                    ['label' => 'Talk to support',    'value' => 'escalate'],
+                ],
+            ];
+        }
+
+        // ── 2. Button-triggered deals browsing (show_deals, browse_sale, browse_deals, etc.) ──
+        $dealButtons = ['show_deals', 'browse_sale', 'browse_deals', 'check_sale_items', 'subscribe_offers'];
+        if (in_array($messageLower, $dealButtons, true)) {
+            return [
+                'message'       => "Here's what's on offer right now! 🛍️\n\nWe have great prices across Liquor, Perfumes, Chocolates, and more. Browse below or search for something specific:",
+                'content_type'  => 'text',
+                'quick_replies' => [
+                    ['label' => 'Liquor under ₹3,000', 'value' => 'liquor under 3000'],
+                    ['label' => 'Best sellers',         'value' => 'best_sellers'],
+                    ['label' => 'New arrivals',         'value' => 'new_arrivals'],
+                    ['label' => 'Find a product',       'value' => 'find_product'],
+                ],
+            ];
+        }
+
+        // ── 3. Personal coupon lookup (user asked "my coupons", "any discount?" etc.) ──
         $email = $context['email'] ?? null;
-        $coupons = [];
+        $coupons = collect();
 
         if ($email) {
             $coupons = DB::connection('mongodb')
@@ -993,23 +1027,26 @@ class ChatService
         if ($coupons instanceof \Illuminate\Support\Collection && $coupons->isNotEmpty()) {
             $couponList = $coupons->map(fn($c) => "• **{$c['code']}** — {$c['value']}% off (expires {$c['expires_at']})")->implode("\n");
             return [
-                'message'      => "Great news! You have active coupons:\n\n{$couponList}\n\nWould you like me to apply one to your cart?",
-                'content_type' => 'text',
-                'action'       => 'apply_coupon',
+                'message'        => "Great news! You have active coupons:\n\n{$couponList}\n\nAdd items to your cart and enter the code at checkout.",
+                'content_type'   => 'text',
+                'action'         => 'apply_coupon',
                 'action_payload' => ['coupons' => $coupons->pluck('code')->toArray()],
-                'quick_replies' => $coupons->take(3)->map(fn($c) => [
-                    'label' => "Apply {$c['code']}",
+                'quick_replies'  => $coupons->take(3)->map(fn($c) => [
+                    'label' => "Use {$c['code']}",
                     'value' => 'apply_coupon_' . $c['code'],
                 ])->values()->toArray(),
             ];
         }
 
+        // No personal coupons found — offer browsing instead (not the same loop buttons)
         return [
-            'message'       => "I don't see any active coupons for your account right now. But keep checking — we send exclusive offers via email!",
+            'message'       => "I don't see personal coupons for your account right now. But there are great deals available — try browsing our products!",
             'content_type'  => 'text',
             'quick_replies' => [
-                ['label' => 'Subscribe for offers', 'value' => 'subscribe_offers'],
-                ['label' => 'Check sale items', 'value' => 'browse_sale'],
+                ['label' => 'Browse products',  'value' => 'find_product'],
+                ['label' => 'Best sellers',     'value' => 'best_sellers'],
+                ['label' => 'New arrivals',     'value' => 'new_arrivals'],
+                ['label' => 'Talk to support',  'value' => 'escalate'],
             ],
         ];
     }
