@@ -30,6 +30,13 @@ Route::prefix('v1/search')
 
         Route::post('/visual', [AiSearchController::class, 'visualSearch']);
         Route::post('/visual-search', [AiSearchController::class, 'visualSearch']);
+
+        // ── Advanced / Semantic endpoints (UC1, UC6, UC9, UC10, UC3/4/8) ──
+        Route::post('/gift-concierge',        [AiSearchController::class, 'giftConcierge']);
+        Route::post('/comparison',            [AiSearchController::class, 'comparison']);
+        Route::post('/voice-to-cart',         [AiSearchController::class, 'voiceToCart']);
+        Route::post('/subscription',          [AiSearchController::class, 'subscriptionDiscovery']);
+        Route::match(['get', 'post'], '/personalized', [AiSearchController::class, 'personalized']);
     });
 
 // ─── CORS preflight for widget endpoints ─────────────────────────────

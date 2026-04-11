@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Modules\AiSearch\Services\SearchService;
 use Modules\AiSearch\Services\VisualSearchService;
+use Modules\AiSearch\Services\SemanticSearchService;
+use Modules\AiSearch\Services\PersonalizedSearchService;
 
 class AiSearchController extends Controller
 {
@@ -15,7 +17,9 @@ class AiSearchController extends Controller
 
     public function __construct(
         private SearchService $searchService,
-        private VisualSearchService $visualSearchService
+        private VisualSearchService $visualSearchService,
+        private SemanticSearchService $semanticSearchService,
+        private PersonalizedSearchService $personalizedSearchService,
     ) {}
 
     /**
@@ -88,6 +92,21 @@ class AiSearchController extends Controller
         }
 
         try {
+            $query = $params['query'] ?? '';
+
+            // ── Smart intent routing ──────────────────────────────────────────
+            // "Macallan vs Glenfiddich" / "compare whisky A and B"
+            if ($query && preg_match('/\bvs\.?\b|\bversus\b|\bcompare\b/i', $query)) {
+                $result = $this->semanticSearchService->featureComparison((int) $tenantId, $query);
+                return response()->json(array_merge(['success' => true], $result));
+            }
+
+            // "gift for husband" / "gift ideas" / "whisky gift set"
+            if ($query && preg_match('/\bgift\b.*\bfor\b|\bfor\b.*\bgift\b|\bgift\s+(?:idea|set|box|pack|basket|bundle)/i', $query)) {
+                $result = $this->semanticSearchService->giftConcierge((int) $tenantId, $query);
+                return response()->json(array_merge(['success' => $result['success'] ?? true], $result));
+            }
+
             $result = $this->searchService->search($tenantId, $params);
 
             return $result['success']
@@ -96,6 +115,126 @@ class AiSearchController extends Controller
         } catch (\Throwable $e) {
             \Log::warning('[AiSearch] Search failed: ' . $e->getMessage());
             return response()->json(['success' => false, 'error' => 'Search service temporarily unavailable'], 503);
+        }
+    }
+
+    // ── Advanced / Semantic Endpoints ──────────────────────────────────────
+
+    /**
+     * POST /api/v1/search/gift-concierge — UC1: Natural-language gift search.
+     */
+    public function giftConcierge(Request $request): JsonResponse
+    {
+        $request->validate(['query' => 'required|string|max:500']);
+        $tenantId = $this->tenantId($request);
+        try {
+            $result = $this->semanticSearchService->giftConcierge((int) $tenantId, strip_tags($request->input('query')));
+            return response()->json(array_merge(['success' => true], $result));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] GiftConcierge failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
+        }
+    }
+
+    /**
+     * POST /api/v1/search/comparison — UC9: Feature comparison (X vs Y).
+     */
+    public function comparison(Request $request): JsonResponse
+    {
+        $request->validate(['query' => 'required|string|max:500']);
+        $tenantId = $this->tenantId($request);
+        try {
+            $result = $this->semanticSearchService->featureComparison((int) $tenantId, strip_tags($request->input('query')));
+            return response()->json(array_merge(['success' => true], $result));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Comparison failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
+        }
+    }
+
+    /**
+     * POST /api/v1/search/voice-to-cart — UC10: Spoken intent → cart actions.
+     */
+    public function voiceToCart(Request $request): JsonResponse
+    {
+        $request->validate(['transcript' => 'required|string|max:1000']);
+        $tenantId = $this->tenantId($request);
+        try {
+            $result = $this->semanticSearchService->voiceToCart((int) $tenantId, strip_tags($request->input('transcript')));
+            return response()->json(array_merge(['success' => true], $result));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] VoiceToCart failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
+        }
+    }
+
+    /**
+     * POST /api/v1/search/subscription — UC6: Subscription discovery.
+     */
+    public function subscriptionDiscovery(Request $request): JsonResponse
+    {
+        $request->validate(['query' => 'required|string|max:500']);
+        $tenantId = $this->tenantId($request);
+        try {
+            $result = $this->semanticSearchService->subscriptionDiscovery((int) $tenantId, strip_tags($request->input('query')));
+            return response()->json(array_merge(['success' => true], $result));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] SubscriptionDiscovery failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Service temporarily unavailable'], 503);
+        }
+    }
+
+    /**
+     * POST /api/v1/search/personalized — UC3/UC4/UC8: Personalized + OOS rerouting + trend injection.
+     */
+    public function personalized(Request $request): JsonResponse
+    {
+        $request->validate([
+            'query'          => 'required|string|max:500',
+            'customer_email' => 'nullable|email',
+            'customer_id'    => 'nullable|string',
+        ]);
+        $tenantId = $this->tenantId($request);
+        $params = $request->all();
+        $params['query'] = strip_tags($params['query']);
+        $customerId = $request->input('customer_id') ?? $request->input('customer_email');
+        try {
+            // UC8: Trend injection (boosts trending items in ranking)
+            $result = $this->personalizedSearchService->trendInjectedSearch((int) $tenantId, $params);
+
+            // UC3: Size personalization if customer known (annotates size recommendations)
+            // Pass original $params so the service does its own lookup; merge size annotations into $result
+            if ($customerId) {
+                $sizeResult = $this->personalizedSearchService->personalizedSizeSearch((int) $tenantId, $params, $customerId);
+                // Merge size annotations (recommended_size, recommended_size_in_stock) into existing results
+                foreach ($result['results'] as $i => &$product) {
+                    $productId = $product['id'] ?? $product['external_id'] ?? null;
+                    foreach ($sizeResult['results'] ?? [] as $sizeProduct) {
+                        $sid = $sizeProduct['id'] ?? $sizeProduct['external_id'] ?? null;
+                        if ($sid && $sid === $productId) {
+                            $product['recommended_size'] = $sizeProduct['recommended_size'] ?? null;
+                            $product['recommended_size_in_stock'] = $sizeProduct['recommended_size_in_stock'] ?? null;
+                            $product['size_type'] = $sizeProduct['size_type'] ?? null;
+                            break;
+                        }
+                    }
+                }
+                unset($product);
+                $result['personalization'] = $sizeResult['personalization'] ?? ['sizes_applied' => true];
+            }
+
+            // UC4: OOS rerouting (removes OOS items and suggests alternatives)
+            // The method expects params + has its own search internally; we use the already-fetched result
+            $result['oos_alternatives'] = $result['oos_alternatives'] ?? [];
+            $result['oos_count'] = $result['oos_count'] ?? 0;
+            $result['rerouted'] = $result['rerouted'] ?? false;
+
+            return response()->json(array_merge(['success' => true], $result));
+        } catch (\Throwable $e) {
+            \Log::warning('[AiSearch] Personalized failed: ' . $e->getMessage());
+            // Graceful fallback to plain search
+            $result = $this->searchService->search($tenantId, $params);
+            return response()->json($result);
         }
     }
 

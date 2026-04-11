@@ -284,14 +284,17 @@ class SearchService
                     ->get(['name', 'external_id']);
 
                 // Popular search terms
+                // Carbon is NOT auto-converted in raw aggregation pipelines — use UTCDateTime
+                $since30d = new \MongoDB\BSON\UTCDateTime(now()->subDays(30)->startOfDay()->timestamp * 1000);
                 $popularTerms = SearchLog::where('tenant_id', $tenantId)
                     ->where('query', 'regex', "/^{$escaped}/i")
-                    ->where('created_at', '>=', now()->subDays(30)->toDateTimeString())
-                    ->raw(function ($collection) use ($tenantId, $escaped) {
+                    ->where('created_at', '>=', now()->subDays(30)->startOfDay())
+                    ->raw(function ($collection) use ($tenantId, $escaped, $since30d) {
                         return $collection->aggregate([
                             ['$match' => [
-                                'tenant_id' => $tenantId,
-                                'query' => ['$regex' => "^{$escaped}", '$options' => 'i'],
+                                'tenant_id'  => $tenantId,
+                                'query'      => ['$regex' => "^{$escaped}", '$options' => 'i'],
+                                'created_at' => ['$gte' => $since30d],
                             ]],
                             ['$group' => ['_id' => '$query', 'count' => ['$sum' => 1]]],
                             ['$sort' => ['count' => -1]],
@@ -329,21 +332,24 @@ class SearchService
     {
         $tenantId = (string) $tenantId; // MongoDB stores tenant_id as string
         try {
+            // Carbon is NOT auto-converted in raw aggregation pipelines — use UTCDateTime directly
+            $since = new \MongoDB\BSON\UTCDateTime(now()->subDays(7)->startOfDay()->timestamp * 1000);
             $trending = SearchLog::where('tenant_id', $tenantId)
-                ->where('query_type', 'text')
-                ->where('created_at', '>=', now()->subDays(7)->toDateTimeString())
-                ->raw(function ($collection) use ($tenantId, $limit) {
+                ->raw(function ($collection) use ($tenantId, $limit, $since) {
                     return $collection->aggregate([
                         ['$match' => [
-                            'tenant_id' => $tenantId,
+                            'tenant_id'  => $tenantId,
                             'query_type' => 'text',
+                            'created_at' => ['$gte' => $since],
+                            // Filter out empty/null queries
+                            'query'      => ['$exists' => true, '$ne' => ''],
                         ]],
                         ['$group' => [
-                            '_id' => '$query',
-                            'count' => ['$sum' => 1],
+                            '_id'         => '$query',
+                            'count'       => ['$sum' => 1],
                             'avg_results' => ['$avg' => '$results_count'],
                         ]],
-                        ['$sort' => ['count' => -1]],
+                        ['$sort'  => ['count' => -1]],
                         ['$limit' => $limit],
                     ], ['maxTimeMS' => 30000]);
                 });
@@ -368,7 +374,8 @@ class SearchService
     {
         $tenantId = (string) $tenantId; // MongoDB stores tenant_id as string
         try {
-            $since = now()->subDays($days)->toDateTimeString();
+            // Use Carbon object directly — BSON UTCDateTime doesn't compare with PHP strings
+            $since = now()->subDays($days)->startOfDay();
             $logs = SearchLog::where('tenant_id', $tenantId)
                 ->where('created_at', '>=', $since)
                 ->get();
@@ -475,8 +482,10 @@ class SearchService
         $stopWords = [
             'the', 'a', 'an', 'and', 'or', 'of', 'in', 'on', 'at', 'to', 'for',
             'is', 'it', 'by', 'with', 'from', 'as', 'be', 'was', 'are', 'been',
-            'yo', 'ml', 'cl', 'ltr', 'pack', 'set', 'gift', 'box',
+            'yo', 'ml', 'cl', 'ltr',
             'year', 'years', 'old',
+            // Note: 'gift', 'box', 'set', 'pack' deliberately kept as searchable terms
+            // so queries like "gift set", "whisky gift box", "gift ideas" work correctly.
         ];
 
         return array_values(array_filter($terms, function ($t) use ($stopWords) {
@@ -586,7 +595,13 @@ class SearchService
             'tequila'       => 'Tequila',
             'bourbon'       => 'Bourbon',
             'scotch'        => 'Blended Scotch',
+            // Gift intent: don't strip as a category — keep as text for NLQ
+            // (handled in SemanticSearchService::giftConcierge instead)
         ];
+
+        // "gift" as a word should NOT be consumed as a category —
+        // remove it from remainingWords only if it's part of a "gift + category" phrase.
+        // We handle it below as a flag to enrich results, not strip the word.
 
         // Merge custom category aliases from admin settings (format: "alias → Category Name")
         $customAliases = $this->setting($settings, 'category_aliases', '');
@@ -729,11 +744,12 @@ class SearchService
             $query->where('stock_qty', '>', 0);
         }
         if (!empty($filters['brand'])) {
-            $query->where('brand', $filters['brand']);
+            // Case-insensitive brand matching (brands may be stored in mixed case)
+            $query->where('brand', 'regex', '/' . preg_quote((string) $filters['brand'], '/') . '/i');
         }
         // Alias: 'brands' (plural) → same as 'brand'
         if (empty($filters['brand']) && !empty($filters['brands'])) {
-            $query->where('brand', $filters['brands']);
+            $query->where('brand', 'regex', '/' . preg_quote((string) $filters['brands'], '/') . '/i');
         }
         if (!empty($filters['color'])) {
             $query->where('attributes.color', $filters['color']);
