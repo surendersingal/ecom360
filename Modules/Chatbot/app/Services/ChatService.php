@@ -449,10 +449,10 @@ class ChatService
             'escalation'        => $this->handleEscalation($tenantId, $conversation, $message, $context, $settings),
             'complaint'         => $this->handleComplaint($tenantId, $conversation, $message, $context, $settings),
             'order_tracking'    => $this->handleOrderTracking($tenantId, $message, $context),
+            'recommendation'    => $this->handleRecommendation($tenantId, $message, $context, $settings),
+            'comparison'        => $this->handleComparison($tenantId, $message, $context, $settings),
             'product_inquiry',
-            'product_search',
-            'comparison',
-            'recommendation'    => $this->handleProductInquiry($tenantId, $message, $context, $settings),
+            'product_search'    => $this->handleProductInquiry($tenantId, $message, $context, $settings),
             'checkout_help'     => $this->handleCheckoutHelp($tenantId, $message, $context),
             'return_request',
             'return_policy'     => $this->handleReturnRequest($tenantId, $message, $context, $settings),
@@ -471,7 +471,7 @@ class ChatService
             'greeting'          => $this->handleGreeting($tenantId, $settings),
             'farewell'          => $this->handleFarewell($conversation, $settings),
             'help'              => $this->handleHelp($tenantId, $settings),
-            'store_hours'       => $this->handleGeneral($tenantId, $message, $context, $settings),
+            'store_hours'       => $this->handleStoreHours($tenantId, $settings),
             default             => $this->handleGeneral($tenantId, $message, $context, $settings),
         };
     }
@@ -819,9 +819,9 @@ class ChatService
             ];
         }
 
-        // Button triggers that DO imply a real search query
+        // Button triggers that DO imply a real search query — map to clean search terms
         $buttonQueryMap = [
-            'best_sellers' => 'best sellers popular',
+            'best_sellers' => 'popular',
             'new_arrivals' => 'new arrivals',
             'liquor'       => 'liquor',
             'perfume'      => 'perfume',
@@ -928,17 +928,19 @@ class ChatService
 
         $total = $products->count();
         $searchUrl = $baseUrl . '/default/ecom360/search/results/?q=' . urlencode($query);
+        // Clean display label — don't show internal query strings
+        $displayQuery = strlen($query) > 40 ? substr($query, 0, 40) . '…' : $query;
 
         return [
-            'message'       => "I found {$total} product" . ($total !== 1 ? 's' : '') . " for \"{$query}\":",
+            'message'       => "I found {$total} product" . ($total !== 1 ? 's' : '') . " for \"{$displayQuery}\":",
             'content_type'  => 'products',
             'products'      => $productCards,
             'total'         => $total,
             'search_url'    => $searchUrl,
             'quick_replies' => [
-                ['label' => 'View all results', 'value' => 'view_all_' . $query],
-                ['label' => 'Refine search', 'value' => 'refine_search'],
-                ['label' => 'Browse categories', 'value' => 'browse_categories'],
+                ['label' => 'View all results', 'value' => 'view_all'],
+                ['label' => 'Refine search',    'value' => 'refine_search'],
+                ['label' => 'Browse categories','value' => 'browse_categories'],
             ],
         ];
     }
@@ -995,7 +997,21 @@ class ChatService
             ];
         }
 
-        // ── 2. Button-triggered deals browsing (show_deals, browse_sale, browse_deals, etc.) ──
+        // ── 2. User asking HOW to apply a coupon (not typing a code, not browsing) ──
+        if (preg_match('/\b(how|where|when|steps?|guide|instruction|apply|use|enter|redeem)\b.*\b(coupon|code|promo|voucher|discount)\b/i', $messageTrimmed) ||
+            preg_match('/\b(coupon|code|promo|voucher)\b.*\b(how|where|apply|use|enter|work)\b/i', $messageTrimmed)) {
+            return [
+                'message'       => "To apply a coupon or promo code:\n\n1. Add items to your cart\n2. Proceed to **Checkout**\n3. Look for the **\"Coupon Code\"** field\n4. Enter your code and click **Apply**\n\nThe discount will automatically reflect in your total! 🎉",
+                'content_type'  => 'text',
+                'quick_replies' => [
+                    ['label' => 'Browse products', 'value' => 'find_product'],
+                    ['label' => 'I have a code',   'value' => 'i have a promo code'],
+                    ['label' => 'Checkout help',   'value' => 'checkout'],
+                ],
+            ];
+        }
+
+        // ── 3. Button-triggered deals browsing (show_deals, browse_sale, browse_deals, etc.) ──
         $dealButtons = ['show_deals', 'browse_sale', 'browse_deals', 'check_sale_items', 'subscribe_offers'];
         if (in_array($messageLower, $dealButtons, true)) {
             return [
@@ -1010,7 +1026,7 @@ class ChatService
             ];
         }
 
-        // ── 3. Personal coupon lookup (user asked "my coupons", "any discount?" etc.) ──
+        // ── 4. Personal coupon lookup (user asked "my coupons", "any discount?" etc.) ──
         $email = $context['email'] ?? null;
         $coupons = collect();
 
@@ -1144,6 +1160,91 @@ class ChatService
      * Handle 'help' intent — show a clear menu of what the chatbot can do.
      * Triggered by "I need help", "help me", or the 'need_help' quick-reply button.
      */
+    /**
+     * Handle recommendation intent — ask what type of gift, then search.
+     * "recommend a gift for my wife" → show category prompt, not a bad product search.
+     */
+    private function handleRecommendation(int $tenantId, string $message, array $context, array $settings = []): array
+    {
+        // Extract occasion / recipient from message
+        $lower = strtolower($message);
+        $occasion = null;
+        if (str_contains($lower, 'birthday'))    $occasion = 'birthday';
+        elseif (str_contains($lower, 'anniversary')) $occasion = 'anniversary';
+        elseif (str_contains($lower, 'wedding'))     $occasion = 'wedding';
+        elseif (str_contains($lower, 'mother'))      $occasion = "for mom";
+        elseif (str_contains($lower, 'father'))      $occasion = "for dad";
+        elseif (str_contains($lower, 'wife') || str_contains($lower, 'girlfriend')) $occasion = "for her";
+        elseif (str_contains($lower, 'husband') || str_contains($lower, 'boyfriend')) $occasion = "for him";
+
+        $intro = $occasion
+            ? "Great choice! Here are some popular gift ideas {$occasion}:"
+            : "I'd love to help you find the perfect gift! What type of product are you considering?";
+
+        // If we have an occasion, show a product search based on popular gift types
+        if ($occasion) {
+            // Try a product search for popular gift items
+            return $this->handleProductInquiry($tenantId, 'popular gift perfume whisky chocolate', $context, $settings);
+        }
+
+        return [
+            'message'       => $intro,
+            'content_type'  => 'text',
+            'quick_replies' => [
+                ['label' => 'Perfumes & Fragrances', 'value' => 'perfume'],
+                ['label' => 'Whisky & Spirits',      'value' => 'whisky'],
+                ['label' => 'Chocolates & Sweets',   'value' => 'chocolate'],
+                ['label' => 'Watches & Accessories', 'value' => 'watch'],
+                ['label' => 'Something else',        'value' => 'find_product'],
+            ],
+        ];
+    }
+
+    /**
+     * Handle comparison intent — search for both products and show them side-by-side.
+     */
+    private function handleComparison(int $tenantId, string $message, array $context, array $settings = []): array
+    {
+        // Extract the two items being compared
+        $lower = strtolower($message);
+        $lower = preg_replace('/\b(compare|comparison|versus|vs\.?|or|which is better|difference between)\b/i', ' ', $lower);
+        $query = trim(preg_replace('/\s+/', ' ', $lower));
+
+        if (strlen($query) < 2) {
+            return [
+                'message'       => "Sure! Which two products would you like to compare? You can type something like 'compare whisky vs vodka' or 'Jack Daniels vs Chivas'.",
+                'content_type'  => 'text',
+                'quick_replies' => [
+                    ['label' => 'Compare whisky brands', 'value' => 'compare whisky brands'],
+                    ['label' => 'Compare perfumes',      'value' => 'compare perfumes'],
+                ],
+            ];
+        }
+
+        // Search and show up to 4 products so user can compare
+        try {
+            $searchService = app(\Modules\AiSearch\Services\SearchService::class);
+            $result = $searchService->search((string) $tenantId, [
+                'query'    => $query,
+                'per_page' => 4,
+            ]);
+            if (!empty($result['success']) && !empty($result['results'])) {
+                $products = collect($result['results']);
+                $resp = $this->formatProductResponse($products, $query, $settings);
+                $resp['message'] = "Here are the products I found for comparison:";
+                return $resp;
+            }
+        } catch (\Throwable $e) { /* fall through */ }
+
+        return [
+            'message'       => "I can help you compare! Could you be more specific about which products or brands you'd like to see side by side?",
+            'content_type'  => 'text',
+            'quick_replies' => [
+                ['label' => 'Browse products', 'value' => 'find_product'],
+            ],
+        ];
+    }
+
     private function handleHelp(int $tenantId, array $settings = []): array
     {
         $msg = $this->s($settings, 'tpl_help',
@@ -1159,6 +1260,30 @@ class ChatService
                 ['label' => 'Returns & refunds',  'value' => 'return_help'],
                 ['label' => 'Deals & coupons',    'value' => 'browse_deals'],
                 ['label' => 'Talk to a human',    'value' => 'escalate'],
+            ],
+        ];
+    }
+
+    /**
+     * Handle store_hours intent — provide operating hours for the duty-free store.
+     */
+    private function handleStoreHours(int $tenantId, array $settings = []): array
+    {
+        $hoursMsg = $this->s($settings, 'tpl_store_hours',
+            "🕐 **Store Hours**\n\n" .
+            "Our duty-free stores operate according to flight schedules:\n\n" .
+            "• **Departures** — Open 24 hours, 7 days a week\n" .
+            "• **Arrivals** — Open for all international arriving flights\n\n" .
+            "You can also **pre-order online** and collect at the airport!"
+        );
+
+        return [
+            'message'       => $hoursMsg,
+            'content_type'  => 'text',
+            'quick_replies' => [
+                ['label' => 'Browse products',  'value' => 'find_product'],
+                ['label' => 'Pre-order online', 'value' => 'how to pre-order'],
+                ['label' => 'Contact us',       'value' => 'escalate'],
             ],
         ];
     }

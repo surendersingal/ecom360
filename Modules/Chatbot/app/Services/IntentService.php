@@ -101,8 +101,11 @@ class IntentService
                 'damaged', 'broken', 'not what i ordered', 'want my money back',
                 'item is broken', 'received wrong', 'want to return', 'initiate return',
                 'start a return', 'return this', 'money back', 'i want a refund',
+                // Longer patterns win over short 'my order' in order_tracking
+                'refund my order', 'refund for my order', 'get a refund', 'need a refund',
+                'i need a refund', 'want refund', 'requesting a refund', 'claim refund',
             ],
-            'confidence' => 0.90,
+            'confidence' => 0.92,  // Raised so refund beats order_tracking
             'priority'   => 3,
         ],
         'order_tracking' => [
@@ -234,9 +237,12 @@ class IntentService
                 'gift card', 'gift voucher', 'gift certificate', 'e-gift',
                 'gift card balance', 'redeem gift card', 'buy gift card',
                 'send a gift', 'gift for someone',
+                // Longer patterns to beat 'i want to buy' in add_to_cart
+                'buy a gift card', 'purchase a gift card', 'i want to buy a gift card',
+                'buy gift voucher', 'get a gift card', 'gift card for',
             ],
-            'confidence' => 0.87,
-            'priority'   => 7,
+            'confidence' => 0.93,  // Raised above add_to_cart (0.85)
+            'priority'   => 5,     // Higher priority than add_to_cart (8)
         ],
         'subscription' => [
             'patterns'   => [
@@ -292,6 +298,8 @@ class IntentService
             'shipping_options'   => 'shipping',
             'payment_help'       => 'payment_info',
             'rate_chat'          => 'farewell',
+            'view_all'           => 'product_search',
+            'refine_search'      => 'product_search',
             'start_return'       => 'return_request',
             'exchange_item'      => 'return_request',
             'return_policy'      => 'return_policy',
@@ -414,6 +422,9 @@ class IntentService
             'sue', 'lawyer', 'disgusting', 'awful', 'unacceptable', 'ridiculous',
             'pathetic', 'garbage', 'trash', 'hate', 'never again', 'refund now',
             'complaint', 'report', 'rip off', 'incompetent', 'useless',
+            // Intensified anger phrases
+            'very angry', 'so angry', 'really angry', 'extremely angry',
+            'very upset', 'so upset', 'really upset', 'totally unacceptable',
         ];
         $frustratedWords = [
             'frustrated', 'annoyed', 'disappointed', 'waiting', 'still waiting',
@@ -445,7 +456,7 @@ class IntentService
             'label' => match (true) {
                 $score >= 70 => 'positive',
                 $score >= 40 => 'neutral',
-                $score >= 20 => 'frustrated',
+                $score >= 30 => 'frustrated',  // Raised: score <30 now = angry
                 default      => 'angry',
             },
         ];
