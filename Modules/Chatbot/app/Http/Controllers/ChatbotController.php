@@ -260,7 +260,9 @@ class ChatbotController extends Controller
     {
         $request->validate(['cart_items' => 'required|array']);
         $tenantId = $this->tenantId($request);
-        $result = $this->proactiveSupportService->multiItemSizingAssistant((int) $tenantId, $request->all());
+        // Service expects $cart['items']; request sends cart_items[] — bridge the key mismatch.
+        $cart = ['items' => $request->input('cart_items', [])];
+        $result = $this->proactiveSupportService->multiItemSizingAssistant((int) $tenantId, $cart);
         return $this->success($result);
     }
 

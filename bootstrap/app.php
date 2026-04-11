@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Enable Sanctum session-based auth for same-origin API requests
         $middleware->statefulApi();
 
+        // Force JSON responses on all /api/* routes so validation errors return
+        // HTTP 422 JSON instead of HTTP 302 redirects when Accept header is absent.
+        $middleware->api(prepend: [
+            \App\Http\Middleware\ForceJsonResponse::class,
+        ]);
+
         $middleware->alias([
             'super_admin'       => \App\Http\Middleware\EnsureSuperAdmin::class,
             'resolve_tenant'    => \App\Http\Middleware\ResolveTenant::class,

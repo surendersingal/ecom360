@@ -380,7 +380,9 @@ class ChatService
     public function getAnalytics(int $tenantId, int $days = 30): array
     {
         try {
-            $since = now()->subDays($days)->toDateTimeString();
+            // Use Carbon object directly — BSON UTCDateTime comparison requires a Carbon/DateTime
+            // instance, not a formatted string (string comparison fails silently in MongoDB driver).
+            $since = now()->subDays($days)->startOfDay();
             $conversations = Conversation::where('tenant_id', $tenantId)
                 ->where('created_at', '>=', $since)
                 ->get();

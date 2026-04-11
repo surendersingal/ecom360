@@ -28,8 +28,14 @@ class ProactiveSupportService
             $orderId = $request['order_id'] ?? null;
             $customerEmail = $request['customer_email'] ?? null;
 
-            if (!$orderId || !$customerEmail) {
+            if (!$orderId && !$customerEmail) {
                 return ['success' => false, 'message' => 'Please provide your order ID and email address.'];
+            }
+            if (!$orderId) {
+                return ['success' => false, 'message' => 'Please provide your order ID to continue.'];
+            }
+            if (!$customerEmail) {
+                return ['success' => false, 'message' => "Please provide the email address associated with order #{$orderId} to verify your identity."];
             }
 
             // Fetch order
@@ -337,11 +343,14 @@ class ProactiveSupportService
                     ->where('external_id', $productId)
                     ->first();
 
-                if (!$product) continue;
-
-                $product = (array) $product;
+                // Continue even if product is not in catalog — use cart item data as fallback.
+                $product = $product ? (array) $product : [];
                 $sizeChart = $product['size_chart'] ?? null;
-                $availableSizes = $product['variants'] ?? [];
+                // Accept size_options from cart item itself (passed by caller)
+                $availableSizes = $product['variants'] ?? array_map(
+                    fn($s) => ['size' => $s, 'stock_qty' => 1],
+                    (array) ($item['size_options'] ?? [])
+                );
 
                 $recommendedSize = null;
                 $confidence = 0;
