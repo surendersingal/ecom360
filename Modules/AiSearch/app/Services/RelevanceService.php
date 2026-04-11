@@ -97,11 +97,15 @@ class RelevanceService
         // Sort based on requested sort
         usort($scored, function ($a, $b) use ($sortBy) {
             return match ($sortBy) {
-                'price_asc'  => ($a['price'] ?? 0) <=> ($b['price'] ?? 0),
-                'price_desc' => ($b['price'] ?? 0) <=> ($a['price'] ?? 0),
-                'newest'     => 0, // Already sorted by freshness in score
-                'rating'     => ($b['rating'] ?? 0) <=> ($a['rating'] ?? 0),
-                default      => ($b['relevance_score'] ?? 0) <=> ($a['relevance_score'] ?? 0),
+                'price_asc'       => ($a['price'] ?? 0) <=> ($b['price'] ?? 0),
+                'price_desc'      => ($b['price'] ?? 0) <=> ($a['price'] ?? 0),
+                'name_asc'        => strcasecmp((string)($a['name'] ?? ''), (string)($b['name'] ?? '')),
+                'name_desc'       => strcasecmp((string)($b['name'] ?? ''), (string)($a['name'] ?? '')),
+                'newest',
+                'created_at_desc' => 0, // Already sorted by freshness in score
+                'rating',
+                'rating_desc'     => ($b['rating'] ?? 0) <=> ($a['rating'] ?? 0),
+                default           => ($b['relevance_score'] ?? 0) <=> ($a['relevance_score'] ?? 0),
             };
         });
 

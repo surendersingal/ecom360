@@ -95,8 +95,13 @@ class SearchService
             // Step 1: Parse natural language intent (category + price extraction)
             $nlq = $nlqEnabled
                 ? $this->parseNaturalLanguageQuery($tenantId, $query, $settings)
-                : ['text_query' => $query, 'filters' => [], 'interpretation' => null];
+                : ['text_query' => $query, 'filters' => [], 'interpretation' => null, 'sort_intent' => null];
             $searchQuery = $nlq['text_query'];
+
+            // Apply NLQ-extracted sort intent when caller hasn't set an explicit sort
+            if (!empty($nlq['sort_intent']) && $sortBy === 'relevance') {
+                $sortBy = $nlq['sort_intent']['field'] . '_' . $nlq['sort_intent']['dir'];
+            }
 
             // Merge NLQ-extracted filters with explicit filters (explicit takes priority)
             $mergedFilters = array_merge($nlq['filters'], $filters);
@@ -560,6 +565,45 @@ class SearchService
             }
         }
 
+        // ── Sort directive extraction ──
+        // Strip "sort by X", "order by X", "alphabetically", etc. from the query
+        // before word processing so they don't pollute the text search.
+        $sortIntent = null;
+        $sortPatterns = [
+            // "sort by name z to a" / "z to a" before generic "sort by name"
+            '/\b(?:sort(?:ed)?\s+by\s+name|order(?:ed)?\s+by\s+name)\s+(?:z\s*(?:to|-)\s*a|desc(?:ending)?)\b/i'
+                => ['field' => 'name', 'dir' => 'desc'],
+            // "sort by name" / "order by name" / "sorted by name (a-z)" / "alphabetically"
+            '/\b(?:sort(?:ed)?\s+by\s+name|order(?:ed)?\s+by\s+name)(?:\s+(?:a\s*(?:to|-)\s*z|asc(?:ending)?))?+\b/i'
+                => ['field' => 'name', 'dir' => 'asc'],
+            '/\balphabetical(?:ly|order)?\b/i'
+                => ['field' => 'name', 'dir' => 'asc'],
+            '/\bprice\s+low(?:\s+to\s+high)?\b|\b(?:sort(?:ed)?\s+by|order(?:ed)?\s+by)\s+price(?:\s+asc(?:ending)?)?\b|\bcheapest\s+first\b/i'
+                => ['field' => 'price', 'dir' => 'asc'],
+            '/\bprice\s+high(?:\s+to\s+low)?\b|\bmost\s+expensive\b|\bhighest\s+price\b/i'
+                => ['field' => 'price', 'dir' => 'desc'],
+            '/\bnewest\b|\blatest\b|\brecently\s+added\b|\bnew\s+arrivals?\b/i'
+                => ['field' => 'created_at', 'dir' => 'desc'],
+            '/\btop\s+rated\b|\bbest\s+rated\b|\bhighest\s+rated\b/i'
+                => ['field' => 'rating', 'dir' => 'desc'],
+        ];
+        foreach ($sortPatterns as $pattern => $sort) {
+            if (preg_match($pattern, $queryLower)) {
+                $sortIntent = $sort;
+                $queryLower = trim(preg_replace($pattern, ' ', $queryLower));
+                $queryLower = trim(preg_replace('/\s{2,}/', ' ', $queryLower));
+                // Strip orphaned "by" left after removing "sort by"
+                $queryLower = trim(preg_replace('/\bby\b/', '', $queryLower));
+                $queryLower = trim(preg_replace('/\s{2,}/', ' ', $queryLower));
+                $label = $sort['dir'] === 'asc' ? 'A→Z' : 'Z→A';
+                if ($sort['field'] === 'price') $label = $sort['dir'] === 'asc' ? 'Price ↑' : 'Price ↓';
+                if ($sort['field'] === 'created_at') $label = 'Newest first';
+                if ($sort['field'] === 'rating') $label = 'Top rated';
+                $interpretation[] = "Sort: {$label}";
+                break;
+            }
+        }
+
         // ── Category extraction ── (match against real MongoDB categories + aliases)
 
         $categoryAliases = [
@@ -673,6 +717,7 @@ class SearchService
             'text_query'     => $textQuery,
             'filters'        => $filters,
             'interpretation' => !empty($interpretation) ? implode(' · ', $interpretation) : null,
+            'sort_intent'    => $sortIntent,
         ];
     }
 
