@@ -77,9 +77,67 @@ Route::middleware(['auth:sanctum', 'tenant.permission:business_intelligence.view
     Route::get('intel/operations/coupons',       [BiController::class, 'apiCouponIntelligence'])->name('bi.intel.operations.coupons');
     Route::get('intel/operations/payments',      [BiController::class, 'apiPaymentAnalysis'])->name('bi.intel.operations.payments');
 
-    // Cross-Module Intelligence
+    // Cross-Module Intelligence (original 4)
     Route::get('intel/cross/marketing-attribution', [BiController::class, 'apiMarketingAttribution'])->name('bi.intel.cross.marketing');
     Route::get('intel/cross/search-revenue',        [BiController::class, 'apiSearchRevenue'])->name('bi.intel.cross.search');
     Route::get('intel/cross/chatbot-impact',        [BiController::class, 'apiChatbotImpact'])->name('bi.intel.cross.chatbot');
     Route::get('intel/cross/customer-360',          [BiController::class, 'apiCustomer360'])->name('bi.intel.cross.customer360');
+
+    // ─── 50 Cross-Module Use Cases ────────────────────────────────
+    // Group A: Search × Orders
+    Route::get('intel/cross/search-to-order-funnel',        [BiController::class, 'apiUC05'])->name('bi.intel.cross.uc05');
+    Route::get('intel/cross/zero-result-opportunities',     [BiController::class, 'apiUC06'])->name('bi.intel.cross.uc06');
+    Route::get('intel/cross/abandoned-search-recovery',     [BiController::class, 'apiUC07'])->name('bi.intel.cross.uc07');
+    Route::get('intel/cross/search-seasonality',            [BiController::class, 'apiUC08'])->name('bi.intel.cross.uc08');
+    Route::get('intel/cross/category-search-sales-gap',     [BiController::class, 'apiUC09'])->name('bi.intel.cross.uc09');
+    // Group B: Chatbot × Orders
+    Route::get('intel/cross/chatbot-checkout-path',         [BiController::class, 'apiUC10'])->name('bi.intel.cross.uc10');
+    Route::get('intel/cross/chatbot-abandonment',           [BiController::class, 'apiUC11'])->name('bi.intel.cross.uc11');
+    Route::get('intel/cross/chatbot-product-complaints',    [BiController::class, 'apiUC12'])->name('bi.intel.cross.uc12');
+    Route::get('intel/cross/chatbot-upsell-success',        [BiController::class, 'apiUC13'])->name('bi.intel.cross.uc13');
+    Route::get('intel/cross/chatbot-sentiment-vs-orders',   [BiController::class, 'apiUC14'])->name('bi.intel.cross.uc14');
+    // Group C: Marketing × Behavior
+    Route::get('intel/cross/campaign-to-search-behavior',   [BiController::class, 'apiUC15'])->name('bi.intel.cross.uc15');
+    Route::get('intel/cross/segment-search-affinity',       [BiController::class, 'apiUC16'])->name('bi.intel.cross.uc16');
+    Route::get('intel/cross/campaign-unsubscribe-risk',     [BiController::class, 'apiUC17'])->name('bi.intel.cross.uc17');
+    Route::get('intel/cross/flow-trigger-effectiveness',    [BiController::class, 'apiUC18'])->name('bi.intel.cross.uc18');
+    Route::get('intel/cross/campaign-timing-optimizer',     [BiController::class, 'apiUC19'])->name('bi.intel.cross.uc19');
+    // Group D: Inventory × Demand
+    Route::get('intel/cross/demand-forecast-by-search',     [BiController::class, 'apiUC20'])->name('bi.intel.cross.uc20');
+    Route::get('intel/cross/out-of-stock-revenue-loss',     [BiController::class, 'apiUC21'])->name('bi.intel.cross.uc21');
+    Route::get('intel/cross/category-trend-surface',        [BiController::class, 'apiUC22'])->name('bi.intel.cross.uc22');
+    Route::get('intel/cross/bundle-opportunity',            [BiController::class, 'apiUC23'])->name('bi.intel.cross.uc23');
+    Route::get('intel/cross/brand-search-share',            [BiController::class, 'apiUC24'])->name('bi.intel.cross.uc24');
+    // Group E: Customer Intelligence
+    Route::get('intel/cross/high-value-customer-journey',   [BiController::class, 'apiUC25'])->name('bi.intel.cross.uc25');
+    Route::get('intel/cross/churn-risk-chat-signals',       [BiController::class, 'apiUC26'])->name('bi.intel.cross.uc26');
+    Route::get('intel/cross/dormant-customer-search',       [BiController::class, 'apiUC27'])->name('bi.intel.cross.uc27');
+    Route::get('intel/cross/new-customer-first-touch-roi',  [BiController::class, 'apiUC28'])->name('bi.intel.cross.uc28');
+    Route::get('intel/cross/vip-behavior-profile',          [BiController::class, 'apiUC29'])->name('bi.intel.cross.uc29');
+    // Group F: Operational Excellence
+    Route::get('intel/cross/order-issue-heatmap',           [BiController::class, 'apiUC30'])->name('bi.intel.cross.uc30');
+    Route::get('intel/cross/return-rate-by-search-query',   [BiController::class, 'apiUC31'])->name('bi.intel.cross.uc31');
+    Route::get('intel/cross/payment-failure-recovery',      [BiController::class, 'apiUC32'])->name('bi.intel.cross.uc32');
+    Route::get('intel/cross/fulfillment-delay-impact',      [BiController::class, 'apiUC33'])->name('bi.intel.cross.uc33');
+    Route::get('intel/cross/peak-demand-readiness',         [BiController::class, 'apiUC34'])->name('bi.intel.cross.uc34');
+    // Group G: Revenue Optimization
+    Route::get('intel/cross/revenue-by-acquisition-channel',[BiController::class, 'apiUC35'])->name('bi.intel.cross.uc35');
+    Route::get('intel/cross/discount-sensitivity-by-segment',[BiController::class, 'apiUC36'])->name('bi.intel.cross.uc36');
+    Route::get('intel/cross/ltv-by-first-product',          [BiController::class, 'apiUC37'])->name('bi.intel.cross.uc37');
+    Route::get('intel/cross/cross-sell-gap',                [BiController::class, 'apiUC38'])->name('bi.intel.cross.uc38');
+    // Group H: Real-Time Intervention
+    Route::get('intel/cross/live-cart-abandonment',         [BiController::class, 'apiUC39'])->name('bi.intel.cross.uc39');
+    Route::get('intel/cross/rage-click-order-loss',         [BiController::class, 'apiUC40'])->name('bi.intel.cross.uc40');
+    Route::get('intel/cross/session-intent-scoring',        [BiController::class, 'apiUC41'])->name('bi.intel.cross.uc41');
+    Route::get('intel/cross/realtime-churn-signals',        [BiController::class, 'apiUC42'])->name('bi.intel.cross.uc42');
+    Route::get('intel/cross/proactive-reorder-signals',     [BiController::class, 'apiUC43'])->name('bi.intel.cross.uc43');
+    // Group I: Market Intelligence
+    Route::get('intel/cross/search-gap-analysis',           [BiController::class, 'apiUC44'])->name('bi.intel.cross.uc44');
+    Route::get('intel/cross/new-product-launch-readiness',  [BiController::class, 'apiUC45'])->name('bi.intel.cross.uc45');
+    Route::get('intel/cross/campaign-cannibalization',      [BiController::class, 'apiUC46'])->name('bi.intel.cross.uc46');
+    Route::get('intel/cross/price-conversion-elasticity',   [BiController::class, 'apiUC47'])->name('bi.intel.cross.uc47');
+    Route::get('intel/cross/margin-optimized-search',       [BiController::class, 'apiUC48'])->name('bi.intel.cross.uc48');
+    // Group J: USP Showcase
+    Route::get('intel/cross/omni-channel-funnel',           [BiController::class, 'apiUC49'])->name('bi.intel.cross.uc49');
+    Route::get('intel/cross/store-health-score',            [BiController::class, 'apiUC50'])->name('bi.intel.cross.uc50');
 });
